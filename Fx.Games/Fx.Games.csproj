@@ -47,9 +47,14 @@
     <Compile Include="ConsoleStrategy.cs" />
     <Compile Include="Driver.cs" />
     <Compile Include="Driver{TGame, TBoard, TMove, TPlayer}.cs" />
+    <Compile Include="Extension.cs" />
     <Compile Include="IDisplayer.cs" />
     <Compile Include="IGame.cs" />
     <Compile Include="IStrategy.cs" />
+    <Compile Include="MaximizeMovesStrategy.cs" />
+    <Compile Include="MaximizeMovesStrategy{TGame, TBoard, TMove, TPlayer}.cs" />
+    <Compile Include="MinimizeMovesStrategy{TGame, TBoard, TMove, TPlayer}.cs" />
+    <Compile Include="MinimizeMovesStrategy.cs" />
     <Compile Include="Outcome.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
