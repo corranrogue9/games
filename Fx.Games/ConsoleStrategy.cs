@@ -18,16 +18,27 @@
 
         public TMove SelectMove(TGame game)
         {
-            Console.WriteLine("Select a move:");
-            var moves = game.Moves.ToList();
-            int i = 0;
-            foreach (var move in moves)
+            while (true)
             {
-                Console.WriteLine($"{i}: {this.toString(move)}");
-            }
+                Console.WriteLine("Select a move:");
+                var moves = game.Moves.ToList();
+                int i = 0;
+                foreach (var move in moves)
+                {
+                    Console.WriteLine($"{i++}: {this.toString(move)}");
+                }
 
-            Console.WriteLine();
-            return moves[int.Parse(Console.ReadLine())];
+                Console.WriteLine();
+
+                var input = Console.ReadLine();
+                if (!int.TryParse(input, out var selectedMove) || selectedMove >= moves.Count)
+                {
+                    Console.WriteLine($"The input '{input}' was not the index of a legal move");
+                    continue;
+                }
+
+                return moves[selectedMove];
+            }
         }
     }
 }

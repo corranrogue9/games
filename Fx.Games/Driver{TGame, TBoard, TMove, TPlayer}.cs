@@ -28,6 +28,10 @@
                     displayer.DisplayBoard(game.Board);
                     var move = strategy.SelectMove(game);
                     game = game.CommitMove(move);
+                    if (game.Outcome != null)
+                    {
+                        break;
+                    }
                 }
             }
 

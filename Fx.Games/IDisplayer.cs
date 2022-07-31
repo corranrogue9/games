@@ -8,6 +8,6 @@
     {
         void DisplayBoard(TBoard board);
 
-        void DisplayOutcome(Outcome<TPlayer> player);
+        void DisplayOutcome(Outcome<TPlayer> outcome);
     }
 }

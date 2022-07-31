@@ -50,6 +50,7 @@
     <Compile Include="Extension.cs" />
     <Compile Include="Fx\Ensure.cs" />
     <Compile Include="Fx\EnsureInline.cs" />
+    <Compile Include="Fx\TicTacToe\TicTacToeDisplayer.cs" />
     <Compile Include="Fx\ValidatedNotNullAttribute.cs" />
     <Compile Include="IDisplayer.cs" />
     <Compile Include="IGame.cs" />
