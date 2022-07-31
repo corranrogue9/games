@@ -9,8 +9,8 @@
     public static class Driver
     {
         public static Driver<TGame, TBoard, TMove, TPlayer> Create<TGame, TBoard, TMove, TPlayer>(
-            IEnumerable<IStrategy<TGame, TBoard, TMove, TPlayer>> strategies,
-            IDisplayer<TBoard, TPlayer> displayer)
+            IReadOnlyDictionary<TPlayer, IStrategy<TGame, TBoard, TMove, TPlayer>> strategies,
+            IDisplayer<TGame, TBoard, TMove, TPlayer> displayer)
             where TGame : IGame<TGame, TBoard, TMove, TPlayer>
         {
             return new Driver<TGame, TBoard, TMove, TPlayer>(strategies, displayer);
