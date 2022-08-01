@@ -25,9 +25,9 @@ namespace Fx.Games.TicTacToe
                 throw new ArgumentOutOfRangeException(nameof(board), "A 3x3 board is required");
             }
 
-            this.Board = board.Clone() as TicTacToePiece[,]; //// TODO does clone work here?
+            this.Grid = board.Clone() as TicTacToePiece[,]; //// TODO does clone work here?
         }
 
-        public TicTacToePiece[,] Board { get; }
+        public TicTacToePiece[,] Grid { get; }
     }
 }

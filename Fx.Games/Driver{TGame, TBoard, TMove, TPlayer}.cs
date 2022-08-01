@@ -9,13 +9,13 @@
     /// <threadsafety static="true" instance="true"/>
     public sealed class Driver<TGame, TBoard, TMove, TPlayer> where TGame : IGame<TGame, TBoard, TMove, TPlayer>
     {
-        private readonly IEnumerable<IStrategy<TGame, TBoard, TMove, TPlayer>> strategies;
+        private readonly IReadOnlyDictionary<TPlayer, IStrategy<TGame, TBoard, TMove, TPlayer>> strategies;
 
-        private readonly IDisplayer<TBoard, TPlayer> displayer;
+        private readonly IDisplayer<TGame, TBoard, TMove, TPlayer> displayer;
 
-        public Driver(IEnumerable<IStrategy<TGame, TBoard, TMove, TPlayer>> strategies, IDisplayer<TBoard, TPlayer> displayer)
+        public Driver(IReadOnlyDictionary<TPlayer, IStrategy<TGame, TBoard, TMove, TPlayer>> strategies, IDisplayer<TGame, TBoard, TMove, TPlayer> displayer)
         {
-            this.strategies = strategies.ToList();
+            this.strategies = strategies.ToDictionary();
             this.displayer = displayer;
         }
 
@@ -23,20 +23,19 @@
         {
             while (game.Outcome == null)
             {
-                foreach (var strategy in this.strategies)
+                var strategy = strategies[game.CurrentPlayer];
+                displayer.DisplayBoard(game);
+                displayer.DisplayMoves(game);
+                var move = strategy.SelectMove(game);
+                game = game.CommitMove(move);
+                if (game.Outcome != null)
                 {
-                    displayer.DisplayBoard(game.Board);
-                    var move = strategy.SelectMove(game);
-                    game = game.CommitMove(move);
-                    if (game.Outcome != null)
-                    {
-                        break;
-                    }
+                    break;
                 }
             }
 
-            displayer.DisplayBoard(game.Board);
-            displayer.DisplayOutcome(game.Outcome);
+            displayer.DisplayBoard(game);
+            displayer.DisplayOutcome(game);
             return game;
         }
     }

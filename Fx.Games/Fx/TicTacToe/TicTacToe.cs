@@ -6,25 +6,30 @@
 
     public sealed class TicTacToe<TPlayer> : IGame<TicTacToe<TPlayer>, TicTacToeBoard, TicTacToeMove, TPlayer>
     {
-        private readonly TPlayer exes;
+        private readonly TPlayer[] players;
 
-        private readonly TPlayer ohs;
-
-        private readonly TicTacToePiece currentPiece;
+        private readonly int currentPlayer;
 
         private readonly TicTacToeBoard board;
 
         public TicTacToe(TPlayer exes, TPlayer ohs)
-            : this(EnsureInline.NotNull(exes, nameof(exes)), EnsureInline.NotNull(ohs, nameof(ohs)), TicTacToePiece.Ex, new TicTacToeBoard())
+            : this(new[] { EnsureInline.NotNull(exes, nameof(exes)), EnsureInline.NotNull(ohs, nameof(ohs)) }, 0, new TicTacToeBoard())
         {
         }
 
-        private TicTacToe(TPlayer exes, TPlayer ohs, TicTacToePiece newPiece, TicTacToeBoard newBoard)
+        private TicTacToe(TPlayer[] players, int currentPlayer, TicTacToeBoard newBoard)
         {
-            this.exes = exes;
-            this.ohs = ohs;
-            this.currentPiece = newPiece;
+            this.players = players;
+            this.currentPlayer = currentPlayer;
             this.board = newBoard;
+        }
+
+        public TPlayer CurrentPlayer
+        {
+            get
+            {
+                return this.players[this.currentPlayer];
+            }
         }
 
         public IEnumerable<TicTacToeMove> Moves
@@ -35,7 +40,7 @@
                 {
                     for (uint j = 0; j < 3; ++j)
                     {
-                        if (this.board.Board[i, j] == TicTacToePiece.Empty)
+                        if (this.board.Grid[i, j] == TicTacToePiece.Empty)
                         {
                             yield return new TicTacToeMove(i, j);
                         }
@@ -58,46 +63,46 @@
             {
                 for (int i = 0; i < 3; ++i)
                 {
-                    if (this.board.Board[i, 0] != TicTacToePiece.Empty)
+                    if (this.board.Grid[i, 0] != TicTacToePiece.Empty)
                     {
                         bool win = true;
                         for (int j = 1; j < 3; ++j)
                         {
-                            win = win && this.board.Board[i, 0] == this.board.Board[i, j];
+                            win = win && this.board.Grid[i, 0] == this.board.Grid[i, j];
                         }
 
                         if (win)
                         {
-                            return new Outcome<TPlayer>(new[] { GetPlayerFromPiece(this.board.Board[i, 0]) });
+                            return new Outcome<TPlayer>(new[] { GetPlayerFromPiece(this.board.Grid[i, 0]) });
                         }
                     }
                 }
 
                 for (int j = 0; j < 3; ++j)
                 {
-                    if (this.board.Board[0, j] != TicTacToePiece.Empty)
+                    if (this.board.Grid[0, j] != TicTacToePiece.Empty)
                     {
                         bool win = true;
                         for (int i = 1; i < 3; ++i)
                         {
-                            win = win && this.board.Board[0, j] == this.board.Board[i, j];
+                            win = win && this.board.Grid[0, j] == this.board.Grid[i, j];
                         }
 
                         if (win)
                         {
-                            return new Outcome<TPlayer>(new[] { GetPlayerFromPiece(this.board.Board[0, j]) });
+                            return new Outcome<TPlayer>(new[] { GetPlayerFromPiece(this.board.Grid[0, j]) });
                         }
                     }
                 }
 
-                if (this.board.Board[0, 0] != TicTacToePiece.Empty && this.board.Board[0, 0] == this.board.Board[1, 1] && this.board.Board[0, 0] == this.board.Board[2, 2])
+                if (this.board.Grid[0, 0] != TicTacToePiece.Empty && this.board.Grid[0, 0] == this.board.Grid[1, 1] && this.board.Grid[0, 0] == this.board.Grid[2, 2])
                 {
-                    return new Outcome<TPlayer>(new[] { GetPlayerFromPiece(this.board.Board[1, 1]) });
+                    return new Outcome<TPlayer>(new[] { GetPlayerFromPiece(this.board.Grid[1, 1]) });
                 }
 
-                if (this.board.Board[2, 0] != TicTacToePiece.Empty && this.board.Board[0, 0] == this.board.Board[1, 1] && this.board.Board[0, 0] == this.board.Board[0, 2])
+                if (this.board.Grid[2, 0] != TicTacToePiece.Empty && this.board.Grid[0, 0] == this.board.Grid[1, 1] && this.board.Grid[0, 0] == this.board.Grid[0, 2])
                 {
-                    return new Outcome<TPlayer>(new[] { GetPlayerFromPiece(this.board.Board[1, 1]) });
+                    return new Outcome<TPlayer>(new[] { GetPlayerFromPiece(this.board.Grid[1, 1]) });
                 }
 
                 return null;
@@ -111,28 +116,20 @@
                 throw new ArgumentNullException(nameof(move));
             }
 
-            if (this.board.Board[move.Row, move.Column] != TicTacToePiece.Empty)
+            if (this.board.Grid[move.Row, move.Column] != TicTacToePiece.Empty)
             {
                 throw new IllegalMoveExeption("TODO");
             }
 
-            var newBoard = this.board.Board;
-            newBoard[move.Row, move.Column] = this.currentPiece;
+            var newBoard = this.board.Grid;
+            newBoard[move.Row, move.Column] = (TicTacToePiece)(this.currentPlayer + 1);
 
-            return new TicTacToe<TPlayer>(this.exes, this.ohs, this.currentPiece == TicTacToePiece.Ex ? TicTacToePiece.Oh : TicTacToePiece.Ex, new TicTacToeBoard(newBoard));
+            return new TicTacToe<TPlayer>(this.players, (this.currentPlayer + 1) % 2, new TicTacToeBoard(newBoard));
         }
 
         private TPlayer GetPlayerFromPiece(TicTacToePiece piece)
         {
-            switch (piece)
-            {
-                case TicTacToePiece.Ex:
-                    return this.exes;
-                case TicTacToePiece.Oh:
-                    return this.ohs;
-            }
-
-            throw new InvalidOperationException("TODO");
+            return this.players[(int)(piece) - 1];
         }
     }
 }

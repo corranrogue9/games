@@ -29,6 +29,14 @@
             this.board = new ChessBoard<AmazonsPiece>(pieces);
         }
 
+        public TPlayer CurrentPlayer
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         public ChessBoard<AmazonsPiece> Board
         {
             get

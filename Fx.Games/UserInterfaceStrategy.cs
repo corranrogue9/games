@@ -7,18 +7,23 @@
     /// 
     /// </summary>
     /// <threadsafety static="true" instance="true"/>
-    public sealed class ConsoleStrategy<TGame, TBoard, TMove, TPlayer> : IStrategy<TGame, TBoard, TMove, TPlayer> where TGame : IGame<TGame, TBoard, TMove, TPlayer>
+    public sealed class UserInterfaceStrategy<TGame, TBoard, TMove, TPlayer> : IStrategy<TGame, TBoard, TMove, TPlayer> where TGame : IGame<TGame, TBoard, TMove, TPlayer>
     {
-        private readonly Func<TMove, string> toString;
+        private readonly IDisplayer<TGame, TBoard, TMove, TPlayer> displayer;
 
-        public ConsoleStrategy(Func<TMove, string> toString)
+        public UserInterfaceStrategy(IDisplayer<TGame, TBoard, TMove, TPlayer> displayer)
         {
-            this.toString = toString;
+            if (displayer == null)
+            {
+                throw new ArgumentNullException(nameof(displayer));
+            }
+
+            this.displayer = displayer;
         }
 
         public TMove SelectMove(TGame game)
         {
-            while (true)
+            /*while (true)
             {
                 Console.WriteLine("Select a move:");
                 var moves = game.Moves.ToList();
@@ -38,7 +43,9 @@
                 }
 
                 return moves[selectedMove];
-            }
+            }*/
+
+            return this.displayer.ReadMoveSelection(game);
         }
     }
 }

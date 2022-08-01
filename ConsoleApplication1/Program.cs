@@ -1,6 +1,7 @@
 ﻿namespace ConsoleApplication1
 {
     using System;
+    using System.Collections.Generic;
 
     using Fx.Games;
     using Fx.Games.TicTacToe;
@@ -9,10 +10,18 @@
     {
         static void Main(string[] args)
         {
-            Func<TicTacToeMove, string> moveToString = move => $"{move.Row}, {move.Column}";
-            var consoleStrategy = new ConsoleStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>(moveToString);
-            var game = new TicTacToe<string>("chrispre", "gdebruin");
-            var driver = Driver.Create(new[] { consoleStrategy, consoleStrategy }, new TicTacToeConsoleDisplayer<string>(_ => _));
+            var displayer = new TicTacToeConsoleDisplayer<string>(_ => _);
+            var consoleStrategy = new UserInterfaceStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>(displayer);
+            var chrispre = "chrispre";
+            var gdebruin = "gdebruin";
+            var game = new TicTacToe<string>(chrispre, gdebruin);
+            var driver = Driver.Create(
+                new Dictionary<string, IStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>>
+                {
+                    { chrispre, consoleStrategy },
+                    { gdebruin, consoleStrategy },
+                }, 
+                displayer);
             var result = driver.Run(game);
             Console.ReadLine();
         }

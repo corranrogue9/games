@@ -44,13 +44,14 @@
     <Compile Include="AmazonsPiece.cs" />
     <Compile Include="ChessBoard.cs" />
     <Compile Include="ChessMove.cs" />
-    <Compile Include="ConsoleStrategy.cs" />
+    <Compile Include="Fx\DictionaryExtensions.cs" />
+    <Compile Include="UserInterfaceStrategy.cs" />
     <Compile Include="Driver.cs" />
     <Compile Include="Driver{TGame, TBoard, TMove, TPlayer}.cs" />
     <Compile Include="Extension.cs" />
     <Compile Include="Fx\Ensure.cs" />
     <Compile Include="Fx\EnsureInline.cs" />
-    <Compile Include="Fx\TicTacToe\TicTacToeDisplayer.cs" />
+    <Compile Include="Fx\TicTacToe\TicTacToeConsoleDisplayer.cs" />
     <Compile Include="Fx\ValidatedNotNullAttribute.cs" />
     <Compile Include="IDisplayer.cs" />
     <Compile Include="IGame.cs" />

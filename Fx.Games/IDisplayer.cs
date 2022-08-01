@@ -4,10 +4,14 @@
     /// 
     /// </summary>
     /// <threadsafety instance="true"/>
-    public interface IDisplayer<in TBoard, TPlayer>
+    public interface IDisplayer<in TGame, out TBoard, out TMove, TPlayer> where TGame : IGame<TGame, TBoard, TMove, TPlayer>
     {
-        void DisplayBoard(TBoard board);
+        void DisplayBoard(TGame game);
 
-        void DisplayOutcome(Outcome<TPlayer> outcome);
+        void DisplayOutcome(TGame game);
+
+        void DisplayMoves(TGame game);
+
+        TMove ReadMoveSelection(TGame game);
     }
 }
