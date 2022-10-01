@@ -19,7 +19,13 @@
             return game.Moves.Maximum(myMove =>
             {
                 var newGame = game.CommitMove(myMove);
-                return newGame.Moves.Average(yourMove => newGame.CommitMove(yourMove).Moves.Count());
+                var newMoves = newGame.Moves.ToList();
+                if (newMoves.Count == 0)
+                {
+                    return 0;
+                }
+
+                return newMoves.Average(yourMove => newGame.CommitMove(yourMove).Moves.Count());
             });
         }
     }

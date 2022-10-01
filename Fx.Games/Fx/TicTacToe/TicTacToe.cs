@@ -100,7 +100,7 @@
                     return new Outcome<TPlayer>(new[] { GetPlayerFromPiece(this.board.Grid[1, 1]) });
                 }
 
-                if (this.board.Grid[2, 0] != TicTacToePiece.Empty && this.board.Grid[0, 0] == this.board.Grid[1, 1] && this.board.Grid[0, 0] == this.board.Grid[0, 2])
+                if (this.board.Grid[2, 0] != TicTacToePiece.Empty && this.board.Grid[2, 0] == this.board.Grid[1, 1] && this.board.Grid[2, 0] == this.board.Grid[0, 2])
                 {
                     return new Outcome<TPlayer>(new[] { GetPlayerFromPiece(this.board.Grid[1, 1]) });
                 }
@@ -121,7 +121,7 @@
                 throw new IllegalMoveExeption("TODO");
             }
 
-            var newBoard = this.board.Grid;
+            var newBoard = this.board.Grid.Clone() as TicTacToePiece[,];
             newBoard[move.Row, move.Column] = (TicTacToePiece)(this.currentPlayer + 1);
 
             return new TicTacToe<TPlayer>(this.players, (this.currentPlayer + 1) % 2, new TicTacToeBoard(newBoard));
