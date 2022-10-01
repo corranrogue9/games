@@ -9,7 +9,7 @@ namespace Fx.Games.TicTacToe
     public sealed class TicTacToeBoard
     {
         public TicTacToeBoard()
-            : this(new TicTacToePiece[3,3])
+            : this(new TicTacToePiece[3, 3])
         {
         }
 

@@ -5,11 +5,17 @@
 
     using Fx.Games;
     using Fx.Games.TicTacToe;
+    using Fx.Games.Bobble;
 
     class Program
     {
+
+
+
         static void Main(string[] args)
         {
+      
+
             Console.WriteLine("Provide SKU:");
             var sku = int.Parse(Console.ReadLine());
             switch (sku)
@@ -19,7 +25,7 @@
                     break;
                 case 1:
                     var displayer = new TicTacToeConsoleDisplayer<string>(_ => _);
-                    var computer = nameof(MaximizeMovesStrategy).ToLowerInvariant();
+                    var computer = "max";
                     var gdebruin = "gdebruin";
                     var game = new TicTacToe<string>(computer, gdebruin);
                     var driver = Driver.Create(
@@ -31,10 +37,13 @@
                         displayer);
                     var result = driver.Run(game);
                     break;
+                case 2:
+                    Bobble();
+                    break;
                 default:
                     throw new Exception("bad sku given");
             }
-            
+
             Console.ReadLine();
         }
 
@@ -54,5 +63,26 @@
                 displayer);
             var result = driver.Run(game);
         }
+
+
+
+
+        static void Bobble()
+        {
+            var displayer = new BobbleConsoleDisplayer<string>(_ => _);
+            var computer = "max";
+            var gdebruin = "gdebruin";
+            var game = new Bobble<string>(computer, gdebruin);
+            var driver = Driver.Create(
+                new Dictionary<string, IStrategy<Bobble<string>, BobbleBoard, BobbleMove, string>>
+                {
+                    //{ computer, MaximizeMovesStrategy.Default<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>() },
+                    //{ gdebruin, new UserInterfaceStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>(displayer) },
+                },
+                displayer);
+            var result = driver.Run(game);
+        }
+
+
     }
 }
