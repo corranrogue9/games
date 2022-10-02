@@ -121,6 +121,7 @@
                 throw new IllegalMoveExeption("TODO");
             }
 
+            // TODO: does clone work here?
             var newBoard = this.board.Grid.Clone() as TicTacToePiece[,];
             newBoard[move.Row, move.Column] = (TicTacToePiece)(this.currentPlayer + 1);
 

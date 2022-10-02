@@ -76,8 +76,8 @@
             var driver = Driver.Create(
                 new Dictionary<string, IStrategy<Bobble<string>, BobbleBoard, BobbleMove, string>>
                 {
-                    //{ computer, MaximizeMovesStrategy.Default<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>() },
-                    //{ gdebruin, new UserInterfaceStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>(displayer) },
+                    { computer, MaximizeMovesStrategy.Default<Bobble<string>, BobbleBoard, BobbleMove, string>() },
+                    { gdebruin, new UserInterfaceStrategy<Bobble<string>, BobbleBoard, BobbleMove, string>(displayer) },                    
                 },
                 displayer);
             var result = driver.Run(game);

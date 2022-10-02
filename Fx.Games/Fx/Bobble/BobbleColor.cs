@@ -2,6 +2,7 @@ namespace Fx.Games.Bobble
 {
     public enum BobbleColor
     {
-        Orange, Blue
+        Orange = 0,
+        Blue = 1,
     }
 }

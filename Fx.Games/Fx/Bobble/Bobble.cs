@@ -41,11 +41,11 @@
                     for (uint j = 0; j < 3; ++j)
                     {
                         var current = this.board.Grid[i, j];
-                        //for var size = 
-                        //if (this.board.Grid[i, j] == BobblePiece.Empty)
-                        //{
-                        //    yield return new BobbleMove(i, j);
-                        //}
+                        var size = current.HasValue ? (int)current.Value.Size : -1;
+                        for(var s = size; s < 2; s++)
+                        {
+                            yield return new BobbleMove(i, j, (BobbleSize)(s+1));
+                        }                      
                     }
                 }
             }
@@ -65,46 +65,46 @@
             {
                 for (int i = 0; i < 3; ++i)
                 {
-                    if (this.board.Grid[i, 0] != BobblePiece.Empty)
+                    if (this.board.Grid[i, 0].HasValue)
                     {
                         bool win = true;
                         for (int j = 1; j < 3; ++j)
                         {
-                            win = win && this.board.Grid[i, 0] == this.board.Grid[i, j];
+                            win = win && ArePiecesSamePlayer(this.board.Grid[i, 0], this.board.Grid[i, j]);
                         }
 
                         if (win)
                         {
-                            return new Outcome<TPlayer>(new[] { GetPlayerFromPiece(this.board.Grid[i, 0]) });
+                            return new Outcome<TPlayer>(new[] { GetPlayerFromPiece(this.board.Grid[i, 0].Value) });
                         }
                     }
                 }
 
                 for (int j = 0; j < 3; ++j)
                 {
-                    if (this.board.Grid[0, j] != BobblePiece.Empty)
+                    if (this.board.Grid[0, j].HasValue)
                     {
                         bool win = true;
                         for (int i = 1; i < 3; ++i)
                         {
-                            win = win && this.board.Grid[0, j] == this.board.Grid[i, j];
+                            win = win && ArePiecesSamePlayer(this.board.Grid[0, j], this.board.Grid[i, j]);
                         }
 
                         if (win)
                         {
-                            return new Outcome<TPlayer>(new[] { GetPlayerFromPiece(this.board.Grid[0, j]) });
+                            return new Outcome<TPlayer>(new[] { GetPlayerFromPiece(this.board.Grid[0, j].Value) });
                         }
                     }
                 }
 
-                if (this.board.Grid[0, 0] != BobblePiece.Empty && this.board.Grid[0, 0] == this.board.Grid[1, 1] && this.board.Grid[0, 0] == this.board.Grid[2, 2])
+                if (this.board.Grid[0, 0].HasValue && ArePiecesSamePlayer(this.board.Grid[0, 0], this.board.Grid[1, 1]) && ArePiecesSamePlayer(this.board.Grid[0, 0], this.board.Grid[2, 2]))
                 {
-                    return new Outcome<TPlayer>(new[] { GetPlayerFromPiece(this.board.Grid[1, 1]) });
+                    return new Outcome<TPlayer>(new[] { GetPlayerFromPiece(this.board.Grid[1, 1].Value) });
                 }
 
-                if (this.board.Grid[2, 0] != BobblePiece.Empty && this.board.Grid[2, 0] == this.board.Grid[1, 1] && this.board.Grid[2, 0] == this.board.Grid[0, 2])
+                if (this.board.Grid[2, 0].HasValue && ArePiecesSamePlayer(this.board.Grid[2, 0], this.board.Grid[1, 1]) && ArePiecesSamePlayer(this.board.Grid[2, 0], this.board.Grid[0, 2]))
                 {
-                    return new Outcome<TPlayer>(new[] { GetPlayerFromPiece(this.board.Grid[1, 1]) });
+                    return new Outcome<TPlayer>(new[] { GetPlayerFromPiece(this.board.Grid[1, 1].Value) });
                 }
 
                 return null;
@@ -118,20 +118,27 @@
                 throw new ArgumentNullException(nameof(move));
             }
 
-            if (this.board.Grid[move.Row, move.Column] != BobblePiece.Empty)
+            if (this.board.Grid[move.Row, move.Column].HasValue && this.board.Grid[move.Row, move.Column].Value.Size >= move.Size)
             {
                 throw new IllegalMoveExeption("TODO");
             }
 
-            var newBoard = this.board.Grid.Clone() as BobblePiece[,];
-            newBoard[move.Row, move.Column] = (BobblePiece)(this.currentPlayer + 1);
+            // TODO: does clone work here?
+            var newBoard = this.board.Grid.Clone() as BobblePiece?[,];
+            // TODO ensure that BobbleColor cast works
+            newBoard[move.Row, move.Column] = new BobblePiece(move.Size, (BobbleColor)currentPlayer);
 
             return new Bobble<TPlayer>(this.players, (this.currentPlayer + 1) % 2, new BobbleBoard(newBoard));
         }
 
         private TPlayer GetPlayerFromPiece(BobblePiece piece)
         {
-            return this.players[(int)(piece) - 1];
+            return this.players[(int)(piece.Color)];
+        }
+
+        private static bool ArePiecesSamePlayer(BobblePiece? first, BobblePiece? second)
+        {
+            return second.HasValue && first.Value.Color == second.Value.Color;
         }
     }
 }

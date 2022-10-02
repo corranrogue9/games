@@ -62,11 +62,11 @@
 
         public void DisplayMoves(Bobble<TPlayer> game)
         {
-            Console.WriteLine("Select a move (row, column):");
+            Console.WriteLine("Select a move (row, column, size):");
             int i = 0;
             foreach (var move in game.Moves)
             {
-                Console.WriteLine($"{i++}: {move.Row}, {move.Column}");
+                Console.WriteLine($"{i++}: {move.Row}, {move.Column}, {move.Size}");
             }
 
             Console.WriteLine();
