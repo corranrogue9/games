@@ -36,6 +36,8 @@
         {
             get
             {
+                // TODO: keep track of the number of pieces a player has played of each size.
+                // currently it doesn't so a player can play more than 3 of a size. 
                 for (uint i = 0; i < 3; ++i)
                 {
                     for (uint j = 0; j < 3; ++j)
