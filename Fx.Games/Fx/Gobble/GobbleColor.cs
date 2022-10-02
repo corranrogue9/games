@@ -1,6 +1,6 @@
-namespace Fx.Games.Bobble
+namespace Fx.Games.Gobble
 {
-    public enum BobbleColor
+    public enum GobbleColor
     {
         Orange = 0,
         Blue = 1,

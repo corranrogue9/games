@@ -1,10 +1,10 @@
-﻿namespace Fx.Games.Bobble
+﻿namespace Fx.Games.Gobble
 {
     using System;
 
-    public sealed class BobbleMove
+    public sealed class GobbleMove
     {
-        public BobbleMove(uint row, uint column, BobbleSize size)
+        public GobbleMove(uint row, uint column, GobbleSize size)
         {
             if (row > 2)
             {
@@ -17,7 +17,7 @@
             }
 
             // TODO Ensure.EnumExists(size)
-            
+
             this.Row = row;
             this.Column = column;
             this.Size = size;
@@ -27,6 +27,6 @@
 
         public uint Column { get; }
 
-        public BobbleSize Size { get; }
+        public GobbleSize Size { get; }
     }
 }

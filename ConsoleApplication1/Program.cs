@@ -5,7 +5,7 @@
 
     using Fx.Games;
     using Fx.Games.TicTacToe;
-    using Fx.Games.Bobble;
+    using Fx.Games.Gobble;
 
     class Program
     {
@@ -46,7 +46,7 @@
                     var result = driver.Run(game);
                     break;
                 case 2:
-                    Bobble();
+                    Gobble();
                     break;
                 default:
                     throw new Exception("bad sku given");
@@ -75,19 +75,19 @@
 
 
 
-        static void Bobble()
+        static void Gobble()
         {
             var seed = 0;
-            var displayer = new BobbleConsoleDisplayer<string>(_ => _);
+            var displayer = new GobbleConsoleDisplayer<string>(_ => _);
             var computer = "maxheadroom";
             var gdebruin = "gdebruin";
-            var game = new Bobble<string>(computer, gdebruin);
+            var game = new Gobble<string>(computer, gdebruin);
             var driver = Driver.Create(
-                new Dictionary<string, IStrategy<Bobble<string>, BobbleBoard, BobbleMove, string>>
+                new Dictionary<string, IStrategy<Gobble<string>, GobbleBoard, GobbleMove, string>>
                 {
-                    ////{ computer, MaximizeMovesStrategy.Default<Bobble<string>, BobbleBoard, BobbleMove, string>() },
-                    { computer, new MonteCarloStrategy<Bobble<string>, BobbleBoard, BobbleMove, string>(1.0, new Random(seed), computer) },
-                    { gdebruin, new UserInterfaceStrategy<Bobble<string>, BobbleBoard, BobbleMove, string>(displayer) },                    
+                    ////{ computer, MaximizeMovesStrategy.Default<Gobble<string>, GobbleBoard, GobbleMove, string>() },
+                    { computer, new MonteCarloStrategy<Gobble<string>, GobbleBoard, GobbleMove, string>(1.0, new Random(seed), computer) },
+                    { gdebruin, new UserInterfaceStrategy<Gobble<string>, GobbleBoard, GobbleMove, string>(displayer) },
                 },
                 displayer);
             var result = driver.Run(game);
