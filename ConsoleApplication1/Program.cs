@@ -5,7 +5,7 @@
 
     using Fx.Games;
     using Fx.Games.TicTacToe;
-    using Fx.Games.Bobble;
+    using Fx.Games.Gobble;
 
     class Program
     {
@@ -72,7 +72,7 @@
             var human = "human";
             var game = new Bobble<string>(computer, human);
             var driver = Driver.Create(
-                new Dictionary<string, IStrategy<Bobble<string>, BobbleBoard, BobbleMove, string>>
+                new Dictionary<string, IStrategy<Gobble<string>, GobbleBoard, GobbleMove, string>>
                 {
                     { computer, MaximizeMovesStrategy.Default<Bobble<string>, BobbleBoard, BobbleMove, string>() },
                     { human, new UserInterfaceStrategy<Bobble<string>, BobbleBoard, BobbleMove, string>(displayer) },                    

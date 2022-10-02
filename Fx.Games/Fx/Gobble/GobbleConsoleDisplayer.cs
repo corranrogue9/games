@@ -1,12 +1,12 @@
-﻿namespace Fx.Games.Bobble
+﻿namespace Fx.Games.Gobble
 {
     using System;
     using System.Linq;
-    public sealed class BobbleConsoleDisplayer<TPlayer> : IDisplayer<Bobble<TPlayer>, BobbleBoard, BobbleMove, TPlayer>
+    public sealed class GobbleConsoleDisplayer<TPlayer> : IDisplayer<Gobble<TPlayer>, GobbleBoard, GobbleMove, TPlayer>
     {
         private readonly Func<TPlayer, string> playerToString;
 
-        public BobbleConsoleDisplayer(Func<TPlayer, string> playerToString)
+        public GobbleConsoleDisplayer(Func<TPlayer, string> playerToString)
         {
             if (playerToString == null)
             {
@@ -16,18 +16,18 @@
             this.playerToString = playerToString;
         }
 
-        private static char FromPiece(Nullable<BobblePiece> piece)
+        private static char FromPiece(Nullable<GobblePiece> piece)
         {
             if (!piece.HasValue)
             {
                 return '_';
             }
 
-            var ix = piece.Value.Color == BobbleColor.Orange ? 'a' : '1';
+            var ix = piece.Value.Color == GobbleColor.Orange ? 'a' : '1';
             return (char)(ix + (int)piece.Value.Size);
         }
 
-        public void DisplayBoard(Bobble<TPlayer> game)
+        public void DisplayBoard(Gobble<TPlayer> game)
         {
             if (game == null)
             {
@@ -47,7 +47,7 @@
             }
         }
 
-        public void DisplayOutcome(Bobble<TPlayer> game)
+        public void DisplayOutcome(Gobble<TPlayer> game)
         {
             if (game == null)
             {
@@ -60,7 +60,7 @@
             }
         }
 
-        public void DisplayMoves(Bobble<TPlayer> game)
+        public void DisplayMoves(Gobble<TPlayer> game)
         {
             Console.WriteLine("Select a move (row, column, size):");
             int i = 0;
@@ -72,7 +72,7 @@
             Console.WriteLine();
         }
 
-        public BobbleMove ReadMoveSelection(Bobble<TPlayer> game)
+        public GobbleMove ReadMoveSelection(Gobble<TPlayer> game)
         {
             var moves = game.Moves.ToList();
             while (true)

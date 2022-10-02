@@ -1,16 +1,16 @@
 using System;
 
-namespace Fx.Games.Bobble
+namespace Fx.Games.Gobble
 {
 
-        public sealed class BobbleBoard
+    public sealed class GobbleBoard
     {
-        public BobbleBoard()
-            : this(new Nullable<BobblePiece>[3, 3])
+        public GobbleBoard()
+            : this(new Nullable<GobblePiece>[3, 3])
         {
         }
 
-        public BobbleBoard(Nullable<BobblePiece>[,] board)
+        public GobbleBoard(Nullable<GobblePiece>[,] board)
         {
             if (board == null)
             {
@@ -22,9 +22,9 @@ namespace Fx.Games.Bobble
                 throw new ArgumentOutOfRangeException(nameof(board), "A 3x3 board is required");
             }
 
-            this.Grid = board.Clone() as Nullable<BobblePiece>[,]; //// TODO does clone work here?
+            this.Grid = board.Clone() as Nullable<GobblePiece>[,]; //// TODO does clone work here?
         }
 
-        public Nullable<BobblePiece>[,] Grid { get; }
+        public Nullable<GobblePiece>[,] Grid { get; }
     }
 }
