@@ -10,41 +10,42 @@
     class Program
     {
 
-
-
         static void Main(string[] args)
         {
-      
-
-            Console.WriteLine("Provide SKU:");
-            var sku = int.Parse(Console.ReadLine());
+            int sku = GetSkuFromArgsOrConsole(args);
             switch (sku)
             {
                 case 0: // two player console tic tac toe
                     TwoPlayerConsoleTicTacToe();
                     break;
                 case 1:
-                    var displayer = new TicTacToeConsoleDisplayer<string>(_ => _);
-                    var computer = "max";
-                    var gdebruin = "gdebruin";
-                    var game = new TicTacToe<string>(computer, gdebruin);
-                    var driver = Driver.Create(
-                        new Dictionary<string, IStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>>
-                        {
-                            { computer, MaximizeMovesStrategy.Default<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>() },
-                            { gdebruin, new UserInterfaceStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>(displayer) },
-                        },
-                        displayer);
-                    var result = driver.Run(game);
+                    TicTacToeHumanVsMaximizeMoves();
                     break;
                 case 2:
-                    Bobble();
+                    Gobble();
                     break;
                 default:
                     throw new Exception("bad sku given");
             }
 
+            Console.WriteLine("hit enter to exit");
             Console.ReadLine();
+        }
+
+        private static void TicTacToeHumanVsMaximizeMoves()
+        {
+            var displayer = new TicTacToeConsoleDisplayer<string>(_ => _);
+            var computer = "max";
+            var human = "human";
+            var game = new TicTacToe<string>(computer, human);
+            var driver = Driver.Create(
+                new Dictionary<string, IStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>>
+                {
+                            { computer, MaximizeMovesStrategy.Default<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>() },
+                            { human, new UserInterfaceStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>(displayer) },
+                },
+                displayer);
+            var result = driver.Run(game);
         }
 
         private static void TwoPlayerConsoleTicTacToe()
@@ -64,25 +65,31 @@
             var result = driver.Run(game);
         }
 
-
-
-
-        static void Bobble()
+        private static void Gobble()
         {
             var displayer = new BobbleConsoleDisplayer<string>(_ => _);
             var computer = "max";
-            var gdebruin = "gdebruin";
-            var game = new Bobble<string>(computer, gdebruin);
+            var human = "human";
+            var game = new Bobble<string>(computer, human);
             var driver = Driver.Create(
                 new Dictionary<string, IStrategy<Bobble<string>, BobbleBoard, BobbleMove, string>>
                 {
                     { computer, MaximizeMovesStrategy.Default<Bobble<string>, BobbleBoard, BobbleMove, string>() },
-                    { gdebruin, new UserInterfaceStrategy<Bobble<string>, BobbleBoard, BobbleMove, string>(displayer) },                    
+                    { human, new UserInterfaceStrategy<Bobble<string>, BobbleBoard, BobbleMove, string>(displayer) },                    
                 },
                 displayer);
             var result = driver.Run(game);
         }
 
-
+        private static int GetSkuFromArgsOrConsole(string[] args)
+        {
+            if(args.Length == 1 && int.TryParse(args[0], out var num))
+            {
+                return num;
+            }
+            Console.WriteLine("Provide SKU:");
+            var sku = int.Parse(Console.ReadLine());
+            return sku;
+        }
     }
 }
