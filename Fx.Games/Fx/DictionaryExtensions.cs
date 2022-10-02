@@ -9,6 +9,7 @@ namespace Fx
     public static class DictionaryExtensions
     {
         public static Dictionary<TKey, TValue> ToDictionary<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> source)
+            where TKey: notnull
         {
             //// TODO other overloads IEnumerable<KVP> for example
             if (source == null)

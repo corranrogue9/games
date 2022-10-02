@@ -67,15 +67,15 @@
 
         private static void Gobble()
         {
-            var displayer = new BobbleConsoleDisplayer<string>(_ => _);
+            var displayer = new GobbleConsoleDisplayer<string>(_ => _);
             var computer = "max";
             var human = "human";
-            var game = new Bobble<string>(computer, human);
+            var game = new Gobble<string>(computer, human);
             var driver = Driver.Create(
                 new Dictionary<string, IStrategy<Gobble<string>, GobbleBoard, GobbleMove, string>>
                 {
-                    { computer, MaximizeMovesStrategy.Default<Bobble<string>, BobbleBoard, BobbleMove, string>() },
-                    { human, new UserInterfaceStrategy<Bobble<string>, BobbleBoard, BobbleMove, string>(displayer) },                    
+                    { computer, MaximizeMovesStrategy.Default<Gobble<string>, GobbleBoard, GobbleMove, string>() },
+                    { human, new UserInterfaceStrategy<Gobble<string>, GobbleBoard, GobbleMove, string>(displayer) },
                 },
                 displayer);
             var result = driver.Run(game);
@@ -83,7 +83,7 @@
 
         private static int GetSkuFromArgsOrConsole(string[] args)
         {
-            if(args.Length == 1 && int.TryParse(args[0], out var num))
+            if (args.Length == 1 && int.TryParse(args[0], out var num))
             {
                 return num;
             }
