@@ -109,7 +109,7 @@
                     return new Outcome<TPlayer>(new[] { GetPlayerFromPiece(this.board.Grid[1, 1].Value) });
                 }
 
-                return null;
+                return this.Moves.Any() ? null : new Outcome<TPlayer>(Enumerable.Empty<TPlayer>());
             }
         }
 

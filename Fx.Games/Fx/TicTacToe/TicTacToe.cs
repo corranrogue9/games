@@ -61,6 +61,7 @@
         {
             get
             {
+                //// TODO doesn't deal with draws
                 for (int i = 0; i < 3; ++i)
                 {
                     if (this.board.Grid[i, 0] != TicTacToePiece.Empty)
