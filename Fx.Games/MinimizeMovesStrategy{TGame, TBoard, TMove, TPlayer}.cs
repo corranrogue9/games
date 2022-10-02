@@ -1,7 +1,7 @@
 ﻿namespace Fx.Games
 {
     using System;
-    using System.Collections;
+    using System.Collections.Generic;
     using System.Linq;
 
     /// <summary>
@@ -39,36 +39,75 @@
         
         public TMove SelectMove(TGame game)
         {
-            return game.Moves.Select(move => Tuple.Create(move, GetWins(game.CommitMove(move)))).Maximum(tuple => tuple.Item2).Item1;
+            //// TODO driver doesn't handle a game that isn't over but a player doesn't have legal moves
+
+            ////return FindWins(game).Maximum(tuple => tuple.Item2).Item1;
+            var winAggregations = FindWins(game).ToList();
+
+            var opponentDoesntWin = winAggregations.Where(tuple => tuple.Item2.Opponent == 0).ToList();
+            if (opponentDoesntWin.Count != 0)
+            {
+                return opponentDoesntWin[0].Item1;
+            }
+
+            return winAggregations.Maximum(tuple => tuple.Item2.Me).Item1;
         }
 
-        private IEnumerable<Tuple<TMove, int>> FindWins(TGame game)
+        private IEnumerable<Tuple<TMove, WinCount>> FindWins(TGame game)
         {
+            foreach (var move in game.Moves)
+            {
+
+                yield return Tuple.Create(move, GetWins(game.CommitMove(move)));
+            }
         }
 
-        private int GetWins(TGame game)
+        private sealed class WinCount
+        {
+            public int Me { get; set; }
+
+            public int Opponent { get; set; }
+
+            public int Draw { get; set; }
+        }
+
+        private WinCount GetWins(TGame game)
         {
             if (game.Outcome != null)
             {
                 if (game.Outcome.Winners.Contains(this.player))
                 {
-                    return 1;
+                    return new WinCount() { Me = 1 };
                 }
                 else if (!game.Outcome.Winners.Any())
                 {
-                    return 0;
+                    return new WinCount() { Draw = 1 };
                 }
                 else
                 {
-                    return -1;
+                    return new WinCount() { Opponent = 1 };
                 }
             }
 
-            return game
+            var subset = game
                 .Moves
-                .Where(move => this.rng.NextDouble() < this.branchingFactor)
-                .Select(move => GetWins(game.CommitMove(move)))
-                .Sum();
+                .Where(move => this.rng.NextDouble() < this.branchingFactor);
+            return GetSubset(game, subset)
+                .Aggregate(new WinCount(), (accumalate, wins) =>
+                {
+                    accumalate.Me += wins.Me;
+                    accumalate.Draw += wins.Draw;
+                    accumalate.Opponent += wins.Opponent;
+                    return accumalate;
+                });
+        }
+
+        private IEnumerable<WinCount> GetSubset(TGame game, IEnumerable<TMove> moves)
+        {
+            foreach (var move in moves)
+            {
+                yield return GetWins(game.CommitMove(move));
+            }
         }
     }
 }
