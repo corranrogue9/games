@@ -92,7 +92,13 @@
                 return num;
             }
             Console.WriteLine("Provide SKU:");
-            var sku = int.Parse(Console.ReadLine());
+            int sku;
+            string? written;
+            while ((written = Console.ReadLine()) == null || !int.TryParse(written, out sku))
+            {
+                Console.WriteLine("Invalid sku. Please provide a valid sku:");
+            }
+
             return sku;
         }
     }

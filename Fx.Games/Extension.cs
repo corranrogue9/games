@@ -9,6 +9,22 @@
     /// <threadsafety static="true" instance="true"/>
     internal static class Extension
     {
+        internal static T[,] Copy<T>(this T[,] source)
+        {
+            Ensure.NotNull(source, nameof(source));
+
+            var clone = new T[source.GetLength(0), source.GetLength(1)];
+            for (int i = 0; i < source.GetLength(0); ++i)
+            {
+                for (int j = 0; j < source.GetLength(1); ++j)
+                {
+                    clone[i, j] = source[i, j];
+                }
+            }
+
+            return clone;
+        }
+
         public static T Minimum<T>(this IEnumerable<T> source, Func<T, double> selector)
         {
             using (var enumerator = source.GetEnumerator())

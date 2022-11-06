@@ -211,7 +211,7 @@ Select a move (row, column):
                     return new Outcome<TPlayer>(new[] { GetPlayerFromPiece(this.board.Grid[1, 1]) });
                 }
 
-                return null;
+                return null!;
             }
         }
 
@@ -228,7 +228,7 @@ Select a move (row, column):
             }
 
             // TODO: does clone work here?
-            var newBoard = this.board.Grid.Clone() as TicTacToePiece[,];
+            var newBoard = this.board.Grid.Copy();
             newBoard[move.Row, move.Column] = (TicTacToePiece)(this.currentPlayer + 1);
 
             return new TicTacToe<TPlayer>(this.players, (this.currentPlayer + 1) % 2, new TicTacToeBoard(newBoard));
