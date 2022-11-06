@@ -2,6 +2,7 @@
 {
     using System;
     using System.Linq;
+
     public sealed class TicTacToeConsoleDisplayer<TPlayer> : IDisplayer<TicTacToe<TPlayer>, TicTacToeBoard, TicTacToeMove, TPlayer>
     {
         private readonly Func<TPlayer, string> playerToString;
@@ -58,10 +59,7 @@
                 throw new ArgumentNullException(nameof(game));
             }
 
-            foreach (var winner in game.Outcome.Winners)
-            {
-                Console.WriteLine($"{this.playerToString(winner)} wins!");
-            }
+            game.Outcome.Winners.ApplyToEmptyOrPopulated(() => Console.WriteLine("The game was a draw..."), winner => Console.WriteLine($"{this.playerToString(winner)} wins!"));
         }
 
         public void DisplayMoves(TicTacToe<TPlayer> game)

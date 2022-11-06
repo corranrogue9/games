@@ -61,112 +61,6 @@
         {
             get
             {
-                //// TODO doesn't deal with draws
-                /*
-                 * *|*|*
-*|*|*
-*|*|*
-Select a move (row, column):
-0: 0, 0
-1: 0, 1
-2: 0, 2
-3: 1, 0
-4: 1, 1
-5: 1, 2
-6: 2, 0
-7: 2, 1
-8: 2, 2
-
-4
-*|*|*
-*|X|*
-*|*|*
-Select a move (row, column):
-0: 0, 0
-1: 0, 1
-2: 0, 2
-3: 1, 0
-4: 1, 2
-5: 2, 0
-6: 2, 1
-7: 2, 2
-
-0
-O|*|*
-*|X|*
-*|*|*
-Select a move (row, column):
-0: 0, 1
-1: 0, 2
-2: 1, 0
-3: 1, 2
-4: 2, 0
-5: 2, 1
-6: 2, 2
-
-0
-O|X|*
-*|X|*
-*|*|*
-Select a move (row, column):
-0: 0, 2
-1: 1, 0
-2: 1, 2
-3: 2, 0
-4: 2, 1
-5: 2, 2
-
-4
-O|X|*
-*|X|*
-*|O|*
-Select a move (row, column):
-0: 0, 2
-1: 1, 0
-2: 1, 2
-3: 2, 0
-4: 2, 2
-
-3
-O|X|*
-*|X|*
-X|O|*
-Select a move (row, column):
-0: 0, 2
-1: 1, 0
-2: 1, 2
-3: 2, 2
-
-0
-O|X|O
-*|X|*
-X|O|*
-Select a move (row, column):
-0: 1, 0
-1: 1, 2
-2: 2, 2
-
-0
-O|X|O
-X|X|*
-X|O|*
-Select a move (row, column):
-0: 1, 2
-1: 2, 2
-
-0
-O|X|O
-X|X|O
-X|O|*
-Select a move (row, column):
-0: 2, 2
-
-0
-O|X|O
-X|X|O
-X|O|X
-Select a move (row, column):
-                 */
                 for (int i = 0; i < 3; ++i)
                 {
                     if (this.board.Grid[i, 0] != TicTacToePiece.Empty)
@@ -211,7 +105,17 @@ Select a move (row, column):
                     return new Outcome<TPlayer>(new[] { GetPlayerFromPiece(this.board.Grid[1, 1]) });
                 }
 
-                return null;
+                foreach (var piece in this.board.Grid)
+                {
+                    if (piece == TicTacToePiece.Empty)
+                    {
+                        // no one has won the game, and there are empty spaces, so the game is continuing
+                        return null;
+                    }
+                }
+
+                // no one has won the game, and there are no empty spaces, so the game is a draw
+                return new Outcome<TPlayer>(Enumerable.Empty<TPlayer>());
             }
         }
 
