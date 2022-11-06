@@ -10,40 +10,16 @@
     class Program
     {
 
-
-
         static void Main(string[] args)
         {
-            int sku;
-            if (args.Length == 0)
-            {
-                Console.WriteLine("Provide SKU:");
-                sku = int.Parse(Console.ReadLine());
-            }
-            else
-            {
-                sku = int.Parse(args[0]);
-            }
-
+            int sku = GetSkuFromArgsOrConsole(args);
             switch (sku)
             {
                 case 0: // two player console tic tac toe
                     TwoPlayerConsoleTicTacToe();
                     break;
                 case 1:
-                    var displayer = new TicTacToeConsoleDisplayer<string>(_ => _);
-                    var computer = "max";
-                    var gdebruin = "gdebruin";
-                    var game = new TicTacToe<string>(computer, gdebruin);
-                    var driver = Driver.Create(
-                        new Dictionary<string, IStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>>
-                        {
-                            ////{ computer, MaximizeMovesStrategy.Default<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>() },
-                            { computer, new MonteCarloStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>(1.0, new Random(0), computer) },
-                            { gdebruin, new UserInterfaceStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>(displayer) },
-                        },
-                        displayer);
-                    var result = driver.Run(game);
+                    TicTacToeHumanVsMaximizeMoves();
                     break;
                 case 2:
                     Gobble();
@@ -52,7 +28,24 @@
                     throw new Exception("bad sku given");
             }
 
+            Console.WriteLine("hit enter to exit");
             Console.ReadLine();
+        }
+
+        private static void TicTacToeHumanVsMaximizeMoves()
+        {
+            var displayer = new TicTacToeConsoleDisplayer<string>(_ => _);
+            var computer = "max";
+            var human = "human";
+            var game = new TicTacToe<string>(computer, human);
+            var driver = Driver.Create(
+                new Dictionary<string, IStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>>
+                {
+                            { computer, MaximizeMovesStrategy.Default<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>() },
+                            { human, new UserInterfaceStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>(displayer) },
+                },
+                displayer);
+            var result = driver.Run(game);
         }
 
         private static void TwoPlayerConsoleTicTacToe()
@@ -72,27 +65,31 @@
             var result = driver.Run(game);
         }
 
-
-
-
-        static void Gobble()
+        private static void Gobble()
         {
-            var seed = 0;
             var displayer = new GobbleConsoleDisplayer<string>(_ => _);
-            var computer = "maxheadroom";
-            var gdebruin = "gdebruin";
-            var game = new Gobble<string>(computer, gdebruin);
+            var computer = "max";
+            var human = "human";
+            var game = new Gobble<string>(computer, human);
             var driver = Driver.Create(
                 new Dictionary<string, IStrategy<Gobble<string>, GobbleBoard, GobbleMove, string>>
                 {
-                    ////{ computer, MaximizeMovesStrategy.Default<Gobble<string>, GobbleBoard, GobbleMove, string>() },
-                    { computer, new MonteCarloStrategy<Gobble<string>, GobbleBoard, GobbleMove, string>(1.0, new Random(seed), computer) },
-                    { gdebruin, new UserInterfaceStrategy<Gobble<string>, GobbleBoard, GobbleMove, string>(displayer) },
+                    { computer, MaximizeMovesStrategy.Default<Gobble<string>, GobbleBoard, GobbleMove, string>() },
+                    { human, new UserInterfaceStrategy<Gobble<string>, GobbleBoard, GobbleMove, string>(displayer) },
                 },
                 displayer);
             var result = driver.Run(game);
         }
 
-
+        private static int GetSkuFromArgsOrConsole(string[] args)
+        {
+            if (args.Length == 1 && int.TryParse(args[0], out var num))
+            {
+                return num;
+            }
+            Console.WriteLine("Provide SKU:");
+            var sku = int.Parse(Console.ReadLine());
+            return sku;
+        }
     }
 }
