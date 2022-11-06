@@ -4,7 +4,7 @@
     using System.Collections.Generic;
 
     /// <summary>
-    /// 
+    /// TODO doesn't work probably
     /// </summary>
     /// <threadsafety static="true" instance="true"/>
     public sealed class Amazons<TPlayer> : IGame<Amazons<TPlayer>, ChessBoard<AmazonsPiece>, ChessMove, TPlayer>
@@ -27,6 +27,14 @@
             pieces[size - 1][size - 1] = AmazonsPiece.Player2;
 
             this.board = new ChessBoard<AmazonsPiece>(pieces);
+        }
+
+        public TPlayer CurrentPlayer
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
         }
 
         public ChessBoard<AmazonsPiece> Board
