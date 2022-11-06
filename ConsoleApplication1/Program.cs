@@ -20,6 +20,9 @@
                 case 1:
                     TicTacToeHumanVsMaximizeMoves();
                     break;
+                case 2: // tic tac toe with two computer players using random strategy
+                    TicTacToeTwoRandom();
+                    break;
                 default:
                     throw new Exception("bad sku given");
             }
@@ -56,6 +59,27 @@
                 {
                     { chrispre, consoleStrategy },
                     { gdebruin, consoleStrategy },
+                },
+                displayer);
+            var result = driver.Run(game);
+        }
+
+
+        private static void TicTacToeTwoRandom()
+        {
+
+            const string playerX = "player X";
+            const string playerO = "player O";
+            var strategyX = new RandomStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>();
+            var strategyO = new RandomStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>();
+
+            var displayer = new TicTacToeConsoleDisplayer<string>(_ => _);
+            var game = new TicTacToe<string>(playerX, playerO);
+            var driver = Driver.Create(
+                new Dictionary<string, IStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>>
+                {
+                    { playerX, strategyX },
+                    { playerO, strategyO },
                 },
                 displayer);
             var result = driver.Run(game);
