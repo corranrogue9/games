@@ -294,7 +294,7 @@
                 },
                 displayer);
 
-            var winRates = game
+            /*var winRates = game
                 .ToTree()
                 .Select(
                    game => (game, default(TicTacToeMove), game.Outcome?.Winners.Contains("max") == true ? (true, 1.0) : (false, 0.0)),
@@ -360,7 +360,7 @@
                     writer.WriteLine(value);
                     children.Enumerate();
                     return new Void();
-                });
+                });*/
 
 
 
