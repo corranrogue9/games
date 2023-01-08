@@ -1,6 +1,7 @@
 namespace Fx.Games
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
 
     public sealed class RandomStrategy<TGame, TBoard, TMove, TPlayer> : IStrategy<TGame, TBoard, TMove, TPlayer> where TGame : IGame<TGame, TBoard, TMove, TPlayer>

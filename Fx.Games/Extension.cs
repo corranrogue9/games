@@ -2,13 +2,33 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
+
+    using Fx.Tree;
 
     /// <summary>
     /// 
     /// </summary>
     /// <threadsafety static="true" instance="true"/>
-    internal static class Extension
+    public static class Extension
     {
+        internal static ITree<IGame<TGame, TBoard, TMove, TPlayer>> ToTree<TGame, TBoard, TMove, TPlayer>(this IGame<TGame, TBoard, TMove, TPlayer> game) where TGame : IGame<TGame, TBoard, TMove, TPlayer>
+        {
+            if (game.Moves.Any())
+            {
+                return Node.CreateTree(game, game.Moves.Select(move => game.CommitMove(move).ToTree()));
+            }
+            else
+            {
+                return Node.CreateTree(game);
+            }
+        }
+
+        internal static IGame<TGame, TBoard, TMove, TPlayer> AsGame<TGame, TBoard, TMove, TPlayer>(this IGame<TGame, TBoard, TMove, TPlayer> game) where TGame : IGame<TGame, TBoard, TMove, TPlayer>
+        {
+            return game;
+        }
+
         internal static void ApplyToEmptyOrPopulated<T>(this IEnumerable<T> source, Action empty, Action<T> populated)
         {
             //// TODO this is a good example for either, maybe; how to go from ienumerable to either
