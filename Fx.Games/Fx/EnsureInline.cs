@@ -3,7 +3,7 @@
     using System;
     using System.Runtime.CompilerServices;
 
-    public static class EnsureInline
+    public static class EnsureInline //// TODO use Fx.Core
     {
         /// <summary>
         /// Ensures that <paramref name="value"/> is not null
