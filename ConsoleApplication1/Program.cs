@@ -118,38 +118,96 @@
 
         private sealed class TestStrategy<TGame, TBoard> : IStrategy<TGame, TicTacToeBoard, TicTacToeMove, string> where TGame : IGame<TGame, TicTacToeBoard, TicTacToeMove, string>
         {
+            private enum Status
+            {
+                Win,
+                Lose,
+                Draw,
+                Other,
+            }
+
             public TicTacToeMove SelectMove(TGame game)
             {
                 var toWin = game
                     .ToTree()
                     .Select(
-                       game => (game, default(TicTacToeMove), game.Outcome?.Winners.Contains("max") == true ? (true, 1.0) : (false, 0.0)),
+                       game => (game, default(TicTacToeMove), game.Outcome?.Winners.Contains("max") == true ? (Status.Win, 1.0) : game.Outcome?.Winners.Any() == false ? (Status.Draw, 0.0) : (Status.Lose, -1.0)),
                        (game, children) =>
                        {
                            var zipped = game.Moves.Zip(children).ToList();
                            if (game.CurrentPlayer == "max")
                            {
-                               if (zipped.Where(child => child.Second.Item3.Item1).TryFirst(out var first))
+                               if (zipped.Where(child => child.Second.Item3.Item1 == Status.Win).TryFirst(out var first))
                                {
                                    return (game, first.First, first.Second.Item3);
                                }
 
+                               //// TODO you could choose to pick a draw here instaed of maximum for the "try not to lose" option
                                var choice = zipped.Maximum(child => child.Second.Item3.Item2);
                                return (game, choice.First, choice.Second.Item3);
                            }
                            else
                            {
-                               if (zipped.All(child => child.Second.Item3.Item1))
+                               if (zipped.All(child => child.Second.Item3.Item1 == Status.Win))
                                {
-                                   return (game, default(TicTacToeMove), (true, 1.0));
+                                   return (game, default(TicTacToeMove), (Status.Win, 1.0));
+                               }
+                               else if (zipped.All(child => child.Second.Item3.Item1 == Status.Lose))
+                               {
+                                   return (game, default(TicTacToeMove), (Status.Lose, -1.0));
+                               }
+                               else if (zipped.All(child => child.Second.Item3.Item1 == Status.Draw))
+                               {
+                                   return (game, default(TicTacToeMove), (Status.Draw, 0.0));
                                }
                                else
                                {
-                                   return (game, default(TicTacToeMove), (false, children.Average(_ => _.Item3.Item2)));
+                                   return (game, default(TicTacToeMove), (Status.Other, children.Average(_ => _.Item3.Item2)));
                                }
                            }
                        },
                        Node.TreeFactory);
+                if (!System.IO.File.Exists(@"c:\users\gdebruin\desktop\tictactoe.txt"))
+                {
+                    Func<(IGame<TGame, TicTacToeBoard, TicTacToeMove, string>, TicTacToeMove?, (Status, double)), string> toString = tuple =>
+                    {
+                        var stringBuilder = new System.Text.StringBuilder();
+                        stringBuilder.Append($"{tuple.Item3.Item2}: ");
+                        if (tuple.Item2 != null)
+                        {
+                            stringBuilder.Append($"({tuple.Item2.Row}, {tuple.Item2.Column}) ");
+                        }
+
+                        var array = tuple.Item1.Board.Grid.ToArray();
+                        stringBuilder.Append(string.Join("\\", array.Select(row => string.Join('|', row.Select(element => element == TicTacToePiece.Ex ? "X" : element == TicTacToePiece.Oh ? "O" : ".")))));
+
+                        return stringBuilder.ToString();
+                    };
+                    var toDisplay = toWin
+                        .Select(
+                            toString,
+                            Node.TreeFactory);
+
+                    var formatted = toDisplay.DepthTree(Node.TreeFactory).Merge(toDisplay, (depth, winRate) => $"{new string(' ', depth * 2)}{winRate}", Node.TreeFactory);
+
+                    System.IO.TextWriter writer;
+                    ////writer = Console.Out;
+                    writer = new System.IO.StreamWriter(@"c:\users\gdebruin\desktop\tictactoe.txt");
+                    formatted.Fold(
+                        (value) =>
+                        {
+                            writer.WriteLine(value);
+                            return new Void();
+                        },
+                        (value, children) =>
+                        {
+                            writer.WriteLine(value);
+                            children.Enumerate();
+                            return new Void();
+                        });
+                    writer.Dispose();
+                }
+
                 return toWin.Value.Item2;
 
                 /*return game
@@ -179,7 +237,7 @@
                         })
                     .Item1;*/
 
-                var count = game.ToTree().LeafCount();
+                /*var count = game.ToTree().LeafCount();
 
                 var winRates = game
                     .ToTree()
@@ -243,7 +301,7 @@
                         writer.WriteLine(value);
                         children.Enumerate();
                         return new Void();
-                    });
+                    });*/
 
                 /*var winRates = game
                     .ToTree()
