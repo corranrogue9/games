@@ -294,6 +294,7 @@
                 },
                 displayer);
 
+            //// TODO uncomment this to write all of the games with their moves and winrates to a file
             /*var winRates = game
                 .ToTree()
                 .Select(
