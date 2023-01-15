@@ -5,6 +5,8 @@
     using System.Linq;
 
     using Fx.Games;
+    using Fx.Games.Gobble;
+    using Fx.Games.PegGame;
     using Fx.Games.TicTacToe;
     using Fx.Tree;
 
@@ -130,7 +132,9 @@
             var recreatedTree = Extension.CreateFromBranches(branches, Node.TreeFactory);
 
 
+            Pegs();
             TicTacToeHumanVsMaximizeMoves();
+            Gobble();
 
             int sku = GetSkuFromArgsOrConsole(args);
             switch (sku)
@@ -373,6 +377,39 @@
             }
         }
 
+        private static void Pegs()
+        {
+            var displayer = new PegGameConsoleDisplayer<string>();
+            var computer = "max";
+            var game = new PegGame<string>(computer);
+            var driver = Driver.Create(
+                new Dictionary<string, IStrategy<PegGame<string>, PegBoard, PegMove, string>>
+                {
+                    { computer, new DecisionTreeStrategy<PegGame<string>, PegBoard, PegMove, string>(computer, StringComparer.OrdinalIgnoreCase) },
+                    ////{ computer, new UserInterfaceStrategy<PegGame<string>, PegBoard, PegMove, string>(displayer) },
+                },
+                displayer);
+            var result = driver.Run(game);
+        }
+
+        private static void Gobble()
+        {
+            var displayer = new GobbleConsoleDisplayer<string>(_ => _);
+            var computer = "max";
+            var human = "human";
+            var game = new Gobble<string>(computer, human);
+            var driver = Driver.Create(
+                new Dictionary<string, IStrategy<Gobble<string>, GobbleBoard, GobbleMove, string>>
+                {
+                            ////{ computer, MaximizeMovesStrategy.Default<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>() },
+                            { computer, new DecisionTreeStrategy<Gobble<string>, GobbleBoard, GobbleMove, string>(computer, StringComparer.OrdinalIgnoreCase) },
+                            ////{ computer, new MonteCarloStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>(computer, 0.1, StringComparer.OrdinalIgnoreCase, new Random(0)) },
+                            { human, new UserInterfaceStrategy<Gobble<string>, GobbleBoard, GobbleMove, string>(displayer) },
+                },
+                displayer);
+            var result = driver.Run(game);
+        }
+
         private static void TicTacToeHumanVsMaximizeMoves()
         {
             var displayer = new TicTacToeConsoleDisplayer<string>(_ => _);
@@ -383,8 +420,8 @@
                 new Dictionary<string, IStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>>
                 {
                             ////{ computer, MaximizeMovesStrategy.Default<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>() },
-                            ////{ computer, new DecisionTreeStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>(computer, StringComparer.OrdinalIgnoreCase) },
-                            { computer, new MonteCarloStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>(computer, 0.1, StringComparer.OrdinalIgnoreCase, new Random(0)) },
+                            { computer, new DecisionTreeStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>(computer, StringComparer.OrdinalIgnoreCase) },
+                            ////{ computer, new MonteCarloStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>(computer, 0.1, StringComparer.OrdinalIgnoreCase, new Random(0)) },
                             { human, new UserInterfaceStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>(displayer) },
                 },
                 displayer);
