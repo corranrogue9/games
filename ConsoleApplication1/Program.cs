@@ -76,6 +76,35 @@
                     (aggregation, current) => aggregation.Item1 == 2 ? aggregation : preference(current) ? (2, current) : aggregation.Item1 == 1 ? aggregation : fallback(current) ? (1, current) : (0, current))
                 .Item2;
         }
+
+
+        public static IEnumerable<IEnumerable<T>> EnumerateBranches<T>(this ITree<T> tree)
+        {
+            return tree.Fold(
+                (value) => new[] { new[] { value }.AsEnumerable() }.AsEnumerable(),
+                (value, aggregation) => aggregation.SelectMany(child => child.Select(branch => branch.Prepend(value))));
+        }
+
+        public static ITree<T> CreateFromBranches<T>(IEnumerable<IEnumerable<T>> branches, ITreeFactory treeFactory)
+        {
+            if (!branches.Any())
+            {
+                throw new ArgumentException("TODO");
+            }
+
+            var branch = branches.First();
+            if (!branch.Any())
+            {
+                throw new ArgumentException("TODO");
+            }
+
+            var value = branch.First();
+
+
+            var subbranches = branches.Select(b => b.Skip(1)).Where(b => b.Any()).GroupBy(b => b.First());
+
+            return treeFactory.CreateInner(value, subbranches.Select(b => CreateFromBranches(b, treeFactory)));
+        }
     }
 
     public struct Void
@@ -94,6 +123,13 @@
             //// var tree2 = Node.CreateBinaryTree("Asdf", "qwer", "1234", "zxcv");
             var tree3 = Node.CreateTree("Asdf", Node.CreateTree("qwer1", "zxcv12"), Node.CreateTree("1234567"));
             var lengths = tree3.Select(value => value.Length, Node.TreeFactory);
+
+
+
+            var branches = tree3.EnumerateBranches();
+            var recreatedTree = Extension.CreateFromBranches(branches, Node.TreeFactory);
+
+
             TicTacToeHumanVsMaximizeMoves();
 
             int sku = GetSkuFromArgsOrConsole(args);
@@ -347,7 +383,8 @@
                 new Dictionary<string, IStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>>
                 {
                             ////{ computer, MaximizeMovesStrategy.Default<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>() },
-                            { computer, new DecisionTreeStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>(computer, StringComparer.OrdinalIgnoreCase) },
+                            ////{ computer, new DecisionTreeStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>(computer, StringComparer.OrdinalIgnoreCase) },
+                            { computer, new MonteCarloStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>(computer, 0.1, StringComparer.OrdinalIgnoreCase, new Random(0)) },
                             { human, new UserInterfaceStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>(displayer) },
                 },
                 displayer);
