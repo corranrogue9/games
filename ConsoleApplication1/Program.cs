@@ -404,7 +404,8 @@
                             ////{ computer, MaximizeMovesStrategy.Default<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>() },
                             { computer, new DecisionTreeStrategy<Gobble<string>, GobbleBoard, GobbleMove, string>(computer, StringComparer.OrdinalIgnoreCase) },
                             ////{ computer, new MonteCarloStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>(computer, 0.1, StringComparer.OrdinalIgnoreCase, new Random(0)) },
-                            { human, new UserInterfaceStrategy<Gobble<string>, GobbleBoard, GobbleMove, string>(displayer) },
+                            ////{ human, new UserInterfaceStrategy<Gobble<string>, GobbleBoard, GobbleMove, string>(displayer) },
+                    {human, new RandomStrategy<Gobble<string>, GobbleBoard, GobbleMove, string>() }
                 },
                 displayer);
             var result = driver.Run(game);
@@ -422,7 +423,8 @@
                             ////{ computer, MaximizeMovesStrategy.Default<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>() },
                             { computer, new DecisionTreeStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>(computer, StringComparer.OrdinalIgnoreCase) },
                             ////{ computer, new MonteCarloStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>(computer, 0.1, StringComparer.OrdinalIgnoreCase, new Random(0)) },
-                            { human, new UserInterfaceStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>(displayer) },
+                            ////{ human, new UserInterfaceStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>(displayer) },
+                            {human, new RandomStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>() }
                 },
                 displayer);
 

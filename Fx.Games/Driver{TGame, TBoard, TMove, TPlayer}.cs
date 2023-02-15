@@ -26,7 +26,9 @@
                 var strategy = strategies[game.CurrentPlayer];
                 displayer.DisplayBoard(game);
                 displayer.DisplayMoves(game);
+                Console.WriteLine($"{DateTime.UtcNow}");
                 var move = strategy.SelectMove(game);
+                Console.WriteLine($"{DateTime.UtcNow}");
                 game = game.CommitMove(move);
                 if (game.Outcome != null)
                 {
