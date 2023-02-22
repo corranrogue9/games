@@ -69,6 +69,8 @@
     {
         TResult Fold<TResult>(Func<TValue, TResult> whenLeaf, Func<TValue, IEnumerable<TResult>, TResult> whenInner);
 
+        ////TResult Fold<TResult>(Func<TValue, int, TResult> whenLeaf, Func<TValue, IEnumerable<TResult>, int, TResult> whenInner, int depth);
+
         TValue Value { get; }
 
         IEnumerable<ITree<TValue>> Children { get; }
@@ -114,6 +116,18 @@
                  }
              }*/
         }
+
+        /*public TResult Fold<TResult>(Func<T, int, TResult> whenLeaf, Func<T, IEnumerable<TResult>, int, TResult> whenInner, int depth)
+        {
+            if (!this.Children.Any())
+            {
+                return whenLeaf(this.Value, depth);
+            }
+            else
+            {
+                return whenInner(this.Value, this.Children.Select(child => child.Fold(whenLeaf, whenInner, depth + 1)), depth);
+            }
+        }*/
 
         /*private sealed class Enumerator : IEnumerator<T>
         {

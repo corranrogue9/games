@@ -46,6 +46,43 @@
         }
     }
 
+    public sealed class GameTreeDepthStrategy<TGame, TBoard, TMove, TPlayer> : IStrategy<TGame, TBoard, TMove, TPlayer> where TGame : IGame<TGame, TBoard, TMove, TPlayer>
+    {
+        private readonly Func<IGame<TGame, TBoard, TMove, TPlayer>, (IGame<TGame, TBoard, TMove, TPlayer>, TMove, (Status, double))> selector;
+
+        private readonly ITreeFactory treeFactory;
+
+        private readonly TPlayer player;
+
+        private readonly IEqualityComparer<TPlayer> playerComparer;
+
+        public GameTreeDepthStrategy(Func<IGame<TGame, TBoard, TMove, TPlayer>, (IGame<TGame, TBoard, TMove, TPlayer>, TMove, (Status, double))> selector, ITreeFactory treeFactory, TPlayer player, IEqualityComparer<TPlayer> playerComparer)
+        {
+            /*Ensure.NotNull(selector, nameof(selector));
+            Ensure.NotNull(treeFactory, nameof(treeFactory));*/
+            Ensure.NotNull(player, nameof(player));
+            Ensure.NotNull(playerComparer, nameof(playerComparer));
+
+            /*this.selector = selector;
+            this.treeFactory = treeFactory;*/
+            this.player = player;
+            this.playerComparer = playerComparer;
+
+            this.selector = game => game.ToTree().Decide(this.player, this.playerComparer).Value;
+            this.treeFactory = Node.TreeFactory;
+        }
+
+        public TMove SelectMove(TGame game)
+        {
+            var gameTree = game
+                .ToTree(1);
+            var selectedGameTree = gameTree
+                .Select(selector, this.treeFactory); //// TODO the signature of the selector is wrong; the stragety should take a "score" and make the correct decision from there, the selector should just give us the score
+
+            return selectedGameTree.Value.Item2;
+        }
+    }
+
     public sealed class DecisionTreeStrategy<TGame, TBoard, TMove, TPlayer> : IStrategy<TGame, TBoard, TMove, TPlayer> where TGame : IGame<TGame, TBoard, TMove, TPlayer>
     {
         private readonly TPlayer player;
@@ -146,6 +183,18 @@
             if (game.Outcome == null)
             {
                 return Node.CreateTree(game, game.Moves.Select(move => game.CommitMove(move).ToTree()));
+            }
+            else
+            {
+                return Node.CreateTree(game);
+            }
+        }
+
+        internal static ITree<IGame<TGame, TBoard, TMove, TPlayer>> ToTree<TGame, TBoard, TMove, TPlayer>(this IGame<TGame, TBoard, TMove, TPlayer> game, int depth) where TGame : IGame<TGame, TBoard, TMove, TPlayer>
+        {
+            if (game.Outcome == null && depth != 0)
+            {
+                return Node.CreateTree(game, game.Moves.Select(move => game.CommitMove(move).ToTree(depth - 1)));
             }
             else
             {
