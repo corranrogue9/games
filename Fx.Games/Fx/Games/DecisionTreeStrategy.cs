@@ -75,7 +75,7 @@
         public TMove SelectMove(TGame game)
         {
             var gameTree = game
-                .ToTree(1);
+                .ToTree(3);
             var selectedGameTree = gameTree
                 .Select(selector, this.treeFactory); //// TODO the signature of the selector is wrong; the stragety should take a "score" and make the correct decision from there, the selector should just give us the score
 
