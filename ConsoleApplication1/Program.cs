@@ -118,6 +118,9 @@
 
         static void Main(string[] args)
         {
+            ConsoleApplication4.Main.DoWork();
+
+
 
             var tree = Node.CreateTree("Asdf", "qwer", "1234", "zxcv");
 

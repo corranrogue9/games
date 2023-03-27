@@ -1,5 +1,6 @@
 ﻿namespace Fx.Games
 {
+    using ConsoleApplication4;
     using Fx.Games.TicTacToe;
     using Fx.Tree;
     using System.Linq;
@@ -77,9 +78,52 @@
             var gameTree = game
                 .ToTree(3);
             var selectedGameTree = gameTree
-                .Select(selector, this.treeFactory); //// TODO the signature of the selector is wrong; the stragety should take a "score" and make the correct decision from there, the selector should just give us the score
+                .Select(this.selector, this.treeFactory); //// TODO the signature of the selector is wrong; the stragety should take a "score" and make the correct decision from there, the selector should just give us the score
 
             return selectedGameTree.Value.Item2;
+        }
+    }
+
+    public sealed class GarrettGameTreeDepthStrategy<TGame, TMove, TPlayer> : ConsoleApplication4.IStrategy<TMove, TPlayer, TGame> where TGame : IGame<TMove, TPlayer, TGame>
+    {
+        private readonly Func<TGame, double> selector;
+
+        private readonly ITreeFactory treeFactory;
+
+        private readonly TPlayer player;
+
+        private readonly IEqualityComparer<TPlayer> playerComparer;
+
+        public GarrettGameTreeDepthStrategy(Func<TGame, double> selector, ITreeFactory treeFactory, TPlayer player, IEqualityComparer<TPlayer> playerComparer)
+        {
+            /*Ensure.NotNull(selector, nameof(selector));
+            Ensure.NotNull(treeFactory, nameof(treeFactory));*/
+            Ensure.NotNull(player, nameof(player));
+            Ensure.NotNull(playerComparer, nameof(playerComparer));
+
+            /*this.selector = selector;
+            this.treeFactory = treeFactory;*/
+            this.player = player;
+            this.playerComparer = playerComparer;
+
+            this.selector = selector;
+            this.treeFactory = Node.TreeFactory;
+        }
+
+        public TMove SelectMove(TGame game)
+        {
+            return game.LegalMoves.Maximum(move =>
+            {
+                var testGame = game.CommitMove(move);
+                return testGame
+                    .ToOtherTree<TGame, TMove, TPlayer>(7)
+                    .Fold(this.selector, (game, scores) => scores.Max());
+            });
+        }
+
+        public TGame SelectMove(TPlayer game)
+        {
+            throw new NotImplementedException();
         }
     }
 
@@ -175,6 +219,30 @@
 
                 value = default;
                 return false;
+            }
+        }
+
+        internal static ITree<TGame> ToOtherTree<TGame, TMove, TPlayer>(this TGame game, int depth) where TGame : ConsoleApplication4.IGame<TMove, TPlayer, TGame>
+        {
+            if (game.Outcome == null && depth != 0)
+            {
+                return Node.CreateTree(game, game.LegalMoves.Select(move => game.CommitMove(move).ToOtherTree<TGame, TMove, TPlayer>(depth - 1)));
+            }
+            else
+            {
+                return Node.CreateTree(game);
+            }
+        }
+
+        internal static ITree<ConsoleApplication4.IGame<TMove, TPlayer, TGame>> ToOtherTree<TGame, TMove, TPlayer>(this ConsoleApplication4.IGame<TMove, TPlayer, TGame> game) where TGame : ConsoleApplication4.IGame<TMove, TPlayer, TGame>
+        {
+            if (game.Outcome == null)
+            {
+                return Node.CreateTree(game, game.LegalMoves.Select(move => game.CommitMove(move).ToOtherTree()));
+            }
+            else
+            {
+                return Node.CreateTree(game);
             }
         }
 

@@ -194,6 +194,11 @@
             return treeFactory.CreateInner(depth, tree.Children.Select(child => child.DepthTree(treeFactory, depth + 1)));
         }
 
+        public static IEnumerable<T> Leaves<T>(this ITree<T> tree)
+        {
+            return tree.Fold(value => new[] { value }.AsEnumerable(), (value, values) => values.SelectMany(_ => _));
+        }
+
         public static ITree<TResult> Select<TValue, TResult>(
             this ITree<TValue> tree,
             Func<TValue, TResult> selector, 
