@@ -1,4 +1,4 @@
-﻿using Fx.Games;
+﻿using Fx.Game;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
@@ -886,11 +886,6 @@ namespace ConsoleApplication4
         }
     }
 
-    public interface IGameWithHiddenInformation<TMove, TPlayer, TGame> : IGame<TMove, TPlayer, TGame> where TGame : IGameWithHiddenInformation<TMove, TPlayer, TGame>
-    {
-        IEnumerable<TGame> ExploreMove(TMove move);
-    }
-
     public sealed class Outcome<TPlayer>
     {
         public Outcome(IEnumerable<TPlayer> winners, IEnumerable<TPlayer> losers, IEnumerable<TPlayer> draws)
@@ -905,19 +900,6 @@ namespace ConsoleApplication4
         public IEnumerable<TPlayer> Losers { get; }
 
         public IEnumerable<TPlayer> Draws { get; }
-    }
-
-    public interface IGame<TMove, TPlayer, TGame> where TGame : IGame<TMove, TPlayer, TGame>
-    {
-        IEnumerable<TMove> LegalMoves { get; }
-
-        TGame CommitMove(TMove move);
-
-        TPlayer CurrentPlayer { get; }
-
-        Outcome<TPlayer> Outcome { get; }
-
-        void Display();
     }
 
     public interface IStrategy<TMove, TPlayer, TGame> where TGame : IGame<TMove, TPlayer, TGame>

@@ -1,8 +1,10 @@
-﻿namespace Fx.Games.TicTacToe
+﻿namespace Fx.Game
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
+
+    using Fx.Game.TicTacToe;
 
     public sealed class TicTacToe<TPlayer> : IGame<TicTacToe<TPlayer>, TicTacToeBoard, TicTacToeMove, TPlayer>
     {

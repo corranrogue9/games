@@ -1,4 +1,4 @@
-﻿namespace Fx.Games.TicTacToe
+﻿namespace Fx.Game.TicTacToe
 {
     using System;
     using System.Linq;

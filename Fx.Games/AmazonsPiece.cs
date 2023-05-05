@@ -1,4 +1,4 @@
-﻿namespace Fx.Games
+﻿namespace Fx.Game
 {
     /// <summary>
     /// 

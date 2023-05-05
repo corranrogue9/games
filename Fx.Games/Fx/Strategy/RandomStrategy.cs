@@ -1,4 +1,4 @@
-namespace Fx.Games
+namespace Fx.Game
 {
     using System;
     using System.Collections.Generic;

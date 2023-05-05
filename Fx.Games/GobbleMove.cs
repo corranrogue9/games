@@ -1,4 +1,4 @@
-﻿namespace Fx.Games.Gobble
+﻿namespace Fx.Game.Gobble
 {
     using System;
 

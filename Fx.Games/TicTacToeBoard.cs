@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fx.Games.TicTacToe
+namespace Fx.Game.TicTacToe
 {
     public sealed class TicTacToeBoard
     {

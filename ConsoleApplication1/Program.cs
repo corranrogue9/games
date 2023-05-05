@@ -4,10 +4,10 @@
     using System.Collections.Generic;
     using System.Linq;
 
-    using Fx.Games;
-    using Fx.Games.Gobble;
-    using Fx.Games.PegGame;
-    using Fx.Games.TicTacToe;
+    using Fx.Game;
+    using Fx.Game.Gobble;
+    using Fx.Game.PegGame;
+    using Fx.Game.TicTacToe;
     using Fx.Tree;
 
     internal static class Extension

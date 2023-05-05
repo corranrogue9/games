@@ -1,6 +1,6 @@
 using System;
 
-namespace Fx.Games.Gobble
+namespace Fx.Game.Gobble
 {
 
     public sealed class GobbleBoard

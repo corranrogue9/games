@@ -1,4 +1,4 @@
-﻿namespace Fx.Games.PegGame
+﻿namespace Fx.Game
 {
     public sealed class PegGame<TPlayer> : IGame<PegGame<TPlayer>, PegBoard, PegMove, TPlayer>
     {
