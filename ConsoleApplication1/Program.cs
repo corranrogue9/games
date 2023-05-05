@@ -287,7 +287,7 @@
                 new Dictionary<string, IStrategy<PegGame<string>, PegBoard, PegMove, string>>
                 {
                     ////{ computer, new GameTreeDepthStrategy<PegGame<string>, PegBoard, PegMove, string>(null, null, computer, StringComparer.OrdinalIgnoreCase) },
-                    { computer, new NewGameTreeDepthStrategy<PegGame<string>, PegBoard, PegMove, string>(game => game.ToTree().Decide(computer, StringComparer.OrdinalIgnoreCase).Value.Item3.Item2, null, computer, StringComparer.OrdinalIgnoreCase) },
+                    { computer, new GameTreeDepthStrategy<PegGame<string>, PegBoard, PegMove, string>(game => game.ToTree().Decide(computer, StringComparer.OrdinalIgnoreCase).Value.Item3.Item2, null, computer, StringComparer.OrdinalIgnoreCase) },
                     ////{ computer, new UserInterfaceStrategy<PegGame<string>, PegBoard, PegMove, string>(displayer) },
                 },
                 displayer);
@@ -316,7 +316,7 @@
                     ////{ "gdebruin", new ConsoleStrategy<Direction, string, Twos<string>>(displayMove)},
                     ////{ "brett", new BrettStrategy(consolestat) },
                     
-                    { "gdebruin", new NewGameTreeDepthStrategy<Twos<string>, int[][], TwosDirection, string>(TwosHeuristics.Heuristic12, Fx.Tree.Node.TreeFactory, "gdebruin", StringComparer.OrdinalIgnoreCase)},
+                    { "gdebruin", new GameTreeDepthStrategy<Twos<string>, int[][], TwosDirection, string>(TwosHeuristics.Heuristic12, Fx.Tree.Node.TreeFactory, "gdebruin", StringComparer.OrdinalIgnoreCase)},
                     ////{ "gdebruin", new RandomStrategy<NewTwos<string>, int[][], TwosDirection, string>() }
                     ////{ "gdebruin", new DecisionTree<Direction, string, Twos<string>>(outcome => outcome.Winners.Contains("gdebruin")) },
                     /*{

@@ -6,7 +6,7 @@
     using Fx.Todo;
     using System.Linq;
 
-    public sealed class NewGameTreeDepthStrategy<TGame, TBoard, TMove, TPlayer> : IStrategy<TGame, TBoard, TMove, TPlayer> where TGame : IGame<TGame, TBoard, TMove, TPlayer>
+    public sealed class GameTreeDepthStrategy<TGame, TBoard, TMove, TPlayer> : IStrategy<TGame, TBoard, TMove, TPlayer> where TGame : IGame<TGame, TBoard, TMove, TPlayer>
     {
         private readonly Func<TGame, double> selector;
 
@@ -16,7 +16,7 @@
 
         private readonly IEqualityComparer<TPlayer> playerComparer;
 
-        public NewGameTreeDepthStrategy(Func<TGame, double> selector, ITreeFactory treeFactory, TPlayer player, IEqualityComparer<TPlayer> playerComparer)
+        public GameTreeDepthStrategy(Func<TGame, double> selector, ITreeFactory treeFactory, TPlayer player, IEqualityComparer<TPlayer> playerComparer)
         {
             /*Ensure.NotNull(selector, nameof(selector));
             Ensure.NotNull(treeFactory, nameof(treeFactory));*/
