@@ -382,10 +382,10 @@ namespace ConsoleApplication4
                     ////{ "gdebruin", new RandomStrategy<Direction, string, Twos<string>>(new Random(ticks)) },
                 }).Start();
 
-            foreach (var loser in results.Losers)
+            /*foreach (var loser in results.Losers)
             {
                 Console.WriteLine($"{loser} loses...");
-            }
+            }*/
 
             foreach (var winner in results.Winners)
             {
@@ -647,7 +647,7 @@ namespace ConsoleApplication4
 
                 if (!this.LegalMoves.Any())
                 {
-                    return new Outcome<TPlayer>(Enumerable.Empty<TPlayer>(), new[] { this.player }, Enumerable.Empty<TPlayer>());
+                    return new Outcome<TPlayer>(Enumerable.Empty<TPlayer>());
                 }
 
                 return null;
@@ -886,21 +886,7 @@ namespace ConsoleApplication4
         }
     }
 
-    public sealed class Outcome<TPlayer>
-    {
-        public Outcome(IEnumerable<TPlayer> winners, IEnumerable<TPlayer> losers, IEnumerable<TPlayer> draws)
-        {
-            this.Winners = winners;
-            this.Losers = losers;
-            this.Draws = draws;
-        }
-
-        public IEnumerable<TPlayer> Winners { get; }
-
-        public IEnumerable<TPlayer> Losers { get; }
-
-        public IEnumerable<TPlayer> Draws { get; }
-    }
+    
 
     public interface IStrategy<TMove, TPlayer, TGame> where TGame : IGame<TMove, TPlayer, TGame>
     {

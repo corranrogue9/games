@@ -8,7 +8,7 @@
 
         TPlayer CurrentPlayer { get; }
 
-        Outcome<TPlayer> Outcome { get; }
+        Fx.Game.Outcome<TPlayer> Outcome { get; }
 
         void Display();
     }
