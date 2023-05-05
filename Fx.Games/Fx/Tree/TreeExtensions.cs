@@ -13,6 +13,13 @@
             return tree.Fold(nodeValue => 1, (nodeValue, nodes) => 1 + nodes.Sum());
         }
 
+        public static IEnumerable<IEnumerable<T>> EnumerateBranches<T>(this ITree<T> tree)
+        {
+            return tree.Fold(
+                (value) => new[] { new[] { value }.AsEnumerable() }.AsEnumerable(),
+                (value, aggregation) => aggregation.SelectMany(child => child.Select(branch => branch.Prepend(value))));
+        }
+
         public static int LeafCount<T>(this ITree<T> tree)
         {
             return tree.Fold(nodeValue => 1, (nodeValue, nodes) => nodes.Sum());

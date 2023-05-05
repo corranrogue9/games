@@ -32,7 +32,7 @@
             var tree = game.ToTree();
             var branches = tree.EnumerateBranches();
             var prunedBranches = branches.Where(branch => this.random.NextDouble() < this.sampleRate);
-            var prunedTree = DecisionTreeExtensions.CreateFromBranches(prunedBranches, Node.TreeFactory);
+            var prunedTree = Tree.CreateFromBranches(prunedBranches, Node.TreeFactory);
 
             var decisionTree = prunedTree.Decide(this.player, this.playerComparer);
             return decisionTree.Value.Item2;
