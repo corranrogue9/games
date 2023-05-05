@@ -2,6 +2,7 @@
 {
     using Fx.Game;
     using Fx.Tree;
+    using Fx.TreeFactory;
     using Fx.Todo;
     using System.Linq;
 

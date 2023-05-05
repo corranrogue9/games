@@ -10,6 +10,7 @@
     using Fx.Strategy;
     using Fx.Todo;
     using Fx.Tree;
+    using Fx.TreeFactory;
 
     internal static class Extension
     {

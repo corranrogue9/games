@@ -1,6 +1,8 @@
-﻿namespace Fx.Tree
+﻿namespace Fx.TreeFactory
 {
     using System.Collections.Generic;
+
+    using Fx.Tree;
 
     public interface ITreeFactory
     {

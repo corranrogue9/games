@@ -4,6 +4,8 @@
     using System.Collections.Generic;
     using System.Linq;
 
+    using Fx.TreeFactory;
+
     public static class TreeExtensions
     {
         public static int NodeCount<T>(this ITree<T> tree)

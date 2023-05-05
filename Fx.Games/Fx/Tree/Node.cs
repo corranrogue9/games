@@ -3,6 +3,8 @@
     using System.Collections.Generic;
     using System.Linq;
 
+    using Fx.TreeFactory;
+
     public static class Node
     {
         public static Node<T> CreateBinaryTree<T>(T value, params T[] values)

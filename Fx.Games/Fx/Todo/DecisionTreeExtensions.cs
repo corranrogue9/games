@@ -3,6 +3,7 @@
     using Fx.Game;
     using Fx.Strategy;
     using Fx.Tree;
+    using Fx.TreeFactory;
     using System.Linq;
 
     internal static class DecisionTreeExtensions
