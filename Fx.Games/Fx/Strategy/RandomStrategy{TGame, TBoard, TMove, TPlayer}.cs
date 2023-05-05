@@ -1,7 +1,6 @@
 namespace Fx.Strategy
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
 
     using Fx.Game;
@@ -21,16 +20,6 @@ namespace Fx.Strategy
             var moves = game.Moves.ToList();
             var move = rng.Choose(moves);
             return move;
-        }
-    }
-
-
-    public static class RandomExtensions
-    {
-        public static T Choose<T>(this Random rng, IReadOnlyList<T> items)
-        {
-            var ix = rng.Next(0, items.Count);
-            return items[ix];
         }
     }
 }

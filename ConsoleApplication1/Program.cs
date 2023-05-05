@@ -504,6 +504,7 @@
             {
                 return num;
             }
+
             Console.WriteLine("Provide SKU:");
             var sku = int.Parse(Console.ReadLine());
             return sku;
