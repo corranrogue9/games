@@ -4,6 +4,8 @@ namespace Fx.Game
     using System.Collections.Generic;
     using System.Linq;
 
+    using Fx.Strategy;
+
     public sealed class RandomStrategy<TGame, TBoard, TMove, TPlayer> : IStrategy<TGame, TBoard, TMove, TPlayer> where TGame : IGame<TGame, TBoard, TMove, TPlayer>
     {
         private readonly Random rng;

@@ -8,6 +8,7 @@
     using Fx.Game.Gobble;
     using Fx.Game.PegGame;
     using Fx.Game.TicTacToe;
+    using Fx.Strategy;
     using Fx.Tree;
 
     internal static class Extension

@@ -2,6 +2,8 @@
 {
     using System.Linq;
 
+    using Fx.Strategy;
+
     /// <summary>
     /// 
     /// </summary>

@@ -2,6 +2,7 @@
 {
     using ConsoleApplication4;
     using Fx.Game.TicTacToe;
+    using Fx.Strategy;
     using Fx.Tree;
     using System.Linq;
 
@@ -84,7 +85,7 @@
         }
     }
 
-    public sealed class GarrettGameTreeDepthStrategy<TGame, TMove, TPlayer> : ConsoleApplication4.IStrategy<TMove, TPlayer, TGame> where TGame : Fx.Game.IGame<TMove, TPlayer, TGame>
+    public sealed class GarrettGameTreeDepthStrategy<TGame, TMove, TPlayer> : IStrategy<TMove, TPlayer, TGame> where TGame : Fx.Game.IGame<TMove, TPlayer, TGame>
     {
         private readonly Func<TGame, double> selector;
 

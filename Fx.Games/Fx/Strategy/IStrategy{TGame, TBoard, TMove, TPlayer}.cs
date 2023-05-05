@@ -1,5 +1,7 @@
-﻿namespace Fx.Game
+﻿namespace Fx.Strategy
 {
+    using Fx.Game;
+
     /// <summary>
     /// 
     /// </summary>

@@ -1,6 +1,7 @@
 ﻿namespace ConsoleApplication4
 {
     using Fx.Game;
+    using Fx.Strategy;
 
     public static class Main
     {

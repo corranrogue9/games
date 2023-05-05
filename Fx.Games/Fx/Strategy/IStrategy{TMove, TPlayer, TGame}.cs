@@ -1,4 +1,4 @@
-﻿namespace ConsoleApplication4
+﻿namespace Fx.Strategy
 {
     using Fx.Game;
 
