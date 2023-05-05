@@ -16,6 +16,23 @@
             }
         }
 
+        internal static IGame<TGame, TBoard, TMove, TPlayer> AsGame<TGame, TBoard, TMove, TPlayer>(this IGame<TGame, TBoard, TMove, TPlayer> game) where TGame : IGame<TGame, TBoard, TMove, TPlayer>
+        {
+            return game;
+        }
+
+        /*internal static ITree<IGame<TGame, TBoard, TMove, TPlayer>> ToTree<TGame, TBoard, TMove, TPlayer>(this IGame<TGame, TBoard, TMove, TPlayer> game) where TGame : IGame<TGame, TBoard, TMove, TPlayer>
+        {
+            if (game.Moves.Any())
+            {
+                return Node.CreateTree(game, game.Moves.Select(move => game.CommitMove(move).ToTree()));
+            }
+            else
+            {
+                return Node.CreateTree(game);
+            }
+        }*/
+
         internal static ITree<Fx.Game.IGame<TMove, TPlayer, TGame>> ToOtherTree<TGame, TMove, TPlayer>(this Fx.Game.IGame<TMove, TPlayer, TGame> game) where TGame : Fx.Game.IGame<TMove, TPlayer, TGame>
         {
             if (game.Outcome == null)
