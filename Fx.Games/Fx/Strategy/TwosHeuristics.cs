@@ -322,5 +322,48 @@
 
             return max * (position.Item1 + 1) * (position.Item2 + 1) * 10000 + free * 100 + combine;
         }
+
+        public static double Heuristic12(NewTwos<string> game)
+        {
+            var max = 0;
+            var free = 0;
+            var combine = 0;
+            var position = (0, 0);
+            for (int i = 0; i < 4; ++i)
+            {
+                for (int j = 0; j < 4; ++j)
+                {
+                    var value = game.Board[i][j];
+                    if (value > max)
+                    {
+                        max = value;
+                        position = (i, j);
+                    }
+
+                    if (value == 0)
+                    {
+                        ++free;
+                    }
+
+                    if (j != 0)
+                    {
+                        if (game.Board[i][j - 1] == game.Board[i][j])
+                        {
+                            ++combine;
+                        }
+                    }
+
+                    if (i != 0)
+                    {
+                        if (game.Board[i - 1][j] == game.Board[i][j])
+                        {
+                            ++combine;
+                        }
+                    }
+                }
+            }
+
+            return max * (position.Item1 + 1) * (position.Item2 + 1) * 10000 + free * 100 + combine;
+        }
     }
 }

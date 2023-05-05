@@ -68,5 +68,29 @@
                 return Node.CreateTree(game);
             }
         }
+
+        public static ITree<TGame> ToTree<TGame, TBoard, TMove, TPlayer>(this TGame game) where TGame : IGame<TGame, TBoard, TMove, TPlayer>
+        {
+            if (game.Outcome == null)
+            {
+                return Node.CreateTree(game, game.Moves.Select(move => game.CommitMove(move).ToTree<TGame, TBoard, TMove, TPlayer>()));
+            }
+            else
+            {
+                return Node.CreateTree(game);
+            }
+        }
+
+        internal static ITree<TGame> ToTree<TGame, TBoard, TMove, TPlayer>(this TGame game, int depth) where TGame : IGame<TGame, TBoard, TMove, TPlayer>
+        {
+            if (game.Outcome == null && depth != 0)
+            {
+                return Node.CreateTree(game, game.Moves.Select(move => game.CommitMove(move).ToTree<TGame, TBoard, TMove, TPlayer>(depth - 1)));
+            }
+            else
+            {
+                return Node.CreateTree(game);
+            }
+        }
     }
 }

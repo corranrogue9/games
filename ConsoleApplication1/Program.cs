@@ -365,8 +365,8 @@
                     ////{ "gdebruin", new ConsoleStrategy<Direction, string, Twos<string>>(displayMove)},
                     ////{ "brett", new BrettStrategy(consolestat) },
                     
-                    ////{ "gdebruin", new GarrettGameTreeDepthStrategy<Twos<string>, TwosDirection, string>(TwosHeuristics.Heuristic12, Fx.Tree.Node.TreeFactory, "gdebruin", StringComparer.OrdinalIgnoreCase)},
-                    { "gdebruin", new RandomStrategy<NewTwos<string>, int[][], TwosDirection, string>() }
+                    { "gdebruin", new NewGameTreeDepthStrategy<NewTwos<string>, int[][], TwosDirection, string>(TwosHeuristics.Heuristic12, Fx.Tree.Node.TreeFactory, "gdebruin", StringComparer.OrdinalIgnoreCase)},
+                    ////{ "gdebruin", new RandomStrategy<NewTwos<string>, int[][], TwosDirection, string>() }
                     ////{ "gdebruin", new DecisionTree<Direction, string, Twos<string>>(outcome => outcome.Winners.Contains("gdebruin")) },
                     /*{
                         "gdebruin",
