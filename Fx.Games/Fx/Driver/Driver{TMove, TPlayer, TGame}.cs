@@ -1,15 +1,15 @@
-﻿namespace ConsoleApplication4
+﻿namespace Fx.Driver
 {
     using Fx.Game;
     using Fx.Strategy;
 
-    public sealed class GameRunner<TMove, TPlayer, TGame> where TGame : IGame<TMove, TPlayer, TGame>
+    public sealed class Driver<TMove, TPlayer, TGame> where TGame : IGame<TMove, TPlayer, TGame>
     {
         private readonly TGame game;
 
         private readonly IReadOnlyDictionary<TPlayer, IStrategy<TMove, TPlayer, TGame>> strategies;
 
-        public GameRunner(TGame game, IReadOnlyDictionary<TPlayer, IStrategy<TMove, TPlayer, TGame>> strategies)
+        public Driver(TGame game, IReadOnlyDictionary<TPlayer, IStrategy<TMove, TPlayer, TGame>> strategies)
         {
             this.game = game;
             this.strategies = strategies;

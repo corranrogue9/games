@@ -1,5 +1,6 @@
 ﻿namespace ConsoleApplication4
 {
+    using Fx.Driver;
     using Fx.Game;
     using Fx.Strategy;
 
@@ -339,7 +340,7 @@
             File.WriteAllText(@"c:\users\gdebruin\desktop\ticks.txt", ticks.ToString());
             var random = new Random(ticks);
             var consolestat = new ConsoleStrategy<TwosDirection, string, Twos<string>>(displayMove);
-            var results = new GameRunner<TwosDirection, string, Twos<string>>(
+            var results = new Driver<TwosDirection, string, Twos<string>>(
                 new Twos<string>("gdebruin", new Random(ticks), 12),
                 new Dictionary<string, IStrategy<TwosDirection, string, Twos<string>>>
                 {
