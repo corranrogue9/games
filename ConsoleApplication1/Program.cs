@@ -30,7 +30,7 @@
 
 
             var branches = tree3.EnumerateBranches();
-            var recreatedTree = Extension.CreateFromBranches(branches, Node.TreeFactory);
+            var recreatedTree = Tree.CreateFromBranches(branches, Node.TreeFactory);
 
 
             Pegs();
