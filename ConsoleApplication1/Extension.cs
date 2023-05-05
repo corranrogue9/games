@@ -12,17 +12,6 @@
 
         
 
-        internal static ITree<IGame<TGame, TBoard, TMove, TPlayer>> ToTree<TGame, TBoard, TMove, TPlayer>(this IGame<TGame, TBoard, TMove, TPlayer> game) where TGame : IGame<TGame, TBoard, TMove, TPlayer>
-        {
-            if (game.Outcome == null)
-            {
-                return Node.CreateTree(game, game.Moves.Select(move => game.CommitMove(move).ToTree()));
-            }
-            else
-            {
-                return Node.CreateTree(game);
-            }
-        }
 
         internal static T Choose<T>(this IEnumerable<T> source, Func<T, bool> preference, Func<T, bool> fallback)
         {
