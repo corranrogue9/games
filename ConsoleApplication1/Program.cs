@@ -308,14 +308,14 @@
             ////var ticks = 1071300156;
             File.WriteAllText(@"c:\users\gdebruin\desktop\ticks.txt", ticks.ToString());
             var random = new Random(ticks);
-            var game = new NewTwos<string>("gdebruin", new Random(ticks), 12);
+            var game = new Twos<string>("gdebruin", new Random(ticks), 12);
             var driver = Driver.Create(
-                new Dictionary<string, IStrategy<NewTwos<string>, int[][], TwosDirection, string>>
+                new Dictionary<string, IStrategy<Twos<string>, int[][], TwosDirection, string>>
                 {
                     ////{ "gdebruin", new ConsoleStrategy<Direction, string, Twos<string>>(displayMove)},
                     ////{ "brett", new BrettStrategy(consolestat) },
                     
-                    { "gdebruin", new NewGameTreeDepthStrategy<NewTwos<string>, int[][], TwosDirection, string>(TwosHeuristics.Heuristic12, Fx.Tree.Node.TreeFactory, "gdebruin", StringComparer.OrdinalIgnoreCase)},
+                    { "gdebruin", new NewGameTreeDepthStrategy<Twos<string>, int[][], TwosDirection, string>(TwosHeuristics.Heuristic12, Fx.Tree.Node.TreeFactory, "gdebruin", StringComparer.OrdinalIgnoreCase)},
                     ////{ "gdebruin", new RandomStrategy<NewTwos<string>, int[][], TwosDirection, string>() }
                     ////{ "gdebruin", new DecisionTree<Direction, string, Twos<string>>(outcome => outcome.Winners.Contains("gdebruin")) },
                     /*{

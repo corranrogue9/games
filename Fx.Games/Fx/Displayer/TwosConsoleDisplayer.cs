@@ -6,7 +6,7 @@
     using Fx.Game;
     using Fx.Todo;
 
-    public sealed class TwosConsoleDisplayer<TPlayer> : IDisplayer<NewTwos<TPlayer>, int[][], TwosDirection, TPlayer>
+    public sealed class TwosConsoleDisplayer<TPlayer> : IDisplayer<Twos<TPlayer>, int[][], TwosDirection, TPlayer>
     {
         private readonly Func<TPlayer, string> playerToString;
 
@@ -35,7 +35,7 @@
             throw new InvalidOperationException("TODO");
         }
 
-        public void DisplayBoard(NewTwos<TPlayer> game)
+        public void DisplayBoard(Twos<TPlayer> game)
         {
             if (game == null)
             {
@@ -64,7 +64,7 @@
             Console.WriteLine("----------------");
         }
 
-        public void DisplayOutcome(NewTwos<TPlayer> game)
+        public void DisplayOutcome(Twos<TPlayer> game)
         {
             if (game == null)
             {
@@ -74,7 +74,7 @@
             game.Outcome.Winners.ApplyToEmptyOrPopulated(() => Console.WriteLine("The game was a draw..."), winner => Console.WriteLine($"{this.playerToString(winner)} wins!"));
         }
 
-        public void DisplayMoves(NewTwos<TPlayer> game)
+        public void DisplayMoves(Twos<TPlayer> game)
         {
             var movesList = game.LegalMoves.ToList();
             for (int i = 0; i < movesList.Count; ++i)
@@ -85,7 +85,7 @@
             Console.WriteLine();
         }
 
-        public TwosDirection ReadMoveSelection(NewTwos<TPlayer> game)
+        public TwosDirection ReadMoveSelection(Twos<TPlayer> game)
         {
             var moves = game.Moves.ToList();
             while (true)

@@ -1,6 +1,6 @@
 ﻿namespace Fx.Game
 {
-    public sealed class NewTwos<TPlayer> : IGame<NewTwos<TPlayer>, int[][], TwosDirection, TPlayer>
+    public sealed class Twos<TPlayer> : IGame<Twos<TPlayer>, int[][], TwosDirection, TPlayer>
     {
         private readonly TPlayer player;
 
@@ -10,7 +10,7 @@
 
         private readonly int win;
 
-        public NewTwos(TPlayer player, Random random, int win = 11)
+        public Twos(TPlayer player, Random random, int win = 11)
         {
             this.win = win;
 
@@ -47,7 +47,7 @@
             }
         }
 
-        private NewTwos(TPlayer player, int[][] board, Random random, int win)
+        private Twos(TPlayer player, int[][] board, Random random, int win)
         {
             this.win = win;
 
@@ -249,7 +249,7 @@
             }
         }
 
-        public NewTwos<TPlayer> CommitMove(TwosDirection move)
+        public Twos<TPlayer> CommitMove(TwosDirection move)
         {
             var newGames = ExploreMove(move).ToList();
             return newGames[this.random.Next(0, newGames.Count)];
@@ -289,9 +289,9 @@
             Console.WriteLine("----------------");
         }
 
-        public IEnumerable<NewTwos<TPlayer>> ExploreMove(TwosDirection move)
+        public IEnumerable<Twos<TPlayer>> ExploreMove(TwosDirection move)
         {
-            var newGame = new NewTwos<TPlayer>(this.player, this.board, this.random, this.win);
+            var newGame = new Twos<TPlayer>(this.player, this.board, this.random, this.win);
             if (move == TwosDirection.Up)
             {
                 for (int j = 0; j < newGame.board.Length; ++j)
@@ -467,7 +467,7 @@
                             emptySlot = true;
                             yield return explore;
                         }*/
-                        var explore = new NewTwos<TPlayer>(newGame.player, newGame.board, newGame.random, this.win);
+                        var explore = new Twos<TPlayer>(newGame.player, newGame.board, newGame.random, this.win);
                         explore.board[i][j] = 1;
 
                         emptySlot = true;

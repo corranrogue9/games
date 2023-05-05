@@ -4,17 +4,17 @@
 
     public static class TwosHeuristics //// TODO does this go in fx.strategy or fx.game?
     {
-        public static double Heuristic1(NewTwos<string> game)
+        public static double Heuristic1(Twos<string> game)
         {
             return game.LegalMoves.Count();
         }
 
-        public static double Heuristic2(NewTwos<string> game)
+        public static double Heuristic2(Twos<string> game)
         {
             return game.Max;
         }
 
-        public static double Heuristic3(NewTwos<string> game)
+        public static double Heuristic3(Twos<string> game)
         {
             var max = 0;
             var free = 0;
@@ -37,7 +37,7 @@
             return max * 100 + free;
         }
 
-        public static double Heuristic4(NewTwos<string> game)
+        public static double Heuristic4(Twos<string> game)
         {
             //// best so far
             var max = 0;
@@ -61,7 +61,7 @@
             return (game.Board[0][0] == max ? 100000 : 0) + max * 100 + free;
         }
 
-        public static double Heuristic5(NewTwos<string> game)
+        public static double Heuristic5(Twos<string> game)
         {
             var max = 0;
             var free = 0;
@@ -90,7 +90,7 @@
             return (corner ? 100000 : 0) + max * 100 + free;
         }
 
-        public static double Heuristic6(NewTwos<string> game)
+        public static double Heuristic6(Twos<string> game)
         {
             var max = 0;
             var free = 0;
@@ -119,7 +119,7 @@
             return (corner ? 100000 : 0) + free * 100 + max;
         }
 
-        public static double Heuristic7(NewTwos<string> game)
+        public static double Heuristic7(Twos<string> game)
         {
             var max = 0;
             var free = 0;
@@ -142,7 +142,7 @@
             return free * 100 + max;
         }
 
-        public static double Heuristic8(NewTwos<string> game)
+        public static double Heuristic8(Twos<string> game)
         {
             // this is intentionally bad
             var sum = 0;
@@ -157,7 +157,7 @@
             return sum;
         }
 
-        public static double Heuristic9(NewTwos<string> game)
+        public static double Heuristic9(Twos<string> game)
         {
             var max = 0;
             var free = 0;
@@ -198,7 +198,7 @@
             return free * 10000 + combine * 100 + max;
         }
 
-        public static double Heuristic10(NewTwos<string> game)
+        public static double Heuristic10(Twos<string> game)
         {
             var max = 0;
             var free = 0;
@@ -239,7 +239,7 @@
             return combine * 10000 + free * 100 + max;
         }
 
-        public static double Heuristic11(NewTwos<string> game)
+        public static double Heuristic11(Twos<string> game)
         {
             var max = 0;
             var free = 0;
@@ -280,7 +280,7 @@
             return max * 10000 + free * 100 + combine;
         }
 
-        public static double Heuristic12(NewTwos<string> game)
+        public static double Heuristic12(Twos<string> game)
         {
             var max = 0;
             var free = 0;
