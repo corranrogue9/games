@@ -1,9 +1,9 @@
-﻿namespace Fx.Game.Gobble
+﻿namespace Fx.Displayer
 {
     using System;
     using System.Linq;
 
-    using Fx.Displayer;
+    using Fx.Game;
 
     public sealed class GobbleConsoleDisplayer<TPlayer> : IDisplayer<Gobble<TPlayer>, GobbleBoard, GobbleMove, TPlayer>
     {

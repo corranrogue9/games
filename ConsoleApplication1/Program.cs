@@ -4,10 +4,8 @@
     using System.Collections.Generic;
     using System.Linq;
 
+    using Fx.Displayer;
     using Fx.Game;
-    using Fx.Game.Gobble;
-    using Fx.Game.PegGame;
-    using Fx.Game.TicTacToe;
     using Fx.Strategy;
     using Fx.Tree;
 

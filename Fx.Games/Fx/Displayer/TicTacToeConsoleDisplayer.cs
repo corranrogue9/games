@@ -1,9 +1,9 @@
-﻿namespace Fx.Game.TicTacToe
+﻿namespace Fx.Displayer
 {
     using System;
     using System.Linq;
 
-    using Fx.Displayer;
+    using Fx.Game;
 
     public sealed class TicTacToeConsoleDisplayer<TPlayer> : IDisplayer<TicTacToe<TPlayer>, TicTacToeBoard, TicTacToeMove, TPlayer>
     {
