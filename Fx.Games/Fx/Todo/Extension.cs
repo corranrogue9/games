@@ -20,6 +20,15 @@
             }
         }
 
+        public static Func<Void> ToFunc(Action action)
+        {
+            return () =>
+            {
+                action();
+                return new Void();
+            };
+        }
+
         public static T[][] ToArray<T>(this T[,] source)
         {
             var result = new T[source.GetLength(0)][];

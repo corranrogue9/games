@@ -12,15 +12,6 @@
 
         
 
-        public static Func<Void> ToFunc(Action action)
-        {
-            return () =>
-            {
-                action();
-                return new Void();
-            };
-        }
-
         internal static ITree<IGame<TGame, TBoard, TMove, TPlayer>> ToTree<TGame, TBoard, TMove, TPlayer>(this IGame<TGame, TBoard, TMove, TPlayer> game) where TGame : IGame<TGame, TBoard, TMove, TPlayer>
         {
             if (game.Outcome == null)
