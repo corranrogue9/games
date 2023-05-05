@@ -286,7 +286,8 @@
             var driver = Driver.Create(
                 new Dictionary<string, IStrategy<PegGame<string>, PegBoard, PegMove, string>>
                 {
-                    { computer, new GameTreeDepthStrategy<PegGame<string>, PegBoard, PegMove, string>(null, null, computer, StringComparer.OrdinalIgnoreCase) },
+                    ////{ computer, new GameTreeDepthStrategy<PegGame<string>, PegBoard, PegMove, string>(null, null, computer, StringComparer.OrdinalIgnoreCase) },
+                    { computer, new NewGameTreeDepthStrategy<PegGame<string>, PegBoard, PegMove, string>(game => game.ToTree().Decide(computer, StringComparer.OrdinalIgnoreCase).Value.Item3.Item2, null, computer, StringComparer.OrdinalIgnoreCase) },
                     ////{ computer, new UserInterfaceStrategy<PegGame<string>, PegBoard, PegMove, string>(displayer) },
                 },
                 displayer);
