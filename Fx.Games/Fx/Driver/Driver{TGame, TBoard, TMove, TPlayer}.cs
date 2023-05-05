@@ -1,9 +1,10 @@
-﻿namespace Fx.Game
+﻿namespace Fx.Driver
 {
     using System.Collections.Generic;
     using System.Linq;
 
     using Fx.Displayer;
+    using Fx.Game;
     using Fx.Strategy;
 
     /// <summary>
