@@ -119,7 +119,7 @@
 
         static void Main(string[] args)
         {
-            ConsoleApplication4.Main.DoWork();
+            Fx.Todo.Main.DoWork();
 
 
 

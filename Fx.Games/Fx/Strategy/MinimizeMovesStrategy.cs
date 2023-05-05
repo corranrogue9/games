@@ -1,8 +1,8 @@
-﻿namespace Fx.Game
+﻿namespace Fx.Strategy
 {
     using System;
 
-    using Fx.Strategy;
+    using Fx.Game;
 
     /// <summary>
     /// 
