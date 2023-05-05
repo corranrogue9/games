@@ -84,7 +84,7 @@
         }
     }
 
-    public sealed class GarrettGameTreeDepthStrategy<TGame, TMove, TPlayer> : ConsoleApplication4.IStrategy<TMove, TPlayer, TGame> where TGame : IGame<TMove, TPlayer, TGame>
+    public sealed class GarrettGameTreeDepthStrategy<TGame, TMove, TPlayer> : ConsoleApplication4.IStrategy<TMove, TPlayer, TGame> where TGame : Fx.Game.IGame<TMove, TPlayer, TGame>
     {
         private readonly Func<TGame, double> selector;
 
@@ -222,7 +222,7 @@
             }
         }
 
-        internal static ITree<TGame> ToOtherTree<TGame, TMove, TPlayer>(this TGame game, int depth) where TGame : ConsoleApplication4.IGame<TMove, TPlayer, TGame>
+        internal static ITree<TGame> ToOtherTree<TGame, TMove, TPlayer>(this TGame game, int depth) where TGame : Fx.Game.IGame<TMove, TPlayer, TGame>
         {
             if (game.Outcome == null && depth != 0)
             {
@@ -234,7 +234,7 @@
             }
         }
 
-        internal static ITree<ConsoleApplication4.IGame<TMove, TPlayer, TGame>> ToOtherTree<TGame, TMove, TPlayer>(this ConsoleApplication4.IGame<TMove, TPlayer, TGame> game) where TGame : ConsoleApplication4.IGame<TMove, TPlayer, TGame>
+        internal static ITree<Fx.Game.IGame<TMove, TPlayer, TGame>> ToOtherTree<TGame, TMove, TPlayer>(this Fx.Game.IGame<TMove, TPlayer, TGame> game) where TGame : Fx.Game.IGame<TMove, TPlayer, TGame>
         {
             if (game.Outcome == null)
             {

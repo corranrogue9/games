@@ -1,4 +1,4 @@
-﻿namespace ConsoleApplication4
+﻿namespace Fx.Game
 {
     public interface IGame<TMove, TPlayer, TGame> where TGame : IGame<TMove, TPlayer, TGame>
     {
