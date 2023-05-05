@@ -16,7 +16,7 @@
 
         static void Main(string[] args)
         {
-            Fx.Todo.Main.DoWork();
+            DoWork();
 
 
 
@@ -291,6 +291,54 @@
                 },
                 displayer);
             var result = driver.Run(game);
+        }
+
+        public static void DoWork()
+        {
+            //// TODO do other display mechanism to formalize "board state"
+            //// TODO do game of amazons to fix decision tree with monte carlo simulation
+            //// TODO do more games
+            Func<TwosDirection, string> displayMove = (move) =>
+            {
+                return move.ToString();
+            };
+            var ticks = Environment.TickCount;
+            ////var ticks = 551040140;
+            ////var ticks = 1071300156;
+            File.WriteAllText(@"c:\users\gdebruin\desktop\ticks.txt", ticks.ToString());
+            var random = new Random(ticks);
+            var consolestat = new ConsoleStrategy<TwosDirection, string, Twos<string>>(displayMove);
+            var results = new Driver<TwosDirection, string, Twos<string>>(
+                new Twos<string>("gdebruin", new Random(ticks), 12),
+                new Dictionary<string, IStrategy<TwosDirection, string, Twos<string>>>
+                {
+                    ////{ "gdebruin", new ConsoleStrategy<Direction, string, Twos<string>>(displayMove)},
+                    ////{ "brett", new BrettStrategy(consolestat) },
+                    { "gdebruin", new GarrettGameTreeDepthStrategy<Twos<string>, TwosDirection, string>(TwosHeuristics.Heuristic12, Fx.Tree.Node.TreeFactory, "gdebruin", StringComparer.OrdinalIgnoreCase)},
+                    ////{ "gdebruin", new RandomStrategy<Direction, string, Twos<string>>(random) }
+                    ////{ "gdebruin", new DecisionTree<Direction, string, Twos<string>>(outcome => outcome.Winners.Contains("gdebruin")) },
+                    /*{
+                        "gdebruin",
+                        new DecisionTreeImp<Direction, string, Twos<string>>(
+                            outcome => outcome.Winners.Contains("gdebruin"),
+                            2, 
+                            game => MontyCarloSimulation<Twos<string>, Direction, string>(game, outcome => outcome.Winners.Contains("gdebruin"), 100000, random))
+                    },*/
+                    ////{ "gdebruin", new RandomStrategy<Direction, string, Twos<string>>(new Random(ticks)) },
+                }).Start();
+
+            /*foreach (var loser in results.Losers)
+            {
+                Console.WriteLine($"{loser} loses...");
+            }*/
+
+            foreach (var winner in results.Winners)
+            {
+                Console.WriteLine($"{winner} wins!");
+            }
+
+            Console.WriteLine(ticks);
+            Console.ReadLine();
         }
 
         private static void Gobble()
