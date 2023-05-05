@@ -4,7 +4,7 @@
 
     using Fx.Tree;
 
-    public interface ITreeFactory
+    public interface ITreeFactory //// TODO is there something to the fact that these methods have the same signature as the fold funcs?
     {
         ITree<T> CreateLeaf<T>(T value);
 
