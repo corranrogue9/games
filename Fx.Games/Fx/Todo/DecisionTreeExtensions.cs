@@ -11,7 +11,7 @@
         public static ITree<(IGame<TGame, TBoard, TMove, TPlayer>, TMove, (DecisionTreeStatus, double))> Decide<TGame, TBoard, TMove, TPlayer>(
             this ITree<IGame<TGame, TBoard, TMove, TPlayer>> gameTree, 
             TPlayer player, 
-            IEqualityComparer<TPlayer> playerComparer) 
+            IEqualityComparer<TPlayer> playerComparer) //// TODO wouldn't it be nice if there were a igametree and this was an extension on that?
             where TGame : IGame<TGame, TBoard, TMove, TPlayer>
         {
             return gameTree.Select(

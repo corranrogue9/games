@@ -14,12 +14,6 @@
     /// <threadsafety static="true" instance="true"/>
     public static class Extension
     {
-        public static void Enumerate<T>(this IEnumerable<T> source)
-        {
-            foreach (var element in source)
-            {
-            }
-        }
 
         public static Func<Void> ToFunc(Action action)
         {

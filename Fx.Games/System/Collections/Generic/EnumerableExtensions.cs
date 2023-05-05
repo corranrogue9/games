@@ -16,5 +16,12 @@
                 return false;
             }
         }
+
+        public static void Enumerate<T>(this IEnumerable<T> source)
+        {
+            foreach (var element in source)
+            {
+            }
+        }
     }
 }
