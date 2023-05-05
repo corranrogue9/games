@@ -3,6 +3,8 @@
     using System;
     using System.Linq;
 
+    using Fx.Displayer;
+
     public sealed class GobbleConsoleDisplayer<TPlayer> : IDisplayer<Gobble<TPlayer>, GobbleBoard, GobbleMove, TPlayer>
     {
         private readonly Func<TPlayer, string> playerToString;

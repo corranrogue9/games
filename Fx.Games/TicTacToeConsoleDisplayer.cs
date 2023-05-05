@@ -3,6 +3,8 @@
     using System;
     using System.Linq;
 
+    using Fx.Displayer;
+
     public sealed class TicTacToeConsoleDisplayer<TPlayer> : IDisplayer<TicTacToe<TPlayer>, TicTacToeBoard, TicTacToeMove, TPlayer>
     {
         private readonly Func<TPlayer, string> playerToString;

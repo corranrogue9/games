@@ -1,5 +1,7 @@
-﻿namespace Fx.Game
+﻿namespace Fx.Displayer
 {
+    using Fx.Game;
+
     /// <summary>
     /// 
     /// </summary>

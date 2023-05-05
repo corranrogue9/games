@@ -3,6 +3,7 @@
     using System.Collections.Generic;
     using System.Linq;
 
+    using Fx.Displayer;
     using Fx.Strategy;
 
     /// <summary>

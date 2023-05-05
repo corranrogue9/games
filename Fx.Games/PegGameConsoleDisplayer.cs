@@ -1,5 +1,7 @@
 ﻿namespace Fx.Game.PegGame
 {
+    using Fx.Displayer;
+
     public sealed class PegGameConsoleDisplayer<TPlayer> : IDisplayer<PegGame<TPlayer>, PegBoard, PegMove, TPlayer>
     {
         public void DisplayBoard(PegGame<TPlayer> game)
