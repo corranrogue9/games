@@ -10,6 +10,12 @@
     {
         TPlayer CurrentPlayer { get; }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="move"></param>
+        /// <returns></returns>
+        /// <exception cref="IllegalMoveExeption"></exception>
         TGame CommitMove(TMove move);
 
         IEnumerable<TMove> Moves { get; }

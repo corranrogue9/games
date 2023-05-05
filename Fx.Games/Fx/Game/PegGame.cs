@@ -147,42 +147,4 @@
             return new PegGame<TPlayer>(player, new PegBoard(board.Triangle.Length, blanks));
         }
     }
-
-    public sealed class PegBoard
-    {
-        public PegBoard(int height, IEnumerable<(int, int)> blanks)
-        {
-            Triangle = new Peg[height][];
-            for (int i = 0; i < height; ++i)
-            {
-                Triangle[i] = new Peg[i + 1];
-            }
-
-            foreach (var blank in blanks)
-            {
-                Triangle[blank.Item1][blank.Item2] = Peg.Empty;
-            }
-        }
-
-        public Peg[][] Triangle { get; }
-    }
-
-    public enum Peg
-    {
-        Peg = 0,
-        Empty = 1,
-    }
-
-    public sealed class PegMove
-    {
-        public PegMove((int, int) start, (int, int) end)
-        {
-            Start = start;
-            End = end;
-        }
-
-        public (int, int) Start { get; }
-
-        public (int, int) End { get; }
-    }
 }

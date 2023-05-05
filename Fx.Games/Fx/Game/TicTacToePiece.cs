@@ -1,4 +1,4 @@
-﻿namespace Fx.Game.TicTacToe
+﻿namespace Fx.Game
 {
     public enum TicTacToePiece
     {

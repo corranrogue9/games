@@ -4,8 +4,6 @@
     using System.Collections.Generic;
     using System.Linq;
 
-    using Fx.Game.Gobble;
-
     public sealed class Gobble<TPlayer> : IGame<Gobble<TPlayer>, GobbleBoard, GobbleMove, TPlayer>
     {
         private readonly TPlayer[] players;
