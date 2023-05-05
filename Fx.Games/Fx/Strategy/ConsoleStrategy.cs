@@ -1,7 +1,6 @@
-﻿namespace ConsoleApplication4
+﻿namespace Fx.Strategy
 {
     using Fx.Game;
-    using Fx.Strategy;
 
     public sealed class ConsoleStrategy<TMove, TPlayer, TGame> : IStrategy<TMove, TPlayer, TGame> where TGame : IGame<TMove, TPlayer, TGame>
     {

@@ -1,7 +1,7 @@
-﻿namespace Fx.Game
+﻿namespace Fx.Strategy
 {
     using ConsoleApplication4;
-    using Fx.Game.TicTacToe;
+    using Fx.Game;
     using Fx.Strategy;
     using Fx.Tree;
     using System.Linq;
