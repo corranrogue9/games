@@ -1,4 +1,4 @@
-﻿namespace ConsoleApplication4
+﻿namespace Fx.Game
 {
     public enum TwosDirection
     {

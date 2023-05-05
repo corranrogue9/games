@@ -1,7 +1,5 @@
-﻿namespace ConsoleApplication4
+﻿namespace Fx.Game
 {
-    using Fx.Game;
-
     public sealed class Twos<TPlayer> : IGameWithHiddenInformation<TwosDirection, TPlayer, Twos<TPlayer>>
     {
         private readonly TPlayer player;
