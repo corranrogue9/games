@@ -6,7 +6,7 @@
     using Fx.TreeFactory;
     using System.Linq;
 
-    internal static class DecisionTreeExtensions
+    public static class DecisionTreeExtensions
     {
         public static ITree<(IGame<TGame, TBoard, TMove, TPlayer>, TMove, (DecisionTreeStatus, double))> Decide<TGame, TBoard, TMove, TPlayer>(
             this ITree<IGame<TGame, TBoard, TMove, TPlayer>> gameTree, 

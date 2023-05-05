@@ -13,6 +13,28 @@
     /// <threadsafety static="true" instance="true"/>
     public static class Extension
     {
+        public static void Enumerate<T>(this IEnumerable<T> source)
+        {
+            foreach (var element in source)
+            {
+            }
+        }
+
+        public static T[][] ToArray<T>(this T[,] source)
+        {
+            var result = new T[source.GetLength(0)][];
+            for (int i = 0; i < result.Length; ++i)
+            {
+                result[i] = new T[source.GetLength(1)];
+                for (int j = 0; j < result[i].Length; ++j)
+                {
+                    result[i][j] = source[i, j];
+                }
+            }
+
+            return result;
+        }
+
         /*internal static ITree<IGame<TGame, TBoard, TMove, TPlayer>> ToTree<TGame, TBoard, TMove, TPlayer>(this IGame<TGame, TBoard, TMove, TPlayer> game) where TGame : IGame<TGame, TBoard, TMove, TPlayer>
         {
             if (game.Moves.Any())

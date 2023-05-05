@@ -9,42 +9,8 @@
 
     internal static class Extension
     {
-        public static bool TryFirst<T>(this IEnumerable<T> source, out T value)
-        {
-            using (var enumerator = source.GetEnumerator())
-            {
-                if (enumerator.MoveNext())
-                {
-                    value = enumerator.Current;
-                    return true;
-                }
 
-                value = default;
-                return false;
-            }
-        }
-
-        public static void Enumerate<T>(this IEnumerable<T> source)
-        {
-            foreach (var element in source)
-            {
-            }
-        }
-
-        public static T[][] ToArray<T>(this T[,] source)
-        {
-            var result = new T[source.GetLength(0)][];
-            for (int i = 0; i < result.Length; ++i)
-            {
-                result[i] = new T[source.GetLength(1)];
-                for (int j = 0; j < result[i].Length; ++j)
-                {
-                    result[i][j] = source[i, j];
-                }
-            }
-
-            return result;
-        }
+        
 
         public static Func<Void> ToFunc(Action action)
         {
@@ -74,14 +40,6 @@
                     (0, default(T)),
                     (aggregation, current) => aggregation.Item1 == 2 ? aggregation : preference(current) ? (2, current) : aggregation.Item1 == 1 ? aggregation : fallback(current) ? (1, current) : (0, current))
                 .Item2;
-        }
-
-
-        public static IEnumerable<IEnumerable<T>> EnumerateBranches<T>(this ITree<T> tree)
-        {
-            return tree.Fold(
-                (value) => new[] { new[] { value }.AsEnumerable() }.AsEnumerable(),
-                (value, aggregation) => aggregation.SelectMany(child => child.Select(branch => branch.Prepend(value))));
         }
 
         public static ITree<T> CreateFromBranches<T>(IEnumerable<IEnumerable<T>> branches, ITreeFactory treeFactory)
