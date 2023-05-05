@@ -21,14 +21,14 @@
         {
             this.players = players;
             this.currentPlayer = currentPlayer;
-            this.board = newBoard;
+            board = newBoard;
         }
 
         public TPlayer CurrentPlayer
         {
             get
             {
-                return this.players[this.currentPlayer];
+                return players[currentPlayer];
             }
         }
 
@@ -40,7 +40,7 @@
                 {
                     for (uint j = 0; j < 3; ++j)
                     {
-                        if (this.board.Grid[i, j] == TicTacToePiece.Empty)
+                        if (board.Grid[i, j] == TicTacToePiece.Empty)
                         {
                             yield return new TicTacToeMove(i, j);
                         }
@@ -53,7 +53,7 @@
         {
             get
             {
-                return this.board;
+                return board;
             }
         }
 
@@ -63,49 +63,49 @@
             {
                 for (int i = 0; i < 3; ++i)
                 {
-                    if (this.board.Grid[i, 0] != TicTacToePiece.Empty)
+                    if (board.Grid[i, 0] != TicTacToePiece.Empty)
                     {
                         bool win = true;
                         for (int j = 1; j < 3; ++j)
                         {
-                            win = win && this.board.Grid[i, 0] == this.board.Grid[i, j];
+                            win = win && board.Grid[i, 0] == board.Grid[i, j];
                         }
 
                         if (win)
                         {
-                            return new Outcome<TPlayer>(new[] { GetPlayerFromPiece(this.board.Grid[i, 0]) });
+                            return new Outcome<TPlayer>(new[] { GetPlayerFromPiece(board.Grid[i, 0]) });
                         }
                     }
                 }
 
                 for (int j = 0; j < 3; ++j)
                 {
-                    if (this.board.Grid[0, j] != TicTacToePiece.Empty)
+                    if (board.Grid[0, j] != TicTacToePiece.Empty)
                     {
                         bool win = true;
                         for (int i = 1; i < 3; ++i)
                         {
-                            win = win && this.board.Grid[0, j] == this.board.Grid[i, j];
+                            win = win && board.Grid[0, j] == board.Grid[i, j];
                         }
 
                         if (win)
                         {
-                            return new Outcome<TPlayer>(new[] { GetPlayerFromPiece(this.board.Grid[0, j]) });
+                            return new Outcome<TPlayer>(new[] { GetPlayerFromPiece(board.Grid[0, j]) });
                         }
                     }
                 }
 
-                if (this.board.Grid[0, 0] != TicTacToePiece.Empty && this.board.Grid[0, 0] == this.board.Grid[1, 1] && this.board.Grid[0, 0] == this.board.Grid[2, 2])
+                if (board.Grid[0, 0] != TicTacToePiece.Empty && board.Grid[0, 0] == board.Grid[1, 1] && board.Grid[0, 0] == board.Grid[2, 2])
                 {
-                    return new Outcome<TPlayer>(new[] { GetPlayerFromPiece(this.board.Grid[1, 1]) });
+                    return new Outcome<TPlayer>(new[] { GetPlayerFromPiece(board.Grid[1, 1]) });
                 }
 
-                if (this.board.Grid[2, 0] != TicTacToePiece.Empty && this.board.Grid[2, 0] == this.board.Grid[1, 1] && this.board.Grid[2, 0] == this.board.Grid[0, 2])
+                if (board.Grid[2, 0] != TicTacToePiece.Empty && board.Grid[2, 0] == board.Grid[1, 1] && board.Grid[2, 0] == board.Grid[0, 2])
                 {
-                    return new Outcome<TPlayer>(new[] { GetPlayerFromPiece(this.board.Grid[1, 1]) });
+                    return new Outcome<TPlayer>(new[] { GetPlayerFromPiece(board.Grid[1, 1]) });
                 }
 
-                foreach (var piece in this.board.Grid)
+                foreach (var piece in board.Grid)
                 {
                     if (piece == TicTacToePiece.Empty)
                     {
@@ -126,21 +126,21 @@
                 throw new ArgumentNullException(nameof(move));
             }
 
-            if (this.board.Grid[move.Row, move.Column] != TicTacToePiece.Empty)
+            if (board.Grid[move.Row, move.Column] != TicTacToePiece.Empty)
             {
                 throw new IllegalMoveExeption("TODO");
             }
 
             // TODO: does clone work here?
-            var newBoard = this.board.Grid.Clone() as TicTacToePiece[,];
-            newBoard[move.Row, move.Column] = (TicTacToePiece)(this.currentPlayer + 1);
+            var newBoard = board.Grid.Clone() as TicTacToePiece[,];
+            newBoard[move.Row, move.Column] = (TicTacToePiece)(currentPlayer + 1);
 
-            return new TicTacToe<TPlayer>(this.players, (this.currentPlayer + 1) % 2, new TicTacToeBoard(newBoard));
+            return new TicTacToe<TPlayer>(players, (currentPlayer + 1) % 2, new TicTacToeBoard(newBoard));
         }
 
         private TPlayer GetPlayerFromPiece(TicTacToePiece piece)
         {
-            return this.players[(int)(piece) - 1];
+            return players[(int)piece - 1];
         }
     }
 }

@@ -2,6 +2,7 @@
 {
     using System;
     using System.Linq;
+
     public sealed class GobbleConsoleDisplayer<TPlayer> : IDisplayer<Gobble<TPlayer>, GobbleBoard, GobbleMove, TPlayer>
     {
         private readonly Func<TPlayer, string> playerToString;

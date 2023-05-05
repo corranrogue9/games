@@ -21,7 +21,7 @@
         {
             get
             {
-                return this.player;
+                return player;
             }
         }
 
@@ -29,47 +29,47 @@
         {
             get
             {
-                for (int i = 0; i < this.board.Triangle.Length; ++i)
+                for (int i = 0; i < board.Triangle.Length; ++i)
                 {
-                    for (int j = 0; j < this.board.Triangle[i].Length; ++j)
+                    for (int j = 0; j < board.Triangle[i].Length; ++j)
                     {
-                        if (this.board.Triangle[i][j] != Peg.Empty)
+                        if (board.Triangle[i][j] != Peg.Empty)
                         {
-                            if (i + 1 < this.board.Triangle.Length && i + 2 < this.board.Triangle.Length &&
-                                this.board.Triangle[i + 1][j] != Peg.Empty && this.board.Triangle[i + 2][j] == Peg.Empty)
+                            if (i + 1 < board.Triangle.Length && i + 2 < board.Triangle.Length &&
+                                board.Triangle[i + 1][j] != Peg.Empty && board.Triangle[i + 2][j] == Peg.Empty)
                             {
                                 yield return new PegMove((i, j), (i + 2, j));
                             }
 
-                            if (i + 1 < this.board.Triangle.Length && i + 2 < this.board.Triangle.Length &&
-                                j + 1 < this.board.Triangle[i + 1].Length && j + 2 < this.board.Triangle[i + 2].Length &&
-                                this.board.Triangle[i + 1][j + 1] != Peg.Empty && this.board.Triangle[i + 2][j + 2] == Peg.Empty)
+                            if (i + 1 < board.Triangle.Length && i + 2 < board.Triangle.Length &&
+                                j + 1 < board.Triangle[i + 1].Length && j + 2 < board.Triangle[i + 2].Length &&
+                                board.Triangle[i + 1][j + 1] != Peg.Empty && board.Triangle[i + 2][j + 2] == Peg.Empty)
                             {
                                 yield return new PegMove((i, j), (i + 2, j + 2));
                             }
 
-                            if (j + 1 < this.board.Triangle[i].Length && j + 2 < this.board.Triangle[i].Length &&
-                                this.board.Triangle[i][j + 1] != Peg.Empty && this.board.Triangle[i][j + 2] == Peg.Empty)
+                            if (j + 1 < board.Triangle[i].Length && j + 2 < board.Triangle[i].Length &&
+                                board.Triangle[i][j + 1] != Peg.Empty && board.Triangle[i][j + 2] == Peg.Empty)
                             {
                                 yield return new PegMove((i, j), (i, j + 2));
                             }
 
                             if (j - 1 >= 0 && j - 2 >= 0 &&
-                                this.board.Triangle[i][j - 1] != Peg.Empty && this.board.Triangle[i][j - 2] == Peg.Empty)
+                                board.Triangle[i][j - 1] != Peg.Empty && board.Triangle[i][j - 2] == Peg.Empty)
                             {
                                 yield return new PegMove((i, j), (i, j - 2));
                             }
 
                             if (i - 1 >= 0 && i - 2 >= 0 &&
-                                j < this.board.Triangle[i - 1].Length && j < this.board.Triangle[i - 2].Length &&
-                                this.board.Triangle[i - 1][j] != Peg.Empty && this.board.Triangle[i - 2][j] == Peg.Empty)
+                                j < board.Triangle[i - 1].Length && j < board.Triangle[i - 2].Length &&
+                                board.Triangle[i - 1][j] != Peg.Empty && board.Triangle[i - 2][j] == Peg.Empty)
                             {
                                 yield return new PegMove((i, j), (i - 2, j));
                             }
 
                             if (i - 1 >= 0 && i - 2 >= 0 &&
                                 j - 1 >= 0 && j - 2 >= 0 &&
-                                this.board.Triangle[i - 1][j - 1] != Peg.Empty && this.board.Triangle[i - 2][j - 2] == Peg.Empty)
+                                board.Triangle[i - 1][j - 1] != Peg.Empty && board.Triangle[i - 2][j - 2] == Peg.Empty)
                             {
                                 yield return new PegMove((i, j), (i - 2, j - 2));
                             }
@@ -83,7 +83,7 @@
         {
             get
             {
-                return this.board;
+                return board;
             }
         }
 
@@ -91,17 +91,17 @@
         {
             get
             {
-                if (this.Moves.Any())
+                if (Moves.Any())
                 {
                     return null;
                 }
 
                 var pieces = false;
-                for (int i = 0; i < this.board.Triangle.Length; ++i)
+                for (int i = 0; i < board.Triangle.Length; ++i)
                 {
-                    for (int j = 0; j < this.board.Triangle[i].Length; ++j)
+                    for (int j = 0; j < board.Triangle[i].Length; ++j)
                     {
-                        if (this.board.Triangle[i][j] != Peg.Empty)
+                        if (board.Triangle[i][j] != Peg.Empty)
                         {
                             if (pieces)
                             {
@@ -115,16 +115,16 @@
                     }
                 }
 
-                return new Outcome<TPlayer>(new[] { this.player });
+                return new Outcome<TPlayer>(new[] { player });
             }
         }
 
         public PegGame<TPlayer> CommitMove(PegMove move)
         {
             var blanks = new List<(int, int)>();
-            for (int i = 0; i < this.board.Triangle.Length; ++i)
+            for (int i = 0; i < board.Triangle.Length; ++i)
             {
-                for (int j = 0; j < this.board.Triangle[i].Length; ++j)
+                for (int j = 0; j < board.Triangle[i].Length; ++j)
                 {
                     if (i == move.Start.Item1 && j == move.Start.Item2)
                     {
@@ -137,14 +137,14 @@
                     {
                         blanks.Add((i, j));
                     }
-                    else if (this.board.Triangle[i][j] == Peg.Empty)
+                    else if (board.Triangle[i][j] == Peg.Empty)
                     {
                         blanks.Add((i, j));
                     }
                 }
             }
 
-            return new PegGame<TPlayer>(this.player, new PegBoard(this.board.Triangle.Length, blanks));
+            return new PegGame<TPlayer>(player, new PegBoard(board.Triangle.Length, blanks));
         }
     }
 
@@ -160,7 +160,7 @@
 
             foreach (var blank in blanks)
             {
-                this.Triangle[blank.Item1][blank.Item2] = Peg.Empty;
+                Triangle[blank.Item1][blank.Item2] = Peg.Empty;
             }
         }
 
@@ -177,8 +177,8 @@
     {
         public PegMove((int, int) start, (int, int) end)
         {
-            this.Start = start;
-            this.End = end;
+            Start = start;
+            End = end;
         }
 
         public (int, int) Start { get; }
