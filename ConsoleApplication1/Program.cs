@@ -28,17 +28,17 @@
 
         static void Main(string[] args)
         {
-            while (true)
+            for (int i = 0; true; ++i)
             {
-                var sku = GetSkuFromArgsOrConsole(args);
+                var sku = GetSkuFromArgsOrConsole(args, i);
                 games[sku].Item2();
                 Console.WriteLine();
             }
         }
 
-        private static int GetSkuFromArgsOrConsole(string[] args)
+        private static int GetSkuFromArgsOrConsole(string[] args, int arg)
         {
-            if (args.Length == 1 && int.TryParse(args[0], out var num))
+            if (args.Length > arg && int.TryParse(args[arg], out var num))
             {
                 return num;
             }
@@ -49,10 +49,16 @@
                 Console.WriteLine($"{i}: {games[i].Item1}");
             }
 
-            Console.WriteLine();
-            Console.WriteLine("Provide SKU:");
-            var sku = int.Parse(Console.ReadLine());
-            return sku;
+            do
+            {
+                Console.WriteLine();
+                Console.WriteLine("Provide SKU:");
+                if (int.TryParse(Console.ReadLine(), out var sku) && sku >= 0 && sku < games.Count)
+                {
+                    return sku;
+                }
+            }
+            while (true);
         }
 
         private static void TicTacToeHumanVsHuman()
