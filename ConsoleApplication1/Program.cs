@@ -1,10 +1,14 @@
 ﻿namespace ConsoleApplication1
 {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Runtime.CompilerServices;
+    using System.Security;
     using System.Security.Cryptography;
     using System.Xml.Linq;
+    using Fx;
     using Fx.Displayer;
     using Fx.Driver;
     using Fx.Game;
@@ -12,9 +16,111 @@
     using Fx.Todo;
     using Fx.Tree;
 
+    internal static class Extensions
+    {
+        public static IReadOnlyList<TResult> Select<TSource, TResult>(this IReadOnlyList<TSource> source, Func<TSource, TResult> selector)
+        {
+            Ensure.NotNull(source, nameof(source));
+            Ensure.NotNull(selector, nameof(selector));
+
+            return new SelectList<TSource, TResult>(source, selector);
+        }
+
+        private sealed class SelectList<TSource, TResult> : IReadOnlyList<TResult>
+        {
+            private readonly IReadOnlyList<TSource> source;
+
+            private readonly Func<TSource, TResult> selector;
+
+            public SelectList(IReadOnlyList<TSource> source, Func<TSource, TResult> selector)
+            {
+                this.source = source;
+                this.selector = selector;
+            }
+
+            public TResult this[int index]
+            {
+                get
+                {
+                    return this.selector(this.source[index]);
+                }
+            }
+
+            public int Count
+            {
+                get
+                {
+                    return this.source.Count;
+                }
+            }
+
+            public IEnumerator<TResult> GetEnumerator()
+            {
+                return this.source.AsEnumerable().Select(this.selector).GetEnumerator();
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return this.GetEnumerator();
+            }
+        }
+
+        public static IReadOnlyList<T> Concat<T>(this IReadOnlyList<T> first, IReadOnlyList<T> second)
+        {
+            Ensure.NotNull(first, nameof(first));
+            Ensure.NotNull(second, nameof(second));
+
+            return new ConcatList<T>(first, second);
+        }
+
+        private sealed class ConcatList<T> : IReadOnlyList<T>
+        {
+            private readonly IReadOnlyList<T> first;
+
+            private readonly IReadOnlyList<T> second;
+
+            public ConcatList(IReadOnlyList<T> first, IReadOnlyList<T> second)
+            {
+                this.first = first;
+                this.second = second;
+            }
+
+            public T this[int index]
+            {
+                get
+                {
+                    if (index < this.first.Count)
+                    {
+                        return this.first[index];
+                    }
+
+                    return this.second[index - this.first.Count];
+                }
+            }
+
+            public int Count
+            {
+                get
+                {
+                    return this.first.Count + this.second.Count;
+                }
+            }
+
+            public IEnumerator<T> GetEnumerator()
+            {
+                return this.first.AsEnumerable().Concat(this.second).GetEnumerator();
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return this.GetEnumerator();
+            }
+        }
+    }
+
     internal static class Program
     {
-        private static readonly IReadOnlyList<(string, Action)> games = new (string, Action)[]
+        /*private static readonly IReadOnlyList<(string, Action)> games = new (string, Action)[]
         {
             (nameof(TicTacToeHumanVsHuman), TicTacToeHumanVsHuman),
             (nameof(TicTacToeHumanVsDecisionTree), TicTacToeHumanVsDecisionTree),
@@ -26,38 +132,113 @@
             (nameof(GobbleHumanVsRandom), GobbleHumanVsRandom),
             (nameof(TwosHuman), TwosHuman),
             (nameof(TwosSevenMovesHeuristic12), TwosSevenMovesHeuristic12),
-        };
+        };*/
+
+        private delegate IStrategy<TGame, TBoard, TMove, TPlayer> StrategyFactory<TGame, TBoard, TMove, TPlayer>(TPlayer player) where TGame : IGame<TGame, TBoard, TMove, TPlayer>;
+
+        private static IReadOnlyList<(string, StrategyFactory<TGame, TBoard, TMove, TPlayer>)> GeneralStrategyFactories<TGame, TBoard, TMove, TPlayer>(IEqualityComparer<TPlayer> comparer) where TGame : IGame<TGame, TBoard, TMove, TPlayer>
+        {
+            return new (string, StrategyFactory<TGame, TBoard, TMove, TPlayer>)[]
+            {
+                (nameof(DecisionTreeStrategy<TGame, TBoard, TMove, TPlayer>), player => new DecisionTreeStrategy<TGame, TBoard, TMove, TPlayer>(player, comparer)),
+                (nameof(MaximizeMovesStrategy), player => MaximizeMovesStrategy.Default<TGame, TBoard, TMove, TPlayer>()),
+                (nameof(MinimizeMovesStrategy), player => MinimizeMovesStrategy.Default<TGame, TBoard, TMove, TPlayer>()),
+                (nameof(MonteCarloStrategy<TGame, TBoard, TMove, TPlayer>), player => new MonteCarloStrategy<TGame, TBoard, TMove, TPlayer>(player, 0.2, comparer, new Random())),
+                (nameof(RandomStrategy<TGame, TBoard, TMove, TPlayer>), player => new RandomStrategy<TGame, TBoard, TMove, TPlayer>()),
+            };
+        }
+
+        private static IReadOnlyList<IStrategy<TGame, TBoard, TMove, string>> GetStrategiesFromConsole<TGame, TBoard, TMove>(
+            IReadOnlyList<string> players,
+            IReadOnlyList<(string, StrategyFactory<TGame, TBoard, TMove, string>)> strategyFactories)
+            where TGame : IGame<TGame, TBoard, TMove, string>
+        {
+            return players.Select(player =>
+            {
+                Console.WriteLine($"Please select a stragety for {player}:");
+                var choice = GetChoiceFromConsole(strategyFactories.Select(strategy => strategy.Item1));
+                var strategyFactory = strategyFactories[choice];
+                Console.WriteLine();
+                return strategyFactory.Item2(player);
+            });
+        }
+
+        private static IReadOnlyList<(string, StrategyFactory<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>)> TicTacToeStrategyFactories()
+        {
+            var generalStrategies = GeneralStrategyFactories<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>(StringComparer.OrdinalIgnoreCase);
+
+            var specificStrategies = new (string, StrategyFactory<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>)[]
+            {
+                (nameof(GameTreeDepthStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>), player => new GameTreeDepthStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>(game => 0, null, player, StringComparer.OrdinalIgnoreCase)),
+                (nameof(UserInterfaceStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>), player => new UserInterfaceStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>(new TicTacToeConsoleDisplayer<string>(_ => _))),
+            };
+
+            return generalStrategies.Concat(specificStrategies);
+        }
+
+        private static void TicTacToe()
+        {
+            var strategyFactories = TicTacToeStrategyFactories();
+            var players = new[]
+            {
+                "exes",
+                "ohs",
+            };
+
+            var strategies = GetStrategiesFromConsole(players, strategyFactories);
+            TicTacToe(
+                (players[0], strategies[0]), 
+                (players[1], strategies[1]));
+        }
+
+        private static void TicTacToe(
+            (string player, IStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string> strategy) exes, 
+            (string player, IStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string> strategy) ohs)
+        {
+            var displayer = new TicTacToeConsoleDisplayer<string>(_ => _);
+            var game = new TicTacToe<string>(exes.player, ohs.player);
+            var driver = Driver.Create(
+                new Dictionary<string, IStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>>
+                {
+                    { exes.player, exes.strategy },
+                    { ohs.player, ohs.strategy },
+                },
+                displayer);
+            var result = driver.Run(game);
+        }
 
         static void Main(string[] args)
         {
-            for (int i = 0; true; ++i)
+            var games = new (string, Action)[]
             {
-                var sku = GetSkuFromArgsOrConsole(args, i);
-                games[sku].Item2();
+                (nameof(TicTacToe), TicTacToe),
+            };
+
+            while (true)
+            {
+                Console.Write("Please select a game. ");
+                var gameChoice = GetChoiceFromConsole(games.Select(game => game.Item1));
+                games[gameChoice].Item2();
+                Console.WriteLine();
                 Console.WriteLine();
             }
         }
 
-        private static int GetSkuFromArgsOrConsole(string[] args, int arg)
+        private static int GetChoiceFromConsole(IReadOnlyList<string> choices)
         {
-            if (args.Length > arg && int.TryParse(args[arg], out var num))
+            Console.WriteLine("Available choices:");
+            for (int i = 0; i < choices.Count; ++i)
             {
-                return num;
-            }
-
-            Console.WriteLine("Available games:");
-            for (int i = 0; i < games.Count; ++i)
-            {
-                Console.WriteLine($"{i}: {games[i].Item1}");
+                Console.WriteLine($"{i}: {choices[i]}");
             }
 
             do
             {
                 Console.WriteLine();
-                Console.WriteLine("Provide SKU:");
-                if (int.TryParse(Console.ReadLine(), out var sku) && sku >= 0 && sku < games.Count)
+                Console.WriteLine("Provide choice:");
+                if (int.TryParse(Console.ReadLine(), out var choice) && choice >= 0 && choice < choices.Count)
                 {
-                    return sku;
+                    return choice;
                 }
             }
             while (true);
@@ -121,53 +302,6 @@
                 {
                     { exes, strategyX },
                     { ohs, strategyO },
-                },
-                displayer);
-            var result = driver.Run(game);
-        }
-
-        private delegate IStrategy<TGame, TBoard, TMove, TPlayer> StrategyFactory<TGame, TBoard, TMove, TPlayer>(TPlayer player) where TGame : IGame<TGame, TBoard, TMove, TPlayer>;
-
-        private static IEnumerable<StrategyFactory<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>> TicTacToeStrategies()
-        {
-            var generalStrategies = GeneralStrategies<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>(StringComparer.OrdinalIgnoreCase);
-
-            var specificStrategies = new StrategyFactory<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>[]
-            {
-                player => new GameTreeDepthStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>(game => 0, null, player, StringComparer.OrdinalIgnoreCase),
-                player => new UserInterfaceStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>(new TicTacToeConsoleDisplayer<string>(_ => _)),
-            };
-            
-            return generalStrategies.Concat(specificStrategies);
-        }
-
-        private static IEnumerable<StrategyFactory<TGame, TBoard, TMove, TPlayer>> GeneralStrategies<TGame, TBoard, TMove, TPlayer>(IEqualityComparer<TPlayer> comparer) where TGame : IGame<TGame, TBoard, TMove, TPlayer>
-        {
-            return new StrategyFactory<TGame, TBoard, TMove, TPlayer>[]
-            {
-                player => new DecisionTreeStrategy<TGame, TBoard, TMove, TPlayer>(player, comparer),
-                player => MaximizeMovesStrategy.Default<TGame, TBoard, TMove, TPlayer>(),
-                player => MinimizeMovesStrategy.Default<TGame, TBoard, TMove, TPlayer>(),
-                player => new MonteCarloStrategy<TGame, TBoard, TMove, TPlayer>(player, 0.2, comparer, new Random()),
-                player => new RandomStrategy<TGame, TBoard, TMove, TPlayer>(),
-            };
-        }
-
-        private static void TicTacToe()
-        {
-        }
-
-        private static void TicTacToe(IStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string> exesStrategy, IStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string> ohsStrategy)
-        {
-            var exes = "exes";
-            var ohs = "ohs";
-            var displayer = new TicTacToeConsoleDisplayer<string>(_ => _);
-            var game = new TicTacToe<string>(exes, ohs);
-            var driver = Driver.Create(
-                new Dictionary<string, IStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>>
-                {
-                    { exes, exesStrategy },
-                    { ohs, ohsStrategy },
                 },
                 displayer);
             var result = driver.Run(game);
