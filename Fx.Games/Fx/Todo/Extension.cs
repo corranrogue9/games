@@ -14,6 +14,20 @@
     /// <threadsafety static="true" instance="true"/>
     public static class Extension
     {
+        private static void DoWork()
+        {
+            var tree = Node.CreateTree("Asdf", "qwer", "1234", "zxcv");
+
+            //// TODO this should be the same as tree3
+            //// var tree2 = Node.CreateBinaryTree("Asdf", "qwer", "1234", "zxcv");
+            var tree3 = Node.CreateTree("Asdf", Node.CreateTree("qwer1", "zxcv12"), Node.CreateTree("1234567"));
+            var lengths = tree3.Select(value => value.Length, Node.TreeFactory);
+
+
+
+            var branches = tree3.EnumerateBranches();
+            var recreatedTree = Tree.CreateFromBranches(branches, Node.TreeFactory);
+        }
 
         public static Func<Void> ToFunc(Action action)
         {

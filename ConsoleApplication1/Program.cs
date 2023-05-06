@@ -19,20 +19,6 @@
             NewDoWork();
 
 
-
-            var tree = Node.CreateTree("Asdf", "qwer", "1234", "zxcv");
-
-            //// TODO this should be the same as tree3
-            //// var tree2 = Node.CreateBinaryTree("Asdf", "qwer", "1234", "zxcv");
-            var tree3 = Node.CreateTree("Asdf", Node.CreateTree("qwer1", "zxcv12"), Node.CreateTree("1234567"));
-            var lengths = tree3.Select(value => value.Length, Node.TreeFactory);
-
-
-
-            var branches = tree3.EnumerateBranches();
-            var recreatedTree = Tree.CreateFromBranches(branches, Node.TreeFactory);
-
-
             Pegs();
             TicTacToeHumanVsMaximizeMoves();
             Gobble();
@@ -297,24 +283,15 @@
         public static void NewDoWork()
         {
             var displayer = new TwosConsoleDisplayer<string>(_ => _);
-            //// TODO do other display mechanism to formalize "board state"
-            //// TODO do game of amazons to fix decision tree with monte carlo simulation
-            //// TODO do more games
             Func<TwosDirection, string> displayMove = (move) =>
             {
                 return move.ToString();
             };
-            var ticks = Environment.TickCount;
-            ////var ticks = 551040140;
-            ////var ticks = 1071300156;
-            File.WriteAllText(@"c:\users\gdebruin\desktop\ticks.txt", ticks.ToString());
-            var random = new Random(ticks);
-            var game = new Twos<string>("gdebruin", new Random(ticks), 12);
+            var game = new Twos<string>("gdebruin", new Random(), 12);
             var driver = Driver.Create(
                 new Dictionary<string, IStrategy<Twos<string>, int[][], TwosDirection, string>>
                 {
                     ////{ "gdebruin", new ConsoleStrategy<Direction, string, Twos<string>>(displayMove)},
-                    ////{ "brett", new BrettStrategy(consolestat) },
                     
                     { "gdebruin", new GameTreeDepthStrategy<Twos<string>, int[][], TwosDirection, string>(TwosHeuristics.Heuristic12, Fx.Tree.Node.TreeFactory, "gdebruin", StringComparer.OrdinalIgnoreCase)},
                     ////{ "gdebruin", new RandomStrategy<NewTwos<string>, int[][], TwosDirection, string>() }
