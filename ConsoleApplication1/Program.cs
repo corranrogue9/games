@@ -2,7 +2,9 @@
 {
     using System;
     using System.Collections.Generic;
-
+    using System.Diagnostics;
+    using System.Security.Cryptography;
+    using System.Xml.Linq;
     using Fx.Displayer;
     using Fx.Driver;
     using Fx.Game;
@@ -10,7 +12,7 @@
     using Fx.Todo;
     using Fx.Tree;
 
-    class Program
+    internal static class Program
     {
         private static readonly IReadOnlyList<(string, Action)> games = new (string, Action)[]
         {
@@ -119,6 +121,53 @@
                 {
                     { exes, strategyX },
                     { ohs, strategyO },
+                },
+                displayer);
+            var result = driver.Run(game);
+        }
+
+        private delegate IStrategy<TGame, TBoard, TMove, TPlayer> StrategyFactory<TGame, TBoard, TMove, TPlayer>(TPlayer player) where TGame : IGame<TGame, TBoard, TMove, TPlayer>;
+
+        private static IEnumerable<StrategyFactory<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>> TicTacToeStrategies()
+        {
+            var generalStrategies = GeneralStrategies<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>(StringComparer.OrdinalIgnoreCase);
+
+            var specificStrategies = new StrategyFactory<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>[]
+            {
+                player => new GameTreeDepthStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>(game => 0, null, player, StringComparer.OrdinalIgnoreCase),
+                player => new UserInterfaceStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>(new TicTacToeConsoleDisplayer<string>(_ => _)),
+            };
+            
+            return generalStrategies.Concat(specificStrategies);
+        }
+
+        private static IEnumerable<StrategyFactory<TGame, TBoard, TMove, TPlayer>> GeneralStrategies<TGame, TBoard, TMove, TPlayer>(IEqualityComparer<TPlayer> comparer) where TGame : IGame<TGame, TBoard, TMove, TPlayer>
+        {
+            return new StrategyFactory<TGame, TBoard, TMove, TPlayer>[]
+            {
+                player => new DecisionTreeStrategy<TGame, TBoard, TMove, TPlayer>(player, comparer),
+                player => MaximizeMovesStrategy.Default<TGame, TBoard, TMove, TPlayer>(),
+                player => MinimizeMovesStrategy.Default<TGame, TBoard, TMove, TPlayer>(),
+                player => new MonteCarloStrategy<TGame, TBoard, TMove, TPlayer>(player, 0.2, comparer, new Random()),
+                player => new RandomStrategy<TGame, TBoard, TMove, TPlayer>(),
+            };
+        }
+
+        private static void TicTacToe()
+        {
+        }
+
+        private static void TicTacToe(IStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string> exesStrategy, IStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string> ohsStrategy)
+        {
+            var exes = "exes";
+            var ohs = "ohs";
+            var displayer = new TicTacToeConsoleDisplayer<string>(_ => _);
+            var game = new TicTacToe<string>(exes, ohs);
+            var driver = Driver.Create(
+                new Dictionary<string, IStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>>
+                {
+                    { exes, exesStrategy },
+                    { ohs, ohsStrategy },
                 },
                 displayer);
             var result = driver.Run(game);
