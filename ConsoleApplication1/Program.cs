@@ -3,11 +3,6 @@
     using System;
     using System.Collections;
     using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Runtime.CompilerServices;
-    using System.Security;
-    using System.Security.Cryptography;
-    using System.Xml.Linq;
     using Fx;
     using Fx.Displayer;
     using Fx.Driver;
@@ -225,31 +220,147 @@
 
         private static void Pegs()
         {
-            var strategyFactories = PegsStrategyFactories();
-            var players = new[]
-            {
-                "player",
-            };
-
-            var strategies = GetStrategiesFromConsole(players, strategyFactories);
-            Pegs(
-                (players[0], strategies[0]));
-        }
-
-        private static void Pegs(
-            (string player, IStrategy<PegGame<string>, PegBoard, PegMove, string> strategy) player)
-        {
-            var displayer = new PegGameConsoleDisplayer<string>(); //// TODO two of these get instantiated, one for the strategy and one for the driver
-            var game = new PegGame<string>(player.player);
-            var driver = Driver.Create(
-                new Dictionary<string, IStrategy<PegGame<string>, PegBoard, PegMove, string>>
-                {
-                    { player.player, player.strategy },
-                },
-                displayer);
-            var result = driver.Run(game);
+            Game(
+                DelegateGameFactory.Create<PegGame<string>, PegBoard, PegMove>((player) => new PegGame<string>(player)), //// TODO having to specify the generic type parameters here seems like a failure
+                DelegateStrategyFactoryFactory.Create(PegsStrategyFactories),
+                new DelegatePlayerFactory(() => new[] { "player" }),
+                DelegateDisplayerFactory.Create(() => new PegGameConsoleDisplayer<string>()));
         }
         #endregion Pegs
+
+        private interface IGameFactory<TGame, TBoard, TMove> where TGame : IGame<TGame, TBoard, TMove, string>
+        {
+            TGame Create(string player);
+        }
+
+        private static class DelegateGameFactory
+        {
+            public static DelegateGameFactory<TGame, TBoard, TMove> Create<TGame, TBoard, TMove>(Func<string, TGame> factory) where TGame : IGame<TGame, TBoard, TMove, string>
+            {
+                return new DelegateGameFactory<TGame, TBoard, TMove>(factory);
+            }
+        }
+
+        private sealed class DelegateGameFactory<TGame, TBoard, TMove> : IGameFactory<TGame, TBoard, TMove> where TGame : IGame<TGame, TBoard, TMove, string>
+        {
+            private readonly Func<string, TGame> factory;
+
+            public DelegateGameFactory(Func<string, TGame> factory) //// TODO try an implicit operator on delegate
+            {
+                Ensure.NotNull(factory, nameof(factory));
+
+                this.factory = factory;
+            }
+
+            public TGame Create(string player)
+            {
+                return this.factory(player);
+            }
+        }
+
+        private interface IDisplayerFactory<TGame, TBoard, TMove> where TGame : IGame<TGame, TBoard, TMove, string>
+        {
+            IDisplayer<TGame, TBoard, TMove, string> Create();
+        }
+
+        private static class DelegateDisplayerFactory
+        {
+            public static DelegateDisplayerFactory<TGame, TBoard, TMove> Create<TGame, TBoard, TMove>(Func<IDisplayer<TGame, TBoard, TMove, string>> factory) where TGame : IGame<TGame, TBoard, TMove, string>
+            {
+                return new DelegateDisplayerFactory<TGame, TBoard, TMove>(factory);
+            }
+        }
+
+        private sealed class DelegateDisplayerFactory<TGame, TBoard, TMove> : IDisplayerFactory<TGame, TBoard, TMove> where TGame : IGame<TGame, TBoard, TMove, string>
+        {
+            private readonly Func<IDisplayer<TGame, TBoard, TMove, string>> factory;
+
+            public DelegateDisplayerFactory(Func<IDisplayer<TGame, TBoard, TMove, string>> factory)
+            {
+                Ensure.NotNull(factory, nameof(factory));
+
+                this.factory = factory;
+            }
+
+            public IDisplayer<TGame, TBoard, TMove, string> Create()
+            {
+                return this.factory();
+            }
+        }
+
+        private interface IStrategyFactoryFactory<TGame, TBoard, TMove> where TGame : IGame<TGame, TBoard, TMove, string>
+        {
+            IReadOnlyList<(string, StrategyFactory<TGame, TBoard, TMove, string>)> Create();
+        }
+
+        private static class DelegateStrategyFactoryFactory
+        {
+            public static DelegateStrategyFactoryFactory<TGame, TBoard, TMove> Create<TGame, TBoard, TMove>(Func<IReadOnlyList<(string, StrategyFactory<TGame, TBoard, TMove, string>)>> factory) where TGame : IGame<TGame, TBoard, TMove, string>
+            {
+                return new DelegateStrategyFactoryFactory<TGame, TBoard, TMove>(factory);
+            }
+        }
+
+        private sealed class DelegateStrategyFactoryFactory<TGame, TBoard, TMove> : IStrategyFactoryFactory<TGame, TBoard, TMove> where TGame : IGame<TGame, TBoard, TMove, string>
+        {
+            private readonly Func<IReadOnlyList<(string, StrategyFactory<TGame, TBoard, TMove, string>)>> factory;
+
+            public DelegateStrategyFactoryFactory(Func<IReadOnlyList<(string, StrategyFactory<TGame, TBoard, TMove, string>)>> factory)
+            {
+                Ensure.NotNull(factory, nameof(factory));
+
+                this.factory = factory;
+            }
+
+            public IReadOnlyList<(string, StrategyFactory<TGame, TBoard, TMove, string>)> Create()
+            {
+                return this.factory();
+            }
+        }
+
+        private interface IPlayerFactory
+        {
+            IReadOnlyList<string> Create();
+        }
+
+        private sealed class DelegatePlayerFactory : IPlayerFactory
+        {
+            private readonly Func<IReadOnlyList<string>> factory;
+
+            public DelegatePlayerFactory(Func<IReadOnlyList<string>> factory)
+            {
+                Ensure.NotNull(factory, nameof(factory));
+
+                this.factory = factory;
+            }
+
+            public IReadOnlyList<string> Create()
+            {
+                return this.factory();
+            }
+        }
+
+        private static void Game<TGame, TBoard, TMove>(
+            IGameFactory<TGame, TBoard, TMove> gameFactory,
+            IStrategyFactoryFactory<TGame, TBoard, TMove> strategyFactoryFactory,
+            IPlayerFactory playerFactory,
+            IDisplayerFactory<TGame, TBoard, TMove> displayerFactory) 
+            where TGame : IGame<TGame, TBoard, TMove, string>
+        {
+            var players = playerFactory.Create();
+            var strategyFactories = strategyFactoryFactory.Create();
+            var strategies = GetStrategiesFromConsole(players, strategyFactories); //// TODO this is the only part using the factories that takes a hard dependency on the console //// TODO this also probably goes hand in hand with TPlayer being assumed to be string
+            var displayer = displayerFactory.Create(); //// TODO two of these get instantiated, one for the strategy and one for the driver
+            var game = gameFactory.Create(players[0]);
+
+            var driver = Driver.Create(
+                new Dictionary<string, IStrategy<TGame, TBoard, TMove, string>>
+                {
+                    { players[0], strategies[0] },
+                },
+                displayer);
+            driver.Run(game);
+        }
 
         static void Main(string[] args)
         {
