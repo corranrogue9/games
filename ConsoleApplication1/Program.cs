@@ -251,24 +251,6 @@
         }
         #endregion Pegs
 
-        private interface IStrategyFactoryFactory<TGame, TBoard, TMove> where TGame : IGame<TGame, TBoard, TMove, string>
-        {
-            IReadOnlyList<(string, StrategyFactory<TGame, TBoard, TMove, string>)> Create();
-        }
-
-        private static void Game<TGame, TBoard, TMove>(IStrategyFactoryFactory<TGame, TBoard, TMove> strategyFactoryFactory) where TGame : IGame<TGame, TBoard, TMove, string>
-        {
-            var strategyFactories = PegsStrategyFactories();
-            var players = new[]
-            {
-                "player",
-            };
-
-            var strategies = GetStrategiesFromConsole(players, strategyFactories);
-            Pegs(
-                (players[0], strategies[0]));
-        }
-
         static void Main(string[] args)
         {
             var games = new (string, Action)[]
