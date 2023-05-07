@@ -229,7 +229,7 @@
             return generalStrategies.Concat(specificStrategies);
         }
 
-        private static void TicTacToe()
+        private static void TicTacToe() //// TODO this is all well and good, but where's the external extensibility? if someone comes along and creates this "runner" method for a game to run on the console, and then someone else writes the displayer for it to have a ux, the second dev has to package all of the stragies together, as well as the game factory, and create a new runnner method
         {
             var exes = "exes";
             var ohs = "ohs";
