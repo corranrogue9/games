@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33516.290
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fx.Games", "Fx.Games\Fx.Games.csproj", "{BE866533-02BA-408E-A2EE-43CFA2378C61}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fx.Games", "Fx.Games\Fx.Games.csproj", "{BE866533-02BA-408E-A2EE-43CFA2378C61}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApplication1", "ConsoleApplication1\ConsoleApplication1.csproj", "{D1809865-16E2-4860-AE78-7C60E2B2FE3B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApplication1", "ConsoleApplication1\ConsoleApplication1.csproj", "{D1809865-16E2-4860-AE78-7C60E2B2FE3B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fx.Games.Test", "Fx.Games.Test\Fx.Games.Test.csproj", "{B95D899C-307F-495B-848E-6EFA433E5E06}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{D1809865-16E2-4860-AE78-7C60E2B2FE3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D1809865-16E2-4860-AE78-7C60E2B2FE3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D1809865-16E2-4860-AE78-7C60E2B2FE3B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B95D899C-307F-495B-848E-6EFA433E5E06}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B95D899C-307F-495B-848E-6EFA433E5E06}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B95D899C-307F-495B-848E-6EFA433E5E06}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B95D899C-307F-495B-848E-6EFA433E5E06}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
