@@ -3,6 +3,7 @@
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Collections.Immutable;
     using Fx;
     using Fx.Displayer;
     using Fx.Driver;
@@ -13,6 +14,62 @@
 
     internal static class Extensions
     {
+        public static IReadOnlyList<(TFirst First, TSecond Second)> Zip<TFirst, TSecond, TResult>(this IReadOnlyList<TFirst> first, IReadOnlyList<TSecond> second)
+        {
+            return first.Zip(second, (a, b) => (a, b));
+        }
+
+        public static IReadOnlyList<TResult> Zip<TFirst, TSecond, TResult>(this IReadOnlyList<TFirst> first, IReadOnlyList<TSecond> second, Func<TFirst, TSecond, TResult> zipper)
+        {
+            Ensure.NotNull(first, nameof(first));
+            Ensure.NotNull(second, nameof(second));
+            Ensure.NotNull(zipper, nameof(zipper));
+
+            return new ZipList<TFirst, TSecond, TResult>(first, second, zipper);
+        }
+
+        private sealed class ZipList<TFirst, TSecond, TResult> : IReadOnlyList<TResult>
+        {
+            private readonly IReadOnlyList<TFirst> first;
+
+            private readonly IReadOnlyList<TSecond> second;
+
+            private readonly Func<TFirst, TSecond, TResult> zipper;
+
+            public ZipList(IReadOnlyList<TFirst> first, IReadOnlyList<TSecond> second, Func<TFirst, TSecond, TResult> zipper)
+            {
+                this.first = first;
+                this.second = second;
+                this.zipper = zipper;
+            }
+
+            public TResult this[int index]
+            {
+                get
+                {
+                    return this.zipper(this.first[index], this.second[index]);
+                }
+            }
+
+            public int Count
+            {
+                get
+                {
+                    return Math.Min(this.first.Count, this.second.Count);
+                }
+            }
+
+            public IEnumerator<TResult> GetEnumerator()
+            {
+                return this.first.AsEnumerable().Zip(this.second, this.zipper).GetEnumerator();
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return this.GetEnumerator();
+            }
+        }
+
         public static IReadOnlyList<TResult> Select<TSource, TResult>(this IReadOnlyList<TSource> source, Func<TSource, TResult> selector)
         {
             Ensure.NotNull(source, nameof(source));
@@ -150,7 +207,7 @@
         {
             return players.Select(player =>
             {
-                Console.WriteLine($"Please select a stragety for {player}:");
+                Console.WriteLine($"Please select a strategy for {player}:");
                 var choice = GetChoiceFromConsole(strategyFactories.Select(strategy => strategy.Item1));
                 var strategyFactory = strategyFactories[choice];
                 Console.WriteLine();
@@ -174,33 +231,13 @@
 
         private static void TicTacToe()
         {
-            var strategyFactories = TicTacToeStrategyFactories();
-            var players = new[]
-            {
-                "exes",
-                "ohs",
-            };
-
-            var strategies = GetStrategiesFromConsole(players, strategyFactories);
-            TicTacToe(
-                (players[0], strategies[0]), 
-                (players[1], strategies[1]));
-        }
-
-        private static void TicTacToe(
-            (string player, IStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string> strategy) exes, 
-            (string player, IStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string> strategy) ohs)
-        {
-            var displayer = new TicTacToeConsoleDisplayer<string>(_ => _);
-            var game = new TicTacToe<string>(exes.player, ohs.player);
-            var driver = Driver.Create(
-                new Dictionary<string, IStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>>
-                {
-                    { exes.player, exes.strategy },
-                    { ohs.player, ohs.strategy },
-                },
-                displayer);
-            var result = driver.Run(game);
+            var exes = "exes";
+            var ohs = "ohs";
+            Game(
+                DelegateGameFactory.Create<TicTacToe<string>, TicTacToeBoard, TicTacToeMove>((player) => new TicTacToe<string>(exes, ohs)), //// TODO the fact that this ignores the player parameter indicates that something is very wrong...
+                DelegateStrategyFactoryFactory.Create(TicTacToeStrategyFactories),
+                new DelegatePlayerFactory(() => new[] { exes, ohs }),
+                DelegateDisplayerFactory.Create(() => new TicTacToeConsoleDisplayer<string>(_ => _)));
         }
         #endregion
 
@@ -354,10 +391,7 @@
             var game = gameFactory.Create(players[0]);
 
             var driver = Driver.Create(
-                new Dictionary<string, IStrategy<TGame, TBoard, TMove, string>>
-                {
-                    { players[0], strategies[0] },
-                },
+                players.Zip(strategies).ToDictionary(tuple => tuple.First, tuple => tuple.Second),
                 displayer);
             driver.Run(game);
         }
