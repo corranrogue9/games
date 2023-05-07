@@ -163,6 +163,7 @@
             });
         }
 
+        #region TicTacToe
         private static IReadOnlyList<(string, StrategyFactory<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>)> TicTacToeStrategyFactories()
         {
             var generalStrategies = GeneralStrategyFactories<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>(StringComparer.OrdinalIgnoreCase);
@@ -206,12 +207,74 @@
                 displayer);
             var result = driver.Run(game);
         }
+        #endregion
+
+        #region Pegs
+        private static IReadOnlyList<(string, StrategyFactory<PegGame<string>, PegBoard, PegMove, string>)> PegsStrategyFactories()
+        {
+            var generalStrategies = GeneralStrategyFactories<PegGame<string>, PegBoard, PegMove, string>(StringComparer.OrdinalIgnoreCase);
+
+            var specificStrategies = new (string, StrategyFactory<PegGame<string>, PegBoard, PegMove, string>)[]
+            {
+                (nameof(GameTreeDepthStrategy<PegGame<string>, PegBoard, PegMove, string>), player => new GameTreeDepthStrategy<PegGame<string>, PegBoard, PegMove, string>(game => 0, null, player, StringComparer.OrdinalIgnoreCase)),
+                (nameof(UserInterfaceStrategy<PegGame<string>, PegBoard, PegMove, string>), player => new UserInterfaceStrategy<PegGame<string>, PegBoard, PegMove, string>(new PegGameConsoleDisplayer<string>())),
+            };
+
+            return generalStrategies.Concat(specificStrategies);
+        }
+
+        private static void Pegs()
+        {
+            var strategyFactories = PegsStrategyFactories();
+            var players = new[]
+            {
+                "player",
+            };
+
+            var strategies = GetStrategiesFromConsole(players, strategyFactories);
+            Pegs(
+                (players[0], strategies[0]));
+        }
+
+        private static void Pegs(
+            (string player, IStrategy<PegGame<string>, PegBoard, PegMove, string> strategy) player)
+        {
+            var displayer = new PegGameConsoleDisplayer<string>(); //// TODO two of these get instantiated, one for the strategy and one for the driver
+            var game = new PegGame<string>(player.player);
+            var driver = Driver.Create(
+                new Dictionary<string, IStrategy<PegGame<string>, PegBoard, PegMove, string>>
+                {
+                    { player.player, player.strategy },
+                },
+                displayer);
+            var result = driver.Run(game);
+        }
+        #endregion Pegs
+
+        private interface IStrategyFactoryFactory<TGame, TBoard, TMove> where TGame : IGame<TGame, TBoard, TMove, string>
+        {
+            IReadOnlyList<(string, StrategyFactory<TGame, TBoard, TMove, string>)> Create();
+        }
+
+        private static void Game<TGame, TBoard, TMove>(IStrategyFactoryFactory<TGame, TBoard, TMove> strategyFactoryFactory) where TGame : IGame<TGame, TBoard, TMove, string>
+        {
+            var strategyFactories = PegsStrategyFactories();
+            var players = new[]
+            {
+                "player",
+            };
+
+            var strategies = GetStrategiesFromConsole(players, strategyFactories);
+            Pegs(
+                (players[0], strategies[0]));
+        }
 
         static void Main(string[] args)
         {
             var games = new (string, Action)[]
             {
                 (nameof(TicTacToe), TicTacToe),
+                (nameof(Pegs), Pegs),
             };
 
             while (true)
