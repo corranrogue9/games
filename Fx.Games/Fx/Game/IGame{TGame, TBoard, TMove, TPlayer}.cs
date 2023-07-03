@@ -40,4 +40,34 @@
         /// </summary>
         Outcome<TPlayer> Outcome { get; }
     }
+
+    public interface IGameWithHiddenInformation<out TGame, out TBoard, TMove, TPlayer> : IGame<TGame, TBoard, TMove, TPlayer> where TGame : IGame<TGame, TBoard, TMove, TPlayer>
+    {
+        /// <summary>
+        /// The sum of the weights of the resulting sequence must equal 1.0
+        /// </summary>
+        /// <param name="move"></param>
+        /// <returns></returns>
+        IEnumerable<IWeightedGame<TGame, TBoard, TMove, TPlayer>> ExploreMove(TMove move);
+    }
+
+    public interface IWeightedGame<out TGame, out TBoard, TMove, TPlayer> where TGame : IGame<TGame, TBoard, TMove, TPlayer>
+    {
+        public TGame Game { get; }
+
+        public double Weight { get; }
+    }
+
+    public sealed class WeightedGame<TGame, TBoard, TMove, TPlayer> : IWeightedGame<TGame, TBoard, TMove, TPlayer> where TGame : IGame<TGame, TBoard, TMove, TPlayer>
+    {
+        public WeightedGame(TGame game, double weight)
+        {
+            this.Game = game;
+            this.Weight = weight;
+        }
+
+        public TGame Game { get; }
+
+        public double Weight { get; }
+    }
 }
