@@ -41,7 +41,7 @@
         Outcome<TPlayer> Outcome { get; }
     }
 
-    public interface IGameWithHiddenInformation<out TGame, out TBoard, TMove, TPlayer> : IGame<TGame, TBoard, TMove, TPlayer> where TGame : IGame<TGame, TBoard, TMove, TPlayer>
+    public interface IGameWithHiddenInformation<out TGame, out TBoard, TMove, TPlayer> : IGame<TGame, TBoard, TMove, TPlayer> where TGame : IGameWithHiddenInformation<TGame, TBoard, TMove, TPlayer>
     {
         /// <summary>
         /// The sum of the weights of the resulting sequence must equal 1.0
