@@ -3,11 +3,11 @@ namespace Fx.Game.Chess
     using System;
     using System.Collections.Generic;
     using static ChessPieceKind;
-    using static ChessColor;
+    using static ChessPieceColor;
     using static ChessPiece;
 
 
-    public enum ChessColor { White, Black }
+    public enum ChessPieceColor { White, Black }
 
 
     public enum ChessPieceKind { King, Queen, Knight, Bishop, Rook, Pawn }
@@ -15,10 +15,10 @@ namespace Fx.Game.Chess
 
     public struct ChessPiece : IEquatable<ChessPiece>
     {
-        public ChessColor Color { get; }
+        public ChessPieceColor Color { get; }
         public ChessPieceKind Kind { get; }
 
-        private ChessPiece(ChessColor color, ChessPieceKind kind) : this()
+        private ChessPiece(ChessPieceColor color, ChessPieceKind kind) : this()
         {
             Color = color;
             Kind = kind;
@@ -53,6 +53,11 @@ namespace Fx.Game.Chess
         public static readonly ChessPiece BlackRook = new(Black, Rook);
         public static readonly ChessPiece BlackPawn = new(Black, Pawn);
 
+        override public string ToString()
+        {
+            return string.Format("{0} {1}", Color, Kind);
+        }
+
         internal char Symbol()
         {
             return (Color, Kind) switch
@@ -79,19 +84,19 @@ namespace Fx.Game.Chess
         {
             return piece switch
             {
-                'K' => new ChessPiece(White, King),
-                'Q' => new ChessPiece(White, Queen),
-                'N' => new ChessPiece(White, Knight),
-                'B' => new ChessPiece(White, Bishop),
-                'R' => new ChessPiece(White, Rook),
-                'P' => new ChessPiece(White, Pawn),
+                'K' => ChessPiece.WhiteKing,
+                'Q' => ChessPiece.WhiteQueen,
+                'N' => ChessPiece.WhiteKnight,
+                'B' => ChessPiece.WhiteBishop,
+                'R' => ChessPiece.WhiteRook,
+                'P' => ChessPiece.WhitePawn,
 
-                'k' => new ChessPiece(Black, King),
-                'q' => new ChessPiece(Black, Queen),
-                'n' => new ChessPiece(Black, Knight),
-                'b' => new ChessPiece(Black, Bishop),
-                'r' => new ChessPiece(Black, Rook),
-                'p' => new ChessPiece(Black, Pawn),
+                'k' => ChessPiece.BlackKing,
+                'q' => ChessPiece.BlackQueen,
+                'n' => ChessPiece.BlackKnight,
+                'b' => ChessPiece.BlackBishop,
+                'r' => ChessPiece.BlackRook,
+                'p' => ChessPiece.BlackPawn,
 
                 ' ' => default(ChessPiece?),
                 '_' => default(ChessPiece?),

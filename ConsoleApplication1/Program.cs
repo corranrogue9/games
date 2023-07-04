@@ -30,6 +30,18 @@
 
         static void Main(string[] args)
         {
+            var b = new Fx.Game.Chess.Chess<string>("W", "B");
+
+            System.Console.WriteLine(b.Board.Board);
+            foreach (var m in b.Moves)
+            {
+                System.Console.WriteLine(m);
+            }
+
+            return;
+
+
+
             for (int i = 0; true; ++i)
             {
                 var sku = GetSkuFromArgsOrConsole(args, i);
