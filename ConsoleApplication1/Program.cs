@@ -6,6 +6,7 @@
     using Fx.Displayer;
     using Fx.Driver;
     using Fx.Game;
+    using Fx.Game.Chess;
     using Fx.Strategy;
     using Fx.Todo;
     using Fx.Tree;
@@ -26,11 +27,12 @@
             (nameof(TwosHuman), TwosHuman),
             (nameof(TwosSevenMovesHeuristic12), TwosSevenMovesHeuristic12),
             (nameof(TwosOneMoveHeuristic12), TwosOneMoveHeuristic12),
+            (nameof(Chess), Chess),
         };
 
         static void Main(string[] args)
         {
-            var b = new Fx.Game.Chess.Chess<string>("W", "B");
+            /*var b = new Fx.Game.Chess.Chess<string>("W", "B");
 
             System.Console.WriteLine(b.Board.Board);
             foreach (var m in b.Moves)
@@ -40,7 +42,7 @@
 
             Console.WriteLine("end of moves");
             Console.ReadLine();
-            return;
+            return;*/
 
 
 
@@ -256,6 +258,63 @@
                 },
                 displayer);
             var result = driver.Run(game);
+        }
+
+        public static void Chess()
+        {
+            var displayer = new ChessConsoleDisplayer<string>();
+            var computer = "computer";
+            var human = "human";
+            var driver = Driver.Create(
+                new Dictionary<string, IStrategy<Fx.Game.Chess.Chess<string>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, string>>
+                {
+                    { computer, new RandomStrategy<Fx.Game.Chess.Chess<string>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, string>() },
+                    { human, new UserInterfaceStrategy<Fx.Game.Chess.Chess<string>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, string>(displayer) },
+                },
+                displayer);
+            var game = new Fx.Game.Chess.Chess<string>(human, computer);
+            var result = driver.Run(game);
+        }
+
+        private sealed class ChessConsoleDisplayer<TPlayer> : IDisplayer<Fx.Game.Chess.Chess<TPlayer>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, TPlayer>
+        {
+            public void DisplayBoard(Chess<TPlayer> game)
+            {
+                Console.WriteLine(game.Board.Board.ToString());
+            }
+
+            public void DisplayMoves(Chess<TPlayer> game)
+            {
+                Console.WriteLine("Select a move (row, column):");
+                int i = 0;
+                foreach (var move in game.Moves)
+                {
+                    Console.WriteLine($"{i++}: {move}");
+                }
+
+                Console.WriteLine();
+            }
+
+            public void DisplayOutcome(Chess<TPlayer> game)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Fx.Game.Chess.ChessMove ReadMoveSelection(Chess<TPlayer> game)
+            {
+                var moves = game.Moves.ToList();
+                while (true)
+                {
+                    var input = Console.ReadLine();
+                    if (!int.TryParse(input, out var selectedMove) || selectedMove >= moves.Count)
+                    {
+                        Console.WriteLine($"The input '{input}' was not the index of a legal move");
+                        continue;
+                    }
+
+                    return moves[selectedMove];
+                }
+            }
         }
     }
 }

@@ -8,8 +8,13 @@ namespace Fx.Game.Chess
     public sealed class ChessGameState
     {
         public ChessGameState()
+            : this(new ChessBoard())
         {
-            Board = new ChessBoard();
+        }
+
+        public ChessGameState(ChessBoard board)
+        {
+            Board = board;
         }
 
         public ChessBoard Board { get; }
