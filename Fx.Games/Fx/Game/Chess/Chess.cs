@@ -48,7 +48,17 @@
 
         private ChessPieceColor CurrentPlayerColor { get; }
 
-        private static readonly Direction[] QUEEN_DIRECTIONS = new Direction[] { Direction.N, Direction.E, Direction.S, Direction.W };
+        private static readonly Direction[] QUEEN_DIRECTIONS = new Direction[]
+        {
+            Direction.N,
+            Direction.NE,
+            Direction.E, 
+            Direction.SE,
+            Direction.S, 
+            Direction.SW,
+            Direction.W,
+            Direction.NW,
+        };
 
         public IEnumerable<ChessMove> Moves
         {
@@ -58,7 +68,11 @@
                 foreach (var source in Coordinate.All)
                 {
                     var maybeSourcePiece = board[source];
-                    if (maybeSourcePiece == null) continue;
+                    if (maybeSourcePiece == null || maybeSourcePiece.Value.Color != CurrentPlayerColor)
+                    {
+                        continue;
+                    }
+
                     var sourcePiece = maybeSourcePiece.Value;
                     // TODO: simplify above
 
@@ -119,7 +133,7 @@ public sealed class Coordinate
 
     public static Coordinate operator +(Coordinate coordinate, Direction dir)
     {
-        return new Coordinate(coordinate.x * dir.dx, coordinate.y * dir.dy);
+        return new Coordinate(coordinate.x + dir.dx, coordinate.y + dir.dy);
     }
 
     public override string ToString() => $"{"abcdefgh"[x]}{y + 1}";

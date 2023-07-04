@@ -38,6 +38,8 @@
                 System.Console.WriteLine(m);
             }
 
+            Console.WriteLine("end of moves");
+            Console.ReadLine();
             return;
 
 

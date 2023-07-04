@@ -32,14 +32,14 @@ namespace Fx.Game.Chess
 
         private static readonly string INITIAL =
             "RNBQKBNR" +
-            // "PPPPPPPP" +
+            ////"PPPPPPPP" +
             "________" +
             "________" +
             "________" +
+            "________" + 
+            "________" + 
             "________" +
-            "________" +
-            "________" +
-            // "pppppppp" +
+            ////"pppppppp" +
             "rnbqkbnr";
 
         public ChessBoard()
