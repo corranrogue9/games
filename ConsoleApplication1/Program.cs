@@ -26,6 +26,7 @@
             (nameof(TwosHuman), TwosHuman),
             (nameof(TwosSevenMovesHeuristic12), TwosSevenMovesHeuristic12),
             (nameof(TwosOneMoveHeuristic12), TwosOneMoveHeuristic12),
+            (nameof(MiniPokerHumanVsHuman), MiniPokerHumanVsHuman),
         };
 
         static void Main(string[] args)
@@ -241,6 +242,22 @@
                     { computer, new HeuristicStrategy<Twos<string>, int[][], TwosDirection, string>(TwosHeuristics.Heuristic12)},
                 },
                 displayer);
+            var result = driver.Run(game);
+        }
+
+        public static void MiniPokerHumanVsHuman()
+        {
+            var playerA = "player a";
+            var playerB = "player b";
+            var displayer = new MiniPokerConsoleDisplayer<string>(_ => _);
+            var driver = Driver.Create(
+                new Dictionary<string, IStrategy<MiniPoker<string>, MiniPokerBoard, MiniPokerMove, string>>
+                {
+                    { playerA, new UserInterfaceStrategy<MiniPoker<string>, MiniPokerBoard, MiniPokerMove, string>(displayer) },
+                    { playerB, new UserInterfaceStrategy<MiniPoker<string>, MiniPokerBoard, MiniPokerMove, string>(displayer) },
+                },
+                displayer);
+            var game = new MiniPoker<string>(playerA, playerB, new Random());
             var result = driver.Run(game);
         }
     }

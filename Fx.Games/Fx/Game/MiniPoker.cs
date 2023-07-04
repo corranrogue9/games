@@ -57,14 +57,12 @@
 
         private readonly InternalBoardState internalBoardState;        
 
-        public MiniPoker(TPlayer a, TPlayer b)
+        public MiniPoker(TPlayer a, TPlayer b, Random random)
         {
             this.a = a;
             this.b = b;
             
-            //// TODO ths.card = ...
-            ///
-            this.internalBoardState = new InternalBoardState(MiniPokerCard.Black, null, null);
+            this.internalBoardState = new InternalBoardState(random.Next() % 2 == 0 ? MiniPokerCard.Black : MiniPokerCard.Red, null, null);
         }
 
         private MiniPoker(TPlayer a, TPlayer b, InternalBoardState internalBoardState)
@@ -107,7 +105,7 @@
             }
         }
 
-        public MiniPokerBoard Board //// TODO make this not nullable
+        public MiniPokerBoard Board
         {
             get
             {
@@ -117,7 +115,11 @@
                 }
                 else
                 {
-                    if (this.internalBoardState.BsMove == null)
+                    if (this.internalBoardState.AsMove == MiniPokerMove.Fold)
+                    {
+                        return new MiniPokerBoard.PublicBoard(this.internalBoardState.Card, -20);
+                    }
+                    else if (this.internalBoardState.BsMove == null)
                     {
                         return new MiniPokerBoard.BBoard();
                     }
