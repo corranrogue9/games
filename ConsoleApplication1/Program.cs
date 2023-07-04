@@ -27,6 +27,7 @@
             (nameof(TwosSevenMovesHeuristic12), TwosSevenMovesHeuristic12),
             (nameof(TwosOneMoveHeuristic12), TwosOneMoveHeuristic12),
             (nameof(MiniPokerHumanVsHuman), MiniPokerHumanVsHuman),
+            (nameof(MiniPokerRandomVsRandom), MiniPokerRandomVsRandom),
         };
 
         static void Main(string[] args)
@@ -258,6 +259,25 @@
                 },
                 displayer);
             var game = new MiniPoker<string>(playerA, playerB, new Random());
+            var result = driver.Run(game);
+        }
+
+        public static void MiniPokerRandomVsRandom()
+        {
+            ////var seed = 1786726968;
+            var seed = Environment.TickCount;
+            var playerA = "player a";
+            var playerB = "player b";
+            var displayer = new MiniPokerConsoleDisplayer<string>(_ => _, false);
+            var random = new Random(seed);
+            var driver = Driver.Create(
+                new Dictionary<string, IStrategy<MiniPoker<string>, MiniPokerBoard, MiniPokerMove, string>>
+                {
+                    { playerA, new RandomStrategy<MiniPoker<string>, MiniPokerBoard, MiniPokerMove, string>(random) },
+                    { playerB, new RandomStrategy<MiniPoker<string>, MiniPokerBoard, MiniPokerMove, string>(random) },
+                },
+                displayer);
+            var game = new MiniPoker<string>(playerA, playerB, random);
             var result = driver.Run(game);
         }
     }

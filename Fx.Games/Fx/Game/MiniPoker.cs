@@ -176,6 +176,8 @@
 
         public MiniPoker<TPlayer> CommitMove(MiniPokerMove move)
         {
+            Console.WriteLine($"{this.CurrentPlayer} selected {move}");
+
             if (!this.Moves.Contains(move)) //// TODO this will only check instance equality...
             {
                 throw new IllegalMoveExeption();

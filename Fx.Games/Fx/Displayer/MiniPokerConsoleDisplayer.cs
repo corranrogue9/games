@@ -2,14 +2,21 @@
 {
     using System;
     using System.Linq;
-
+    using System.Runtime.InteropServices;
     using Fx.Game;
 
     public sealed class MiniPokerConsoleDisplayer<TPlayer> : IDisplayer<MiniPoker<TPlayer>, MiniPokerBoard, MiniPokerMove, TPlayer>
     {
         private readonly Func<TPlayer, string> playerToString;
 
+        private readonly bool clearScreen;
+
         public MiniPokerConsoleDisplayer(Func<TPlayer, string> playerToString)
+            : this(playerToString, true)
+        {
+        }
+
+        public MiniPokerConsoleDisplayer(Func<TPlayer, string> playerToString, bool clearScreen)
         {
             if (playerToString == null)
             {
@@ -17,6 +24,7 @@
             }
 
             this.playerToString = playerToString;
+            this.clearScreen = clearScreen;
         }
 
         public void DisplayBoard(MiniPoker<TPlayer> game)
@@ -32,7 +40,10 @@
             }
             else if (game.Board is MiniPokerBoard.BBoard bBoard)
             {
-                Console.Clear();
+                if (this.clearScreen)
+                {
+                    Console.Clear();
+                }
                 ////Console.WriteLine("The card has not been revealed yet");
             }
             else if (game.Board is MiniPokerBoard.PublicBoard publicBoard)

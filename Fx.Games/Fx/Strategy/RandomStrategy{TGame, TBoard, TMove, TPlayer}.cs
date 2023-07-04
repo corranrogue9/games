@@ -10,8 +10,13 @@ namespace Fx.Strategy
         private readonly Random rng;
 
         public RandomStrategy()
+            : this(new Random())
         {
-            this.rng = new Random();
+        }
+
+        public RandomStrategy(Random random)
+        {
+            this.rng = random;
         }
 
         public TMove SelectMove(TGame game)
