@@ -1,3 +1,6 @@
 {
-  "cSpell.words": ["Displayer"]
+  "cSpell.words": [
+    "Displayer"
+  ],
+  "dotnet.defaultSolution": "Fx.Games.sln"
 }
