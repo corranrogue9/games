@@ -1,10 +1,7 @@
 namespace Fx.Game.Chess
 {
-    using System;
-    using System.Collections.Generic;
     using static ChessPieceKind;
     using static ChessPieceColor;
-    using static ChessPiece;
 
 
     public enum ChessPieceColor { White, Black }
@@ -13,7 +10,7 @@ namespace Fx.Game.Chess
     public enum ChessPieceKind { King, Queen, Knight, Bishop, Rook, Pawn }
 
 
-    public struct ChessPiece : IEquatable<ChessPiece>
+    public readonly struct ChessPiece : IEquatable<ChessPiece>
     {
         public ChessPieceColor Color { get; }
         public ChessPieceKind Kind { get; }
@@ -39,6 +36,16 @@ namespace Fx.Game.Chess
             return HashCode.Combine(Color, Kind);
         }
 
+        public static bool operator ==(ChessPiece lhs, ChessPiece rhs)
+        {
+            return lhs.Equals(rhs);
+        }
+
+        public static bool operator !=(ChessPiece lhs, ChessPiece rhs)
+        {
+            return !lhs.Equals(rhs);
+        }
+
         public static readonly ChessPiece WhiteKing = new(White, King);
         public static readonly ChessPiece WhiteQueen = new(White, Queen);
         public static readonly ChessPiece WhiteKnight = new(White, Knight);
@@ -55,7 +62,7 @@ namespace Fx.Game.Chess
 
         override public string ToString()
         {
-            return string.Format("{0} {1}", Color, Kind);
+            return string.Format("{0}{1}", Color, Kind);
         }
 
         internal char Symbol()
@@ -98,8 +105,10 @@ namespace Fx.Game.Chess
                 'r' => ChessPiece.BlackRook,
                 'p' => ChessPiece.BlackPawn,
 
+#pragma warning disable IDE0034
                 ' ' => default(ChessPiece?),
                 '_' => default(ChessPiece?),
+#pragma warning restore
                 _ => throw new ArgumentOutOfRangeException(nameof(piece), $"not a chess piece symbol or space: `{piece}`"),
             };
         }

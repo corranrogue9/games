@@ -1,30 +1,7 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Fx.Game.Chess
 {
-
-
-    /// <summary>
-    /// https://www.wikiwand.com/en/Forsyth%E2%80%93Edwards_Notation
-    /// </summary>
-    public sealed class ChessGameState
-    {
-        public ChessGameState()
-            : this(new ChessBoard())
-        {
-        }
-
-        public ChessGameState(ChessBoard board)
-        {
-            Board = board;
-        }
-
-        public ChessBoard Board { get; }
-
-        public bool WhiteCastlingAvailability { get; }
-
-        public bool BlackCastlingAvailability { get; }
-
-        // TODO: En passant target square and move-clock.
-    }
 
     public sealed class ChessBoard
     {
@@ -37,14 +14,14 @@ namespace Fx.Game.Chess
 
         private static readonly string INITIAL =
             "RNBQKBNR" +
-            ////"PPPPPPPP" +
+            "PPPPPPPP" +
+            // "________" +
             "________" +
             "________" +
             "________" +
-            "________" + 
-            "________" + 
             "________" +
-            ////"pppppppp" +
+            // "________" +
+            "pppppppp" +
             "rnbqkbnr";
 
         public ChessBoard()
@@ -78,10 +55,24 @@ namespace Fx.Game.Chess
             return writer.ToString()!;
         }
 
-
         public ChessPiece? this[Coordinate coordinate]
         {
             get { return this.Board[coordinate.y, coordinate.x]; }
+        }
+
+        public bool TryGetPiece(Coordinate coordinate, [MaybeNullWhen(false)] out ChessPiece piece)
+        {
+            var maybePiece = this[coordinate];
+            if (maybePiece == null)
+            {
+                piece = default;
+                return false;
+            }
+            else
+            {
+                piece = maybePiece.Value;
+                return true;
+            }
         }
     }
 }

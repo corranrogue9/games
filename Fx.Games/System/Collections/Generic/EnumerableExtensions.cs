@@ -14,7 +14,7 @@ namespace System.Collections.Generic
                     return true;
                 }
 
-                value = default;
+                value = default!;
                 return false;
             }
         }

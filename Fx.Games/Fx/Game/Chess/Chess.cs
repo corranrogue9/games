@@ -1,33 +1,6 @@
-﻿using System.Runtime.CompilerServices;
-
+﻿
 namespace Fx.Game.Chess
 {
-    using System;
-    using System.Collections.Generic;
-
-    public sealed class ChessMove
-    {
-        public ChessMove(ChessPiece piece, Coordinate from, Coordinate to)
-        {
-            this.Piece = piece;
-            this.From = from;
-            this.To = to;
-        }
-
-        public ChessPiece Piece { get; }
-
-        public Coordinate From { get; }
-
-        public Coordinate To { get; }
-
-        [Obsolete]
-        public ChessPiece? Captured { get; }
-
-        override public string ToString()
-        {
-            return $"Move {Piece} {From} {To}";
-        }
-    }
 
 
     /// <threadsafety static="true" instance="true"/>
@@ -59,9 +32,9 @@ namespace Fx.Game.Chess
         {
             Direction.N,
             Direction.NE,
-            Direction.E, 
+            Direction.E,
             Direction.SE,
-            Direction.S, 
+            Direction.S,
             Direction.SW,
             Direction.W,
             Direction.NW,
@@ -133,7 +106,7 @@ namespace Fx.Game.Chess
                         case ChessPieceKind.Queen:
                             foreach (var move in ComputeMoves(source, sourcePiece, board, QUEEN_DIRECTIONS, 7))
                             {
-                                yield return move;  
+                                yield return move;
                             }
                             break;
                         case ChessPieceKind.Bishop:
@@ -149,11 +122,33 @@ namespace Fx.Game.Chess
                             }
                             break;
                         case ChessPieceKind.Pawn:
-                            foreach (var move in ComputeMoves(source, sourcePiece, board, PAWN_DIRECTIONS, 1))
+                            var forward = new Direction(0, CurrentPlayerColor == ChessPieceColor.White ? 1 : -1);
+                            var startingRank = CurrentPlayerColor == ChessPieceColor.White ? 1 : 6;
+
+                            // single step move
+                            var singleStep = source + forward;
+                            if (singleStep.IsOnBoard && !Board.Board.TryGetPiece(singleStep, out var _))
                             {
-                                yield return move;
+                                yield return new ChessMove(sourcePiece, source, singleStep);
+                            };
+
+                            // initial two step moves
+                            if (source.y == startingRank)
+                            {
+                                yield return new ChessMove(sourcePiece, source, source + forward * 2);
                             }
-                            //// TODO other pawn moves here
+
+                            // capture opponent's piece
+                            foreach (var dir in new[] { new Direction(1, forward.dy), new Direction(1, forward.dy) })
+                            {
+                                var target = source + dir;
+                                if (target.IsOnBoard && Board.Board.TryGetPiece(target, out var targetPiece) && targetPiece.Color != CurrentPlayerColor)
+                                {
+                                    yield return new ChessMove(sourcePiece, source, target);
+                                };
+                            }
+                            //// TODO en passant
+                            //// TODO Conversion
                             break;
                         case ChessPieceKind.King:
                             foreach (var move in ComputeMoves(source, sourcePiece, board, KING_DIRECTIONS, 1))
@@ -227,94 +222,4 @@ namespace Fx.Game.Chess
             return game;
         }
     }
-}
-
-
-public static class CloneExtension
-{
-    public static void DoWork()
-    {
-        new Foo().Clone2();
-        new Bar().Clone2();
-    }
-
-    private class Foo : ICloneable
-    {
-        public object Clone()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    private struct Bar : ICloneable
-    {
-        public object Clone()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public static T Clone2<T>(this T toClone) where T : class, ICloneable
-    {
-        return toClone.Clone() as T;
-    }
-
-    public static T Clone2<T>(this T toClone, [CallerMemberName] string caller = null) where T : struct, ICloneable
-    {
-        return (T)toClone.Clone();
-    }
-}
-
-public sealed class Coordinate
-{
-    internal Coordinate(int x, int y) { this.x = x; this.y = y; }
-
-    public readonly int x;
-    public readonly int y;
-
-    public static Coordinate operator +(Coordinate coordinate, Direction dir)
-    {
-        return new Coordinate(coordinate.x + dir.dx, coordinate.y + dir.dy);
-    }
-
-    public override string ToString() => $"{"abcdefgh"[x]}{y + 1}";
-
-    public static IEnumerable<Coordinate> All
-    {
-        get
-        {
-            for (int x = 0; x < 8; x++)
-            {
-                for (int y = 0; y < 8; y++)
-                {
-                    yield return new Coordinate(x, y);
-                }
-            }
-        }
-    }
-
-    public bool IsOnBoard { get => this.x >= 0 && this.y >= 0 && this.x < 8 && this.y < 8; }
-}
-
-public sealed class Direction
-{
-    public Direction(int dx, int dy) { this.dx = dx; this.dy = dy; }
-    public readonly int dx;
-    public readonly int dy;
-
-    public static Direction operator *(Direction dir, int distance)
-    {
-        return new Direction(dir.dx * distance, dir.dy * distance);
-    }
-
-    public static readonly Direction N = new Direction(0, -1);
-    public static readonly Direction S = new Direction(0, +1);
-    public static readonly Direction W = new Direction(-1, 0);
-    public static readonly Direction E = new Direction(+1, 0);
-
-    public static readonly Direction NW = new Direction(-1, -1);
-    public static readonly Direction SW = new Direction(-1, +1);
-    public static readonly Direction NE = new Direction(+1, -1);
-    public static readonly Direction SE = new Direction(+1, +1);
-
 }
