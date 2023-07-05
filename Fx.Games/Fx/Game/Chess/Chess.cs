@@ -1,4 +1,5 @@
 ﻿
+
 namespace Fx.Game.Chess
 {
 
@@ -90,7 +91,7 @@ namespace Fx.Game.Chess
             get
             {
                 var board = Board.Board;
-                foreach (var source in Coordinate.All)
+                foreach (Coordinate source in Coordinate.All)
                 {
                     var maybeSourcePiece = board[source];
                     if (maybeSourcePiece == null || maybeSourcePiece.Value.Color != CurrentPlayerColor)
@@ -124,10 +125,13 @@ namespace Fx.Game.Chess
                         case ChessPieceKind.Pawn:
                             var forward = new Direction(0, CurrentPlayerColor == ChessPieceColor.White ? 1 : -1);
                             var startingRank = CurrentPlayerColor == ChessPieceColor.White ? 1 : 6;
+                            var finalRank = CurrentPlayerColor == ChessPieceColor.White ? 7 : 0;
 
                             // single step move
                             var singleStep = source + forward;
-                            if (singleStep.IsOnBoard && !Board.Board.TryGetPiece(singleStep, out var _))
+                            if (singleStep.IsOnBoard
+                                && !Board.Board.TryGetPiece(singleStep, out var _)
+                                && singleStep.y != finalRank)
                             {
                                 yield return new ChessMove(sourcePiece, source, singleStep);
                             };
@@ -139,7 +143,7 @@ namespace Fx.Game.Chess
                             }
 
                             // capture opponent's piece
-                            foreach (var dir in new[] { new Direction(1, forward.dy), new Direction(1, forward.dy) })
+                            foreach (Direction dir in new[] { new Direction(1, forward.dy), new Direction(-1, forward.dy) })
                             {
                                 var target = source + dir;
                                 if (target.IsOnBoard && Board.Board.TryGetPiece(target, out var targetPiece) && targetPiece.Color != CurrentPlayerColor)
@@ -147,8 +151,18 @@ namespace Fx.Game.Chess
                                     yield return new ChessMove(sourcePiece, source, target);
                                 };
                             }
+                            // Promotion
+                            if (source.y == finalRank)
+                            {
+                                var promotionTarget = new Coordinate(source.x, finalRank);
+                                foreach (ChessPieceKind promoteIntoKind in new[] { ChessPieceKind.Queen, ChessPieceKind.Knight })
+                                {
+                                    // TODO: ensure that CommitMove understands this as a promotion
+                                    var promotecInto = new ChessPiece(CurrentPlayerColor, promoteIntoKind);
+                                    yield return new ChessMove(promotecInto, source, promotionTarget);
+                                }
+                            }
                             //// TODO en passant
-                            //// TODO Conversion
                             break;
                         case ChessPieceKind.King:
                             foreach (var move in ComputeMoves(source, sourcePiece, board, KING_DIRECTIONS, 1))

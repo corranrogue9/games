@@ -15,7 +15,7 @@ namespace Fx.Game.Chess
         public ChessPieceColor Color { get; }
         public ChessPieceKind Kind { get; }
 
-        private ChessPiece(ChessPieceColor color, ChessPieceKind kind) : this()
+        internal ChessPiece(ChessPieceColor color, ChessPieceKind kind) : this()
         {
             Color = color;
             Kind = kind;
