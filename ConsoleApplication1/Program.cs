@@ -2,7 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
-
+    using System.Text;
     using Fx.Displayer;
     using Fx.Driver;
     using Fx.Game;
@@ -30,6 +30,27 @@
 
         static void Main(string[] args)
         {
+            var displayer = new TicTacToeConsoleDisplayer<Fx.Todo.Void>(_ => null);
+            var game = new TicTacToe<Fx.Todo.Void>(new Fx.Todo.Void(), new Fx.Todo.Void());
+            Func<IEnumerable<TicTacToe<Fx.Todo.Void>>, string> getStringFromBranch = games =>
+            {
+                var stringBuilder = new StringBuilder();
+                stringBuilder.AppendLine(string.Join("     ", games.Select(game => displayer.GetBoard(game, 0))));
+                stringBuilder.AppendLine(string.Join(" --> ", games.Select(game => displayer.GetBoard(game, 1))));
+                stringBuilder.AppendLine(string.Join("     ", games.Select(game => displayer.GetBoard(game, 2))));
+                return stringBuilder.ToString();
+            };
+
+            // generate and store full game tree
+            var gameTree = game.ToTree<TicTacToe<Fx.Todo.Void>, TicTacToeBoard, TicTacToeMove, Fx.Todo.Void>();
+            var possibleBoards = gameTree.EnumerateBranches().Select(getStringFromBranch);
+            File.WriteAllLines(@"c:\users\gdebruin\desktop\tictactoegames.txt", possibleBoards);
+
+            // generate a store partial game tree
+            var partialGameTree = game.ToTree<TicTacToe<Fx.Todo.Void>, TicTacToeBoard, TicTacToeMove, Fx.Todo.Void>(3);
+            var possiblePartilBoards = partialGameTree.EnumerateBranches().Select(getStringFromBranch);
+            File.WriteAllLines(@"c:\users\gdebruin\desktop\tictactoegames_depth3.txt", possiblePartilBoards);
+
             for (int i = 0; true; ++i)
             {
                 var sku = GetSkuFromArgsOrConsole(args, i);

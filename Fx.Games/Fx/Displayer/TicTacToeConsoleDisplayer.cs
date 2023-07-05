@@ -2,7 +2,7 @@
 {
     using System;
     using System.Linq;
-
+    using System.Text;
     using Fx.Game;
 
     public sealed class TicTacToeConsoleDisplayer<TPlayer> : IDisplayer<TicTacToe<TPlayer>, TicTacToeBoard, TicTacToeMove, TPlayer>
@@ -41,17 +41,41 @@
                 throw new ArgumentNullException(nameof(game));
             }
 
+            Console.WriteLine(GetBoard(game));
+        }
+
+        public string GetBoard(TicTacToe<TPlayer> game)
+        {
+            if (game == null)
+            {
+                throw new ArgumentNullException(nameof(game));
+            }
+
+            var stringBuilder = new StringBuilder();
             for (int i = 0; i < 3; ++i)
             {
-                for (int j = 0; j < 2; ++j)
-                {
-                    Console.Write($"{FromPiece(game.Board.Grid[i, j])}|");
-                }
-
-                Console.Write($"{FromPiece(game.Board.Grid[i, 2])}");
-
-                Console.WriteLine();
+                stringBuilder.AppendLine(GetBoard(game, i));
             }
+
+            return stringBuilder.ToString();
+        }
+
+        public string GetBoard(TicTacToe<TPlayer> game, int line)
+        {
+            if (game == null)
+            {
+                throw new ArgumentNullException(nameof(game));
+            }
+
+            var stringBuilder = new StringBuilder();
+            for (int j = 0; j < 2; ++j)
+            {
+                stringBuilder.Append($"{FromPiece(game.Board.Grid[line, j])}|");
+            }
+
+            stringBuilder.Append($"{FromPiece(game.Board.Grid[line, 2])}");
+
+            return stringBuilder.ToString();
         }
 
         public void DisplayOutcome(TicTacToe<TPlayer> game)

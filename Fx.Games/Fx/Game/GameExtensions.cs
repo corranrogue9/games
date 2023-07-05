@@ -26,7 +26,7 @@
             return game.ToTree<TGame, TBoard, TMove, TPlayer>(-1);
         }
 
-        internal static ITree<TGame> ToTree<TGame, TBoard, TMove, TPlayer>(this TGame game, int depth) where TGame : IGame<TGame, TBoard, TMove, TPlayer>
+        public static ITree<TGame> ToTree<TGame, TBoard, TMove, TPlayer>(this TGame game, int depth) where TGame : IGame<TGame, TBoard, TMove, TPlayer>
         {
             if (game.Outcome == null && depth != 0)
             {
