@@ -15,12 +15,10 @@ namespace Fx.Game.Chess
         private static readonly string INITIAL =
             "RNBQKBNR" +
             "PPPPPPPP" +
-            // "________" +
             "________" +
             "________" +
             "________" +
             "________" +
-            // "________" +
             "pppppppp" +
             "rnbqkbnr";
 
@@ -40,15 +38,16 @@ namespace Fx.Game.Chess
             TextWriter writer = new StringWriter();
 
             writer.WriteLine("\x1b[31;90m{0}\x1b[0m", "  a b c d e f g h");
-            for (int i = 7; i > -1; i--)
+            // rank 8 on top (-> white at bottom)
+            for (var rank = 7; rank > -1; rank--)
             {
-                writer.Write("\x1b[31;90m{0}\x1b[0m ", i + 1);
-                for (var j = 0; j < 8; j++)
+                writer.Write("\x1b[31;90m{0}\x1b[0m ", rank + 1);
+                for (var file = 0; file < 8; file++)
                 {
-                    writer.Write(Board[i, j]?.Symbol() ?? '_');
+                    writer.Write(Board[rank, file]?.Symbol() ?? '_');
                     writer.Write(' ');
                 }
-                writer.WriteLine(" \x1b[31;90m{0}\x1b[0m", i + 1);
+                writer.WriteLine(" \x1b[31;90m{0}\x1b[0m", rank + 1);
             }
             writer.WriteLine("\x1b[31;90m{0}\x1b[0m", "  a b c d e f g h");
 
