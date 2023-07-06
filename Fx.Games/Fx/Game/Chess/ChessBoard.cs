@@ -28,7 +28,7 @@ namespace Fx.Game.Chess
             var pos = (0, 0);
             foreach (var piece in INITIAL)
             {
-                this.Board[pos.Item1, pos.Item2] = ChessPiece.FromChar(piece);
+                this.Board[pos.Item1, pos.Item2] = ChessPiece.SquareFromChar(piece);
                 pos = pos.Item2 < 7 ? (pos.Item1, pos.Item2 + 1) : (pos.Item1 + 1, 0);
             }
         }

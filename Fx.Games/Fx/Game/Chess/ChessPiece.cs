@@ -87,7 +87,7 @@ namespace Fx.Game.Chess
             };
         }
 
-        internal static ChessPiece? FromChar(char piece)
+        internal static ChessPiece? SquareFromChar(char piece)
         {
             return piece switch
             {
@@ -110,6 +110,27 @@ namespace Fx.Game.Chess
                 '_' => default(ChessPiece?),
 #pragma warning restore
                 _ => throw new ArgumentOutOfRangeException(nameof(piece), $"not a chess piece symbol or space: `{piece}`"),
+            };
+        }
+        internal static ChessPiece FromChar(char piece)
+        {
+            return piece switch
+            {
+                'K' => ChessPiece.WhiteKing,
+                'Q' => ChessPiece.WhiteQueen,
+                'N' => ChessPiece.WhiteKnight,
+                'B' => ChessPiece.WhiteBishop,
+                'R' => ChessPiece.WhiteRook,
+                'P' => ChessPiece.WhitePawn,
+
+                'k' => ChessPiece.BlackKing,
+                'q' => ChessPiece.BlackQueen,
+                'n' => ChessPiece.BlackKnight,
+                'b' => ChessPiece.BlackBishop,
+                'r' => ChessPiece.BlackRook,
+                'p' => ChessPiece.BlackPawn,
+
+                _ => throw new ArgumentOutOfRangeException(nameof(piece), $"not a chess piece: `{piece}`"),
             };
         }
     }

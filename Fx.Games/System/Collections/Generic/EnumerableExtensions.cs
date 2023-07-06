@@ -6,6 +6,7 @@ namespace System.Collections.Generic
     {
         public static bool TryFirst<T>(this IEnumerable<T> source, out T value)
         {
+#pragma warning disable IDE0063
             using (var enumerator = source.GetEnumerator())
             {
                 if (enumerator.MoveNext())
@@ -17,6 +18,7 @@ namespace System.Collections.Generic
                 value = default!;
                 return false;
             }
+#pragma warning restore IDE0063
         }
 
         internal static T Choose<T>(this IEnumerable<T> source, Func<T, bool> preference, Func<T, bool> fallback)
@@ -36,6 +38,7 @@ namespace System.Collections.Generic
             Ensure.NotNull(empty, nameof(empty));
             Ensure.NotNull(populated, nameof(populated));
 
+#pragma warning disable IDE0063
             using (var enumerator = source.GetEnumerator())
             {
                 if (!enumerator.MoveNext())
@@ -50,10 +53,12 @@ namespace System.Collections.Generic
                 }
                 while (enumerator.MoveNext());
             }
+#pragma warning restore IDE0063
         }
 
         public static T Minimum<T>(this IEnumerable<T> source, Func<T, double> selector)
         {
+#pragma warning disable IDE0063
             using (var enumerator = source.GetEnumerator())
             {
                 if (!enumerator.MoveNext())
@@ -76,6 +81,7 @@ namespace System.Collections.Generic
 
                 return minElement;
             }
+#pragma warning restore IDE0063
         }
 
         public static T Maximum<T>(this IEnumerable<T> source, Func<T, double> selector)
