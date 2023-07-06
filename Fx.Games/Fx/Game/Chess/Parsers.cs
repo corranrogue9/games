@@ -34,6 +34,23 @@ namespace Fx.Games.Chess
             return Parse;
         }
 
+        public static Parser<string> String(string str)
+        {
+            bool Parse(ReadOnlySpan<char> input, [MaybeNullWhen(false)] out ReadOnlySpan<char> remainder, [MaybeNullWhen(false)] out string value)
+            {
+                if (input.StartsWith(str))
+                {
+                    value = str;
+                    remainder = input[str.Length..];
+                    return true;
+                }
+                remainder = default;
+                value = default;
+                return false;
+            }
+            return Parse;
+        }
+
         public static Parser<string> Regex(string pattern)
         {
             Regex regex = new(@"\G" + pattern, RegexOptions.Compiled);
@@ -182,5 +199,42 @@ namespace Fx.Games.Chess
             }
             return Parse;
         }
+
+        public static Parser<T> Alternatives<T>(params Parser<T>[] parsers)
+        {
+            bool ParseAlternatives(ReadOnlySpan<char> input, out ReadOnlySpan<char> remainder, [MaybeNullWhen(false)] out T value)
+            {
+                foreach (var parser in parsers)
+                {
+                    if (parser(input, out remainder, out value))
+                    {
+                        return true;
+                    }
+                }
+                value = default;
+                remainder = input;
+                return false;
+            }
+            return ParseAlternatives;
+        }
+
+        public static Parser<T> EOI<T>(this Parser<T> parser)
+        {
+            bool ParseEoi(ReadOnlySpan<char> input, out ReadOnlySpan<char> remainder, [MaybeNullWhen(false)] out T value)
+            {
+                if (parser(input, out remainder, out value))
+                {
+                    if (remainder.Length == 0)
+                    {
+                        return true;
+                    }
+                }
+                value = default;
+                remainder = input;
+                return false;
+            }
+            return ParseEoi;
+        }
+
     }
 }

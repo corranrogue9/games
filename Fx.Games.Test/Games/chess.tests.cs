@@ -58,17 +58,18 @@ namespace Fx.Games.Chess
         [DataRow("Qh6")]
 
         [DataRow("Kxe7")]
+        [DataRow("Rxe7+")]
+        [DataRow("Re1+")]
+
         [DataRow("Rab1")]
         [DataRow("b4")]
         [DataRow("exd5")]
         [DataRow("Nfxd5")]
         [DataRow("Rbe1+")]
         [DataRow("Ne7")]
-        [DataRow("Rxe7+")]
-        [DataRow("Re1+")]
         public void ParseMoveTests(string input) // , ChessMove expected)
         {
-            PgnParser.ParseMove(input);
+            SANParser.ParseMove(input);
         }
 
         // [TestMethod]
