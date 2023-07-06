@@ -33,6 +33,16 @@ namespace Fx.Games.Chess
             throw new FormatException($"parse error at {input}");
         }
 
+        public static IReadOnlyList<(int, SANMove, SANMove)> ParseMoves(string input)
+        {
+            if (SANParser.Moves(input, out var rem, out var moves))
+            {
+                return moves;
+            }
+            throw new FormatException($"parse error at {input}");
+        }
+
+
         private static readonly Parser<int> Index =
             Parsers.Terminated(Parsers.Number, Parsers.Char('.'));
 
@@ -68,6 +78,7 @@ namespace Fx.Games.Chess
                 .Select(s => PieceFromLetter(s));
 
         public static readonly Parser<bool> MaybeCapture = Parsers.Char('x').Optional().Select(x => x != null);
+
         public static readonly Parser<bool> MaybeCheck = Parsers.Char('+').Optional().Select(x => x != null);
 
         private static readonly Parser<SANMove> MoveWithStart =
@@ -100,7 +111,6 @@ namespace Fx.Games.Chess
             HalfMove.Token()
         );
 
-        // internal static Parser<IReadOnlyList<(ChessPiece?, bool, (char,short))>> Moves = Move.Many();
+        public static readonly Parser<IReadOnlyList<(int, SANMove, SANMove)>> Moves = FullMove.Many();
     }
-
 }

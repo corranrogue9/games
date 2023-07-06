@@ -66,7 +66,7 @@ namespace Fx.Games.Chess
         [DataRow("Nfxd5")]
         [DataRow("Rbe1+")]
         [DataRow("Ne7")]
-        public void ParseHalfMoveTests(string input)
+        public void ParseHalfMoveTest(string input)
         {
             SANParser.ParseHalfMove(input);
         }
@@ -75,7 +75,9 @@ namespace Fx.Games.Chess
         [DataTestMethod]
         [DataRow("Rbe1+", SANPiece.Rook, "b0", false, "e1", true)]
         [DataRow("Ne7", SANPiece.Knight, "00", false, "e7", false)]
-        public void ParseHalfMoveResultTests(string input, SANPiece Piece, string Start, bool Take, string Coord, bool Check)
+        [DataRow("Nfxd5", SANPiece.Knight, "f0", true, "d5", false)]
+        [DataRow("Bxa7", SANPiece.Bishop, "00", true, "a7", false)]
+        public void ParseHalfMoveResultTest(string input, SANPiece Piece, string Start, bool Take, string Coord, bool Check)
         {
             var actual = SANParser.ParseHalfMove(input);
             Assert.AreEqual(Piece, actual.Piece);
@@ -97,10 +99,9 @@ namespace Fx.Games.Chess
 
         }
 
-
         [DataTestMethod]
         [DataRow("1. e4 e5 2. e4 e5")]
-        public void ParseFullMoveTests(string input)
+        public void ParseFullMoveTest(string input)
         {
             var result = SANParser.FullMove(input, out var remainder, out var actual);
             Assert.IsTrue(result);
@@ -109,6 +110,22 @@ namespace Fx.Games.Chess
                 new SANMove(SANPiece.Pawn, null, false, ('e', 5), false));
             Assert.AreEqual(expected, actual);
             Assert.AreEqual(remainder.ToString(), "2. e4 e5");
+        }
+
+        [DataTestMethod]
+        [DataRow("1. e4 e5 2. e4 e5")]
+        public void ParseGameTest(string input)
+        {
+            if (SANParser.Moves(input, out var remainder, out var actual))
+            {
+                var expected = (1,
+                    new SANMove(SANPiece.Pawn, null, false, ('e', 4), false),
+                    new SANMove(SANPiece.Pawn, null, false, ('e', 5), false));
+                Assert.AreEqual(expected, actual[0]);
+            }
+            {
+                Assert.Fail("failed to parse");
+            }
         }
 
 
