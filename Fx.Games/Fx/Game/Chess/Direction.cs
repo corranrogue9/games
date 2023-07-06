@@ -17,7 +17,6 @@ namespace Fx.Game.Chess
         }
 
 
-#pragma warning disable IDE0090
         public static readonly Direction N = new Direction(0, -1);
         public static readonly Direction S = new Direction(0, +1);
         public static readonly Direction W = new Direction(-1, 0);
@@ -27,6 +26,5 @@ namespace Fx.Game.Chess
         public static readonly Direction SW = new Direction(-1, +1);
         public static readonly Direction NE = new Direction(+1, -1);
         public static readonly Direction SE = new Direction(+1, +1);
-#pragma warning restore
     }
 }

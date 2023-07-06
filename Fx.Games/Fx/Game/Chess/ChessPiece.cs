@@ -105,10 +105,8 @@ namespace Fx.Game.Chess
                 'r' => ChessPiece.BlackRook,
                 'p' => ChessPiece.BlackPawn,
 
-#pragma warning disable IDE0034
                 ' ' => default(ChessPiece?),
                 '_' => default(ChessPiece?),
-#pragma warning restore
                 _ => throw new ArgumentOutOfRangeException(nameof(piece), $"not a chess piece symbol or space: `{piece}`"),
             };
         }

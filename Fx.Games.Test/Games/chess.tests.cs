@@ -57,11 +57,9 @@ namespace Fx.Games.Chess
         [DataRow("Ng8")]
         [DataRow("Bxh5")]
         [DataRow("Qh6")]
-
         [DataRow("Kxe7")]
         [DataRow("Rxe7+")]
         [DataRow("Re1+")]
-
         [DataRow("Rab1")]
         [DataRow("b4")]
         [DataRow("exd5")]
