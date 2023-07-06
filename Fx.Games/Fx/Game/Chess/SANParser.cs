@@ -8,32 +8,44 @@ namespace Fx.Games.Chess
 
     public enum SANPiece { King, Queen, Rook, Bishop, Knight, Pawn }
 
-    public record struct SANMove(SANPiece Piece, (int, int)? Start, bool Take, (int, int) Coord, bool Check)
+    public record struct SANMove(SANPiece Piece, (char, short)? Start, bool Take, (char, short) Coord, bool Check)
     { }
 
 
     // https://en.wikipedia.org/wiki/Algebraic_notation_(chess)
     public class SANParser
     {
-        public static SANMove ParseMove(string input)
+        public static SANMove ParseHalfMove(string input)
         {
-            if (SANParser.Move(input, out var rem, out var move))
+            if (SANParser.HalfMove(input, out var rem, out var move))
             {
                 return move;
             }
             throw new FormatException($"parse error at {input}");
         }
 
-        // private static readonly Parser<int> Index = Parsers.Terminated<int, string>(Parsers.Terminated<int, char>(Parsers.Number, Parsers.Char('.')), Parsers.Whitespace);
+        public static (int, SANMove, SANMove?) ParseFullMove(string input)
+        {
+            if (SANParser.FullMove(input, out var rem, out var move))
+            {
+                return move;
+            }
+            throw new FormatException($"parse error at {input}");
+        }
 
-        public static readonly Parser<int> Rank = Parsers.Regex("[a-h]").Select<string, int>(c => (int)(c[0] - 'a'));
+        private static readonly Parser<int> Index =
+            Parsers.Terminated(Parsers.Number, Parsers.Char('.'));
 
-        public static readonly Parser<int> File = Parsers.Regex("[1-8]").Select<string, int>(c => (int)(c[0] - '0'));
+        public static readonly Parser<char> Rank =
+            Parsers.Regex("[a-h]").Select(c => c[0]);
 
-        public static readonly Parser<(int, int)> Coord = Parsers.Alternatives(
+        public static readonly Parser<short> File =
+            Parsers.Regex("[1-8]").Select(c => (short)(c[0] - '0'));
+
+        public static readonly Parser<(char, short)> Coord = Parsers.Alternatives<(char, short)>(
             Parsers.Tuple(Rank, File),
-            Rank.Select(r => (r, -1)),
-            File.Select(f => (-1, f))
+            File.Select(f => ((char)0, f)),
+            Rank.Select(r => (r, (short)0))
         );
 
         private static SANPiece PieceFromLetter(string str)
@@ -58,31 +70,37 @@ namespace Fx.Games.Chess
         public static readonly Parser<bool> MaybeCapture = Parsers.Char('x').Optional().Select(x => x != null);
         public static readonly Parser<bool> MaybeCheck = Parsers.Char('+').Optional().Select(x => x != null);
 
-        private static readonly Parser<SANMove> MoveWithoutStart = (
+        private static readonly Parser<SANMove> MoveWithStart =
             from p in Piece
             from s in Coord
             from x in MaybeCapture
             from c in Coord
             from k in MaybeCheck
-            select new SANMove(p, s, x, c, k)
-        ).EOI();
+            select new SANMove(p, s, x, c, k);
 
-        private static readonly Parser<SANMove> MoveWithStart = (
+
+        private static readonly Parser<SANMove> MoveWithoutStart =
             from p in Piece
             from x in MaybeCapture
             from c in Coord
             from k in MaybeCheck
-            select new SANMove(p, null, x, c, k)
-        ).EOI();
+            select new SANMove(p, null, x, c, k);
 
-        static readonly Parser<SANMove> Move = Parsers.Alternatives(
-            MoveWithoutStart,
+        static readonly Parser<SANMove> HalfMove = Parsers.Alternatives(
+            // with start needs to come first to greedely parse things like "be1"
             MoveWithStart,
-            Parsers.String("O-O").Select(_ => new SANMove(SANPiece.Rook, (0, 7), false, (0, 5), false)),
-            Parsers.String("O-O-O").Select(_ => new SANMove(SANPiece.Rook, (0, 0), false, (0, 3), false))
+            MoveWithoutStart,
+            Parsers.String("O-O").Select(_ => new SANMove(SANPiece.Rook, ('a', 7), false, ('c', 5), false)),
+            Parsers.String("O-O-O").Select(_ => new SANMove(SANPiece.Rook, ('h', 0), false, ('f', 3), false))
         );
 
-        // internal static Parser<IReadOnlyList<(ChessPiece?, bool, (int, int))>> Moves = Move.Many();
+        public static readonly Parser<(int, SANMove, SANMove)> FullMove = Parsers.Tuple(
+            Index.Token(),
+            HalfMove.Token(),
+            HalfMove.Token()
+        );
+
+        // internal static Parser<IReadOnlyList<(ChessPiece?, bool, (char,short))>> Moves = Move.Many();
     }
 
 }

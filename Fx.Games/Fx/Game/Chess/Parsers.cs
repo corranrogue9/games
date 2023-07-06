@@ -15,12 +15,18 @@ namespace Fx.Games.Chess
     {
         public static readonly Parser<string> Whitespace = Regex(@"\s*");
 
+        public static Parser<T> Token<T>(this Parser<T> parser)
+        {
+            return Parsers.Terminated(parser, Whitespace);
+        }
+
         public static readonly Parser<int> Number = Regex("[0-9]+").Select<string, int>(int.TryParse);
 
         public static Parser<char> Char(char ch)
         {
             bool Parse(ReadOnlySpan<char> input, [MaybeNullWhen(false)] out ReadOnlySpan<char> remainder, [MaybeNullWhen(false)] out char value)
             {
+                var _debug = (input.Length > 0 && input[0] == ch, ch, input.ToString(), ch);
                 if (input.Length > 0 && input[0] == ch)
                 {
                     value = ch;
@@ -38,6 +44,7 @@ namespace Fx.Games.Chess
         {
             bool Parse(ReadOnlySpan<char> input, [MaybeNullWhen(false)] out ReadOnlySpan<char> remainder, [MaybeNullWhen(false)] out string value)
             {
+                var _debug = (input.StartsWith(str), str, input.ToString(), str);
                 if (input.StartsWith(str))
                 {
                     value = str;
@@ -58,6 +65,7 @@ namespace Fx.Games.Chess
             bool Parse(ReadOnlySpan<char> input, [MaybeNullWhen(false)] out ReadOnlySpan<char> remainder, [MaybeNullWhen(false)] out string value)
             {
                 var match = regex.Match(input.ToString());
+                var _debug = (match.Success, pattern, input.ToString(), match.Value);
                 if (match.Success)
                 {
                     remainder = input[match.Length..];

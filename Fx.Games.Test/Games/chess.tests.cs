@@ -1,5 +1,6 @@
 namespace Fx.Games.Chess
 {
+    using System;
     using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
     using System.Text.RegularExpressions;
@@ -67,10 +68,51 @@ namespace Fx.Games.Chess
         [DataRow("Nfxd5")]
         [DataRow("Rbe1+")]
         [DataRow("Ne7")]
-        public void ParseMoveTests(string input) // , ChessMove expected)
+        public void ParseHalfMoveTests(string input)
         {
-            SANParser.ParseMove(input);
+            SANParser.ParseHalfMove(input);
         }
+
+
+        [DataTestMethod]
+        [DataRow("Rbe1+", SANPiece.Rook, "b0", false, "e1", true)]
+        [DataRow("Ne7", SANPiece.Knight, "00", false, "e7", false)]
+        public void ParseHalfMoveResultTests(string input, SANPiece Piece, string Start, bool Take, string Coord, bool Check)
+        {
+            var actual = SANParser.ParseHalfMove(input);
+            Assert.AreEqual(Piece, actual.Piece);
+            Assert.AreEqual(O(Start), actual.Start);
+            Assert.AreEqual(Take, actual.Take);
+            Assert.AreEqual(C(Coord), actual.Coord);
+            Assert.AreEqual(Check, actual.Check);
+
+            static (char, short)? O(string coord)
+            {
+                return coord == "00" ? null : C(coord);
+            }
+
+            static (char, short) C(string coord)
+            {
+                return (coord[0] == '0' ? '\0' : coord[0], (short)(coord[1] - '0'));
+            }
+
+
+        }
+
+
+        [DataTestMethod]
+        [DataRow("1. e4 e5 2. e4 e5")]
+        public void ParseFullMoveTests(string input)
+        {
+            var result = SANParser.FullMove(input, out var remainder, out var actual);
+            Assert.IsTrue(result);
+            var expected = (1,
+                new SANMove(SANPiece.Pawn, null, false, ('e', 4), false),
+                new SANMove(SANPiece.Pawn, null, false, ('e', 5), false));
+            Assert.AreEqual(expected, actual);
+            Assert.AreEqual(remainder.ToString(), "2. e4 e5");
+        }
+
 
         // [TestMethod]
         // public void MoveSequenceTest()
