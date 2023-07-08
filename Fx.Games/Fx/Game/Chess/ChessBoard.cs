@@ -54,12 +54,12 @@ namespace Fx.Game.Chess
             return writer.ToString()!;
         }
 
-        public ChessPiece? this[Coordinate coordinate]
+        public ChessPiece? this[Square coordinate]
         {
             get { return this.Board[coordinate.y, coordinate.x]; }
         }
 
-        public bool TryGetPiece(Coordinate coordinate, [MaybeNullWhen(false)] out ChessPiece piece)
+        public bool TryGetPiece(Square coordinate, [MaybeNullWhen(false)] out ChessPiece piece)
         {
             var maybePiece = this[coordinate];
             if (maybePiece == null)

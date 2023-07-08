@@ -5,19 +5,19 @@ namespace Fx.Game.Chess
 
 
     /// <threadsafety static="true" instance="true"/>
-    public sealed class Chess<TPlayer> : IGame<Chess<TPlayer>, ChessGameState, ChessMove, TPlayer>
+    public sealed class ChessGame<TPlayer> : IGame<ChessGame<TPlayer>, ChessGameState, ChessMove, TPlayer>
     {
 
         private readonly TPlayer[] players;
 
         public ChessGameState Board { get; }
 
-        public Chess(TPlayer white, TPlayer black)
+        public ChessGame(TPlayer white, TPlayer black)
             : this(white, black, new ChessGameState(), ChessPieceColor.White)
         {
         }
 
-        private Chess(TPlayer white, TPlayer black, ChessGameState newState, ChessPieceColor newCurrentPlayerColor)
+        private ChessGame(TPlayer white, TPlayer black, ChessGameState newState, ChessPieceColor newCurrentPlayerColor)
         {
             players = new[] { white, black };
 
@@ -91,7 +91,7 @@ namespace Fx.Game.Chess
             get
             {
                 var board = Board.Board;
-                foreach (Coordinate source in Coordinate.All)
+                foreach (Square source in Square.All)
                 {
                     var maybeSourcePiece = board[source];
                     if (maybeSourcePiece == null || maybeSourcePiece.Value.Color != CurrentPlayerColor)
@@ -154,7 +154,7 @@ namespace Fx.Game.Chess
                             // Promotion
                             if (source.y == finalRank)
                             {
-                                var promotionTarget = new Coordinate(source.x, finalRank);
+                                var promotionTarget = new Square(source.x, finalRank);
                                 foreach (ChessPieceKind promoteIntoKind in new[] { ChessPieceKind.Queen, ChessPieceKind.Knight })
                                 {
                                     // TODO: ensure that CommitMove understands this as a promotion
@@ -184,7 +184,7 @@ namespace Fx.Game.Chess
             }
         }
 
-        private static IEnumerable<ChessMove> ComputeMoves(Coordinate source, ChessPiece sourcePiece, ChessBoard board, Direction[] directions, int maxDistance)
+        private static IEnumerable<ChessMove> ComputeMoves(Square source, ChessPiece sourcePiece, ChessBoard board, Direction[] directions, int maxDistance)
         {
 
             foreach (var dir in directions)
@@ -217,7 +217,7 @@ namespace Fx.Game.Chess
 
         public Outcome<TPlayer> Outcome => null; //// TODO TODO TODO this and "check" rules
 
-        public Chess<TPlayer> CommitMove(ChessMove move)
+        public ChessGame<TPlayer> CommitMove(ChessMove move)
         {
             /*if (!this.Moves.Contains(move)) //// TODO is this equatable?
             {
@@ -232,7 +232,7 @@ namespace Fx.Game.Chess
             var newBoard = new ChessBoard(clonedBoard);
             var newGameState = new ChessGameState(newBoard);
 
-            var game = new Chess<TPlayer>(this.players[0], this.players[1], newGameState, (ChessPieceColor)(((int)CurrentPlayerColor + 1) % 2));
+            var game = new ChessGame<TPlayer>(this.players[0], this.players[1], newGameState, (ChessPieceColor)(((int)CurrentPlayerColor + 1) % 2));
             return game;
         }
     }

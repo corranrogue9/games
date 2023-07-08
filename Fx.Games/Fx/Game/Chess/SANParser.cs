@@ -32,8 +32,8 @@ namespace Fx.Game.Chess
 
             static IEnumerable<(int, SANMove)> ToHalfMoves((int, SANMove, SANMove) round)
             {
-                yield return (round.Item1 * 2, round.Item2);
-                yield return (round.Item1 * 2 + 1, round.Item3);
+                yield return (round.Item1 * 2 - 1, round.Item2);
+                yield return (round.Item1 * 2, round.Item3);
             }
         }
 
@@ -96,8 +96,8 @@ namespace Fx.Game.Chess
             // with start needs to come first to greedely parse things like "be1"
             MoveWithStart,
             MoveWithoutStart,
-            Parsers.String("O-O").Select(_ => new SANMove(SANPiece.Rook, ('a', 7), false, ('c', 5), false)),
-            Parsers.String("O-O-O").Select(_ => new SANMove(SANPiece.Rook, ('h', 0), false, ('f', 3), false))
+            Parsers.String("O-O").Select(_ => SANMove.KingSideCastling),
+            Parsers.String("O-O-O").Select(_ => SANMove.KingSideCastling)
         );
 
         public static readonly Parser<(int, SANMove, SANMove)> FullMove = Parsers.Tuple(

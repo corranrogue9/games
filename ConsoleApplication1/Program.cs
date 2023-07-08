@@ -266,25 +266,25 @@
             var computer = "computer";
             var human = "human";
             var driver = Driver.Create(
-                new Dictionary<string, IStrategy<Fx.Game.Chess.Chess<string>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, string>>
+                new Dictionary<string, IStrategy<Fx.Game.Chess.ChessGame<string>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, string>>
                 {
-                    { computer, new RandomStrategy<Fx.Game.Chess.Chess<string>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, string>() },
-                    { human, new RandomStrategy<Fx.Game.Chess.Chess<string>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, string>() },
+                    { computer, new RandomStrategy<Fx.Game.Chess.ChessGame<string>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, string>() },
+                    { human, new RandomStrategy<Fx.Game.Chess.ChessGame<string>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, string>() },
                     // { human, new UserInterfaceStrategy<Fx.Game.Chess.Chess<string>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, string>(displayer) },
                 },
                 displayer);
-            var game = new Fx.Game.Chess.Chess<string>(human, computer);
+            var game = new Fx.Game.Chess.ChessGame<string>(human, computer);
             var result = driver.Run(game);
         }
 
-        private sealed class ChessConsoleDisplayer<TPlayer> : IDisplayer<Fx.Game.Chess.Chess<TPlayer>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, TPlayer>
+        private sealed class ChessConsoleDisplayer<TPlayer> : IDisplayer<Fx.Game.Chess.ChessGame<TPlayer>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, TPlayer>
         {
-            public void DisplayBoard(Chess<TPlayer> game)
+            public void DisplayBoard(ChessGame<TPlayer> game)
             {
                 Console.WriteLine(game.Board.Board.ToString());
             }
 
-            public void DisplayMoves(Chess<TPlayer> game)
+            public void DisplayMoves(ChessGame<TPlayer> game)
             {
                 Console.WriteLine("Select a move (row, column):");
                 int i = 0;
@@ -296,12 +296,12 @@
                 Console.WriteLine();
             }
 
-            public void DisplayOutcome(Chess<TPlayer> game)
+            public void DisplayOutcome(ChessGame<TPlayer> game)
             {
                 throw new NotImplementedException();
             }
 
-            public Fx.Game.Chess.ChessMove ReadMoveSelection(Chess<TPlayer> game)
+            public Fx.Game.Chess.ChessMove ReadMoveSelection(ChessGame<TPlayer> game)
             {
                 var moves = game.Moves.ToList();
                 while (true)
