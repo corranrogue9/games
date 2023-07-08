@@ -137,7 +137,7 @@ namespace Fx.Game.Chess
                             };
 
                             // initial two step moves
-                            if (source.y == startingRank)
+                            if (source.y == startingRank && !Board.Board[source + forward].HasValue)
                             {
                                 yield return new ChessMove(sourcePiece, source, source + forward * 2);
                             }
