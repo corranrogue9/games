@@ -15,22 +15,26 @@ namespace Fx.Game.Chess
             throw new FormatException($"parse error at {input}");
         }
 
-        public static (int, SANMove, SANMove?) ParseFullMove(string input)
-        {
-            if (SANParser.FullMove(input, out var rem, out var move))
-            {
-                return move;
-            }
-            throw new FormatException($"parse error at {input}");
-        }
-
-        public static IReadOnlyList<(int, SANMove, SANMove)> ParseMoves(string input)
+        /// <summary>
+        /// parse the list of SAN (standard algebraic notation) moves
+        /// e.g.: "1. e4 e6 2. d4 b6"
+        /// </summary>
+        /// <returns>a list of SAN moves together with the half move number
+        /// </returns>
+        /// <param name="input"></param>
+        public static IEnumerable<(int, SANMove)> ParseMoves(string input)
         {
             if (SANParser.Moves(input, out var rem, out var moves))
             {
-                return moves;
+                return moves.SelectMany(ToHalfMoves);
             }
             throw new FormatException($"parse error at {input}");
+
+            static IEnumerable<(int, SANMove)> ToHalfMoves((int, SANMove, SANMove) round)
+            {
+                yield return (round.Item1 * 2, round.Item2);
+                yield return (round.Item1 * 2 + 1, round.Item3);
+            }
         }
 
 
@@ -96,11 +100,11 @@ namespace Fx.Game.Chess
             Parsers.String("O-O-O").Select(_ => new SANMove(SANPiece.Rook, ('h', 0), false, ('f', 3), false))
         );
 
-        public static readonly Parser<(int, SANMove, SANMove)> FullMove = Parsers.Tuple(
-            Index.Token(),
-            HalfMove.Token(),
-            HalfMove.Token()
-        );
+        static readonly Parser<(int, SANMove, SANMove)> FullMove = Parsers.Tuple(
+           Index.Token(),
+           HalfMove.Token(),
+           HalfMove.Token()
+       );
 
         public static readonly Parser<IReadOnlyList<(int, SANMove, SANMove)>> Moves = FullMove.Many();
     }

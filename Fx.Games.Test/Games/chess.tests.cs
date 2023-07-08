@@ -144,28 +144,22 @@ namespace Fx.Game.Chess
         public void GamePlayTest(string input)
         {
             var game = new Chess<string>("W", "B");
-            foreach (var round in SANParser.ParseMoves(input))
-            {
-                FindAndPlayMove(ref game, round.Item2);
-                FindAndPlayMove(ref game, round.Item3);
-            }
-
-            void FindAndPlayMove(ref Chess<string> game, SANMove san)
+            foreach (var (halfMoveNumber, sanMove) in SANParser.ParseMoves(input))
             {
                 var moves = game.Moves;
-                var matches = moves.Where(m => san.Matches(m)).ToList();
+                var matches = moves.Where(m => sanMove.Matches(m)).ToList();
                 if (matches.Count() == 0)
                 {
-                    Assert.Fail($"unable to find move {san} in {string.Join(", ", moves)}");
+                    Assert.Fail($"unable to find move {sanMove} in {string.Join(", ", moves)}");
                 }
-                else if (matches.Count() > 1)
-                {
-                    Assert.Fail($"found multiple matches for move {san}: \n matches: {string.Join(", ", matches)} \nin moves: {string.Join(", ", moves)} \n{game.Board.Board}");
-                }
-                else
+                else if (matches.Count() == 1)
                 {
                     var move = matches[0];
                     game = game.CommitMove(move);
+                }
+                else
+                {
+                    Assert.Fail($"found multiple matches for move {sanMove}: \n matches: {string.Join(", ", matches)} \nin moves: {string.Join(", ", moves)} \n{game.Board.Board}");
                 }
             }
         }
