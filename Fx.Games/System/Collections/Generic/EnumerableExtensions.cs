@@ -1,4 +1,5 @@
-﻿using Fx;
+﻿using System.Diagnostics.CodeAnalysis;
+using Fx;
 
 namespace System.Collections.Generic
 {
@@ -81,6 +82,38 @@ namespace System.Collections.Generic
         public static T Maximum<T>(this IEnumerable<T> source, Func<T, double> selector)
         {
             return Minimum(source, (element) => selector(element) * -1);
+        }
+
+
+
+        public static bool TryGetSingle<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate, [MaybeNullWhen(false)] out TSource single)
+        {
+            ArgumentNullException.ThrowIfNull(source, nameof(source));
+            ArgumentNullException.ThrowIfNull(predicate, nameof(predicate));
+
+            using (IEnumerator<TSource> e = source.GetEnumerator())
+            {
+                while (e.MoveNext())
+                {
+                    TSource result = e.Current;
+                    if (predicate(result))
+                    {
+                        while (e.MoveNext())
+                        {
+                            if (predicate(e.Current))
+                            {
+                                throw new InvalidOperationException("Sequence contains more than one element");
+
+                            }
+                        }
+                        single = result;
+                        return true;
+                    }
+                }
+            }
+
+            single = default;
+            return false;
         }
     }
 }

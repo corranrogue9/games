@@ -1,4 +1,4 @@
-namespace Fx.Games.Chess
+namespace Fx.Game.Chess
 {
     using System.Diagnostics.CodeAnalysis;
     using System.Text.RegularExpressions;

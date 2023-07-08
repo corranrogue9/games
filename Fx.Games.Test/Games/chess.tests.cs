@@ -1,10 +1,9 @@
-namespace Fx.Games.Chess
+namespace Fx.Game.Chess
 {
-    using System;
     using System.Diagnostics;
-    using System.Diagnostics.CodeAnalysis;
     using System.Text.RegularExpressions;
     using Fx.Game.Chess;
+    using Microsoft.VisualBasic;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]
@@ -83,7 +82,7 @@ namespace Fx.Games.Chess
             Assert.AreEqual(Piece, actual.Piece);
             Assert.AreEqual(O(Start), actual.Start);
             Assert.AreEqual(Take, actual.Take);
-            Assert.AreEqual(C(Coord), actual.Coord);
+            Assert.AreEqual(C(Coord), actual.Target);
             Assert.AreEqual(Check, actual.Check);
 
             static (char, short)? O(string coord)
@@ -123,22 +122,55 @@ namespace Fx.Games.Chess
                     new SANMove(SANPiece.Pawn, null, false, ('e', 5), false));
                 Assert.AreEqual(expected, actual[0]);
             }
+            else
             {
                 Assert.Fail("failed to parse");
             }
         }
 
-
         // [TestMethod]
-        // public void MoveSequenceTest()
+        // public void SanMoveTest()
         // {
+        //     var san = new SANMove(SANPiece.Pawn, null, false, ('e', 4), false);
+        //     var move = new ChessMove(ChessPiece.WhitePawn, new Coordinate(4, 1), new Coordinate(4, 3));
 
-        //     // var input = "1. e4 e6 2. d4 b6 3. a3 Bb7 4. Nc3 Nh6 5. Bxh6 gxh6 6. Be2 Qg5 7. Bg4 h5 8. Nf3 Qg6 9. Nh4 Qg5 10. Bxh5 Qxh4 11. Qf3 Kd8 12. Qxf7 Nc6 13. Qe8# 1-0";
-        //     var input = "1. 2. 3. ";
-        //     var moves = PgnParser.Parse(input);
-
-        //     Assert.AreEqual(3, moves.Count);
+        //     Assert.IsTrue(san.Matches(move));
         // }
+
+
+        [DataTestMethod]
+        [DataRow("1. e4 e6 2. d4 b6")]
+        [DataRow("1. e4 e6 2. d4 b6 3. a3 Bb7 4. Nc3 Nh6 5. Bxh6 gxh6 6. Be2 Qg5 7. Bg4 h5 8. Nf3 Qg6 9. Nh4 Qg5 10. Bxh5 Qxh4 11. Qf3 Kd8 12. Qxf7 Nc6 13. Qe8# 1-0")]
+        public void GamePlayTest(string input)
+        {
+            var game = new Chess<string>("W", "B");
+            foreach (var round in SANParser.ParseMoves(input))
+            {
+                FindAndPlayMove(ref game, round.Item2);
+                FindAndPlayMove(ref game, round.Item3);
+            }
+
+            void FindAndPlayMove(ref Chess<string> game, SANMove san)
+            {
+                var moves = game.Moves;
+                var matches = moves.Where(m => san.Matches(m)).ToList();
+                if (matches.Count() == 0)
+                {
+                    Assert.Fail($"unable to find move {san} in {string.Join(", ", moves)}");
+                }
+                else if (matches.Count() > 1)
+                {
+                    Assert.Fail($"found multiple matches for move {san}: \n matches: {string.Join(", ", matches)} \nin moves: {string.Join(", ", moves)} \n{game.Board.Board}");
+                }
+                else
+                {
+                    var move = matches[0];
+                    game = game.CommitMove(move);
+                }
+            }
+        }
+
     }
+
 }
 

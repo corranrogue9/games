@@ -21,7 +21,7 @@ namespace Fx.Game.Chess
 
         override public string ToString()
         {
-            return $"Move {Piece} {From} {To}";
+            return $"Move{{{Piece} {From} {To}}}";
         }
     }
 

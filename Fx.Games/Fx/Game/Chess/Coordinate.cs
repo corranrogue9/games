@@ -6,7 +6,7 @@ namespace Fx.Game.Chess
 
     public sealed class Coordinate
     {
-        internal Coordinate(int x, int y) { this.x = x; this.y = y; }
+        public Coordinate(int x, int y) { this.x = x; this.y = y; }
 
         public readonly int x;
         public readonly int y;

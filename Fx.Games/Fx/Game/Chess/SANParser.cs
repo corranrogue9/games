@@ -1,15 +1,6 @@
-namespace Fx.Games.Chess
+namespace Fx.Game.Chess
 {
-    using System.Diagnostics.CodeAnalysis;
-    using System.Text.RegularExpressions;
-    using Fx.Game;
-    using Fx.Game.Chess;
 
-
-    public enum SANPiece { King, Queen, Rook, Bishop, Knight, Pawn }
-
-    public record struct SANMove(SANPiece Piece, (char, short)? Start, bool Take, (char, short) Coord, bool Check)
-    { }
 
 
     // https://en.wikipedia.org/wiki/Algebraic_notation_(chess)
