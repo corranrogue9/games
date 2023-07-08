@@ -49,7 +49,7 @@
         }
     }
 
-    public sealed class MiniPoker<TPlayer> : IGameWithHiddenInformation<MiniPoker<TPlayer>, MiniPokerBoard, MiniPokerMove, TPlayer>
+    public sealed class MiniPoker<TPlayer> : IGameWithHiddenInformation<MiniPoker<TPlayer>, MiniPokerBoard, MiniPokerMove, TPlayer, Distribution<MiniPoker<TPlayer>>>
     {
         private readonly TPlayer a;
 
@@ -193,7 +193,7 @@
             }
         }
 
-        public IEnumerable<IWeightedGame<MiniPoker<TPlayer>, MiniPokerBoard, MiniPokerMove, TPlayer>> ExploreMove(MiniPokerMove move)
+        public Distribution<MiniPoker<TPlayer>> ExploreMove(MiniPokerMove move)
         {
             throw new NotImplementedException();
         }
