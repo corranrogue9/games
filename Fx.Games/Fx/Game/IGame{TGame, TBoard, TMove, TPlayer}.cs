@@ -46,7 +46,7 @@
     public interface IGameWithHiddenInformation<out TGame, out TBoard, TMove, TPlayer, out TDistribution> : IGame<TGame, TBoard, TMove, TPlayer> where TGame : IGameWithHiddenInformation<TGame, TBoard, TMove, TPlayer, TDistribution> where TDistribution : Distribution<TGame>
     {
         /// <summary>
-        /// The sum of the weights of the resulting sequence must equal 1.0
+        /// TODO why does the tdistribution type parameter get around the covariance issue?
         /// </summary>
         /// <param name="move"></param>
         /// <returns></returns>
@@ -73,16 +73,11 @@
         public double Weight { get; }
     }
 
-    public interface IDistribution<out T>
-    {
-        T Value { get; }
-    }
-
     /// <summary>
     /// TODO probably this isnt' enough of a distrubiotn to use that name
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public abstract class Distribution<T> : IDistribution<T>
+    public abstract class Distribution<T>
     {
         private Distribution(T value)
         {
