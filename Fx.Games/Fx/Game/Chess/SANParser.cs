@@ -100,7 +100,7 @@ namespace Fx.Game.Chess
             Parsers.String("O-O-O").Select(_ => new SANMove(SANPiece.Rook, ('h', 0), false, ('f', 3), false))
         );
 
-        static readonly Parser<(int, SANMove, SANMove)> FullMove = Parsers.Tuple(
+        public static readonly Parser<(int, SANMove, SANMove)> FullMove = Parsers.Tuple(
            Index.Token(),
            HalfMove.Token(),
            HalfMove.Token()
