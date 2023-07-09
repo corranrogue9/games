@@ -315,7 +315,7 @@
             {
                 this.maximizeMovesStrategy = MaximizeMovesStrategy.Default<Fx.Game.Chess.ChessGame<TPlayer>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, TPlayer>();
                 this.treeStrategy = new GameTreeDepthStrategy<ChessGame<TPlayer>, ChessGameState, Fx.Game.Chess.ChessMove, TPlayer>(
-                    game => ChessGame<TPlayer>.HasACheckMove(ChessPieceColor.Black, game.Board) ? 10000000 : ChessScore(game, player), //// TODO hard-coded piece color
+                    game => game.Board.Board.Board.Cast<ChessPiece?>().Where(piece => piece?.Color == ChessPieceColor.White && piece?.Kind != ChessPieceKind.King).Any() ? ChessScore(game, player) : (game.Outcome != null ? 100000 : ChessScore(game, player)), //// TODO hard-coded piece color
                     Node.TreeFactory);
 
             }
