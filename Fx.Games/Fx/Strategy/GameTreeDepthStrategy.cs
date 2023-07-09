@@ -33,7 +33,7 @@
             {
                 var testGame = game.CommitMove(move);
                 return testGame
-                    .ToTree<TGame, TBoard, TMove, TPlayer>(7)
+                    .ToTree<TGame, TBoard, TMove, TPlayer>(2)
                     .Fold(this.selector, (game, scores) => scores.Max());
             });
         }

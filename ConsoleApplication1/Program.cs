@@ -2,7 +2,8 @@
 {
     using System;
     using System.Collections.Generic;
-
+    using System.Linq;
+    using System.Runtime.Versioning;
     using Fx.Displayer;
     using Fx.Driver;
     using Fx.Game;
@@ -260,21 +261,72 @@
             var result = driver.Run(game);
         }
 
+        private static double ChessScore<TPlayer>(ChessGame<TPlayer> game, TPlayer player)
+        {
+            var scores = new Dictionary<ChessPieceKind, int>()
+            {
+                { ChessPieceKind.King, 100000000 },
+                { ChessPieceKind.Pawn, 1},
+                { ChessPieceKind.Knight, 3},
+                { ChessPieceKind.Bishop, 3},
+                { ChessPieceKind.Rook ,5},
+                { ChessPieceKind.Queen, 9},
+            };
+            return game
+                .Board
+                .Board
+                .Board
+                .Cast<ChessPiece?>()
+                .Where(piece => piece.HasValue)
+                .Select(piece => piece.Value)
+                .Sum(piece => scores[piece.Kind] * ((piece.Color == game.PlayerColors[player]) ? 1 : -1));
+        }
+
         public static void Chess()
         {
+            //// TODO comparers and tests, kind of like the driver stuff
+
             var displayer = new ChessConsoleDisplayer<string>();
-            var computer = "computer";
-            var human = "human";
+            var tree = "tree";
+            var random = "random";
             var driver = Driver.Create(
                 new Dictionary<string, IStrategy<Fx.Game.Chess.ChessGame<string>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, string>>
                 {
-                    { computer, new RandomStrategy<Fx.Game.Chess.ChessGame<string>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, string>() },
-                    { human, new RandomStrategy<Fx.Game.Chess.ChessGame<string>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, string>() },
+                    ////{ computer, new RandomStrategy<Fx.Game.Chess.ChessGame<string>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, string>() },
+                    { random, new RandomStrategy<Fx.Game.Chess.ChessGame<string>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, string>() },
+                    ////{ tree, new GameTreeDepthStrategy<Fx.Game.Chess.ChessGame<string>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, string>(game => ChessScore(game, tree), Node.TreeFactory) }
+                    { tree, new ChessStrategy<string>(tree) },
                     // { human, new UserInterfaceStrategy<Fx.Game.Chess.Chess<string>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, string>(displayer) },
                 },
                 displayer);
-            var game = new Fx.Game.Chess.ChessGame<string>(human, computer);
+            var game = new Fx.Game.Chess.ChessGame<string>(random, tree);
             var result = driver.Run(game);
+        }
+
+        private sealed class ChessStrategy<TPlayer> : IStrategy<Fx.Game.Chess.ChessGame<TPlayer>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, TPlayer>
+        {
+            private readonly MaximizeMovesStrategy<Fx.Game.Chess.ChessGame<TPlayer>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, TPlayer> maximizeMovesStrategy;
+
+            private readonly GameTreeDepthStrategy<Fx.Game.Chess.ChessGame<TPlayer>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, TPlayer> treeStrategy;
+
+            public ChessStrategy(TPlayer player)
+            {
+                this.maximizeMovesStrategy = MaximizeMovesStrategy.Default<Fx.Game.Chess.ChessGame<TPlayer>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, TPlayer>();
+                this.treeStrategy = new GameTreeDepthStrategy<ChessGame<TPlayer>, ChessGameState, Fx.Game.Chess.ChessMove, TPlayer>(game => ChessScore(game, player), Node.TreeFactory);
+
+            }
+
+            public Fx.Game.Chess.ChessMove SelectMove(ChessGame<TPlayer> game)
+            {
+                /*if (game.Board.HalfMoveCount < 10)
+                {
+                    return this.maximizeMovesStrategy.SelectMove(game);
+                }
+                else*/
+                {
+                    return this.treeStrategy.SelectMove(game);
+                }
+            }
         }
 
         private sealed class ChessConsoleDisplayer<TPlayer> : IDisplayer<Fx.Game.Chess.ChessGame<TPlayer>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, TPlayer>
@@ -286,7 +338,7 @@
 
             public void DisplayMoves(ChessGame<TPlayer> game)
             {
-                Console.WriteLine("Select a move (row, column):");
+                Console.WriteLine($"{game.CurrentPlayer}, please select a move (row, column):");
                 int i = 0;
                 foreach (var move in game.Moves)
                 {

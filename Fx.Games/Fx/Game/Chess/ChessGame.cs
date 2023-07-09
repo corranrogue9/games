@@ -29,6 +29,9 @@ namespace Fx.Game.Chess
 
         private ChessPieceColor CurrentPlayerColor { get; }
 
+        public IReadOnlyDictionary<TPlayer, ChessPieceColor> PlayerColors => new Dictionary<TPlayer, ChessPieceColor>
+        { {this.players[0], ChessPieceColor.White }, {this.players[1], ChessPieceColor.Black } };
+
         private static readonly Direction[] QUEEN_DIRECTIONS = new Direction[]
         {
             Direction.N,
@@ -91,6 +94,7 @@ namespace Fx.Game.Chess
             get
             {
                 var board = Board.Board;
+                //// TODO we don't need this; we should have a lookup of currently populated spaces
                 foreach (Square source in Square.All)
                 {
                     var maybeSourcePiece = board[source];
@@ -122,6 +126,7 @@ namespace Fx.Game.Chess
                             }
                             break;
                         case ChessPieceKind.Pawn:
+                            //// TODO possible bugs: do pawns capture when moving forward?
                             var forward = new Direction(0, CurrentPlayerColor == ChessPieceColor.White ? 1 : -1);
                             var startingRank = CurrentPlayerColor == ChessPieceColor.White ? 1 : 6;
                             var finalRank = CurrentPlayerColor == ChessPieceColor.White ? 7 : 0;
@@ -174,6 +179,7 @@ namespace Fx.Game.Chess
                             //  && this.Board.CastlingAvailable(CurrentPlayerColor)
                             )
                             {
+                                //// TODO the castling logic should use the lookup that is used for the overall moves computation to look for pieces that could possible attack the empty spaces
                                 var right = Direction.E;
                                 var kingsideRookSquare = this.Board.Board[source + right * 3];
                                 if (!this.Board.Board[source + right * 1].HasValue
@@ -267,7 +273,7 @@ namespace Fx.Game.Chess
             }
 
             var newBoard = new ChessBoard(clonedBoard);
-            var newGameState = new ChessGameState(newBoard);
+            var newGameState = new ChessGameState(newBoard, this.Board.HalfMoveCount + 1);
 
             var game = new ChessGame<TPlayer>(this.players[0], this.players[1], newGameState, (ChessPieceColor)(((int)CurrentPlayerColor + 1) % 2));
             return game;

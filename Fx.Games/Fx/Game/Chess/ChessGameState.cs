@@ -6,15 +6,16 @@ namespace Fx.Game.Chess
     public sealed class ChessGameState
     {
         public ChessGameState()
-            : this(new ChessBoard())
+            : this(new ChessBoard(), 0)
         {
         }
 
-        public ChessGameState(ChessBoard board)
+        public ChessGameState(ChessBoard board, int halfMoveCount)
         {
             Board = board;
             BlackCastlingAvailability = true;
             WhiteCastlingAvailability = true;
+            this.HalfMoveCount = halfMoveCount; //// TODO this tightly couples game state with number of moves and cannot make its way to the final product because we won't wnat to tvalidate the corectness of that assertion
         }
 
         public ChessBoard Board { get; }
@@ -22,6 +23,8 @@ namespace Fx.Game.Chess
         public bool WhiteCastlingAvailability { get; }
 
         public bool BlackCastlingAvailability { get; }
+
+        public int HalfMoveCount { get; }
 
         internal bool CastlingAvailable(ChessPieceColor playerColor)
         {
