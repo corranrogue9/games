@@ -13,6 +13,8 @@ namespace Fx.Game.Chess
         public ChessGameState(ChessBoard board)
         {
             Board = board;
+            BlackCastlingAvailability = true;
+            WhiteCastlingAvailability = true;
         }
 
         public ChessBoard Board { get; }
@@ -20,6 +22,11 @@ namespace Fx.Game.Chess
         public bool WhiteCastlingAvailability { get; }
 
         public bool BlackCastlingAvailability { get; }
+
+        internal bool CastlingAvailable(ChessPieceColor playerColor)
+        {
+            return playerColor == ChessPieceColor.White ? WhiteCastlingAvailability : BlackCastlingAvailability;
+        }
 
         // TODO: En passant target square and move-clock.
     }

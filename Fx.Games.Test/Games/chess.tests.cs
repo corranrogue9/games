@@ -151,7 +151,7 @@ namespace Fx.Game.Chess
                 var matches = moves.Where(m => sanMove.Matches(m)).ToList();
                 if (matches.Count == 0)
                 {
-                    Assert.Fail($"unable to find move {sanMove} ({halfMoveNumber}) in\n {string.Join(",\n    ", moves)}");
+                    Assert.Fail($"unable to find move {sanMove} (#{halfMoveNumber}) in\n  {string.Join(",\n  ", moves)}\n{game.Board.Board}");
                 }
                 else if (matches.Count == 1)
                 {
@@ -160,7 +160,7 @@ namespace Fx.Game.Chess
                 }
                 else
                 {
-                    Assert.Fail($"found multiple matches for move {sanMove}: \n{string.Join(",\n    ", matches)} \nin moves: {string.Join(",\n    ", moves)} \n{game.Board.Board}");
+                    Assert.Fail($"found multiple matches for move {sanMove}: \n{string.Join(",\n    ", matches)} in\n  {string.Join(",\n  ", moves)} \n{game.Board.Board}");
                 }
             }
         }

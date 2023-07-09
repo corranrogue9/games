@@ -1,3 +1,6 @@
+using System.Drawing;
+using Microsoft.VisualBasic;
+
 namespace Fx.Game.Chess
 {
 
@@ -37,17 +40,30 @@ namespace Fx.Game.Chess
         #region  castling
         // https://en.wikipedia.org/wiki/Castling
         // Castling consists of moving the king two squares towards a rook
-        public static readonly ChessMove WhiteKingSideCastling =
-            new(ChessPiece.WhiteKing, new(4, 0), new(6, 0));
 
-        public static readonly ChessMove WhiteQueenSideCastling =
-            new(ChessPiece.WhiteKing, new(4, 0), new(2, 0));
+        public static ChessMove KingSideCastling(ChessPieceColor color)
+        {
+            var rank = color == ChessPieceColor.White ? 0 : 7;
+            return new(new ChessPiece(color, ChessPieceKind.King), new(4, rank), new(6, rank));
+        }
 
-        public static readonly ChessMove BlackKingSideCastling =
-                   new(ChessPiece.BlackKing, new(4, 7), new(6, 7));
+        public static ChessMove QueenSideCastling(ChessPieceColor color)
+        {
+            var rank = color == ChessPieceColor.White ? 0 : 7;
+            return new(new ChessPiece(color, ChessPieceKind.King), new(4, rank), new(2, rank));
+        }
 
-        public static readonly ChessMove BlackQueenSideCastling =
-            new(ChessPiece.BlackKing, new(4, 7), new(2, 7));
+        public static readonly ChessMove WhiteKingSideCastling = KingSideCastling(ChessPieceColor.White);
+
+        public static readonly ChessMove BlackKingSideCastling = KingSideCastling(ChessPieceColor.Black);
+
+        public static readonly ChessMove WhiteQueenSideCastling = QueenSideCastling(ChessPieceColor.White);
+
+        public static readonly ChessMove BlackQueenSideCastling = QueenSideCastling(ChessPieceColor.Black);
+
+        public bool IsCastling => this.Piece.Kind == ChessPieceKind.King
+            // && this.From.x == 4
+            && Math.Abs(this.To.x - this.From.x) == 2;
 
         public bool IsKingSideCastling => this.Piece.Kind == ChessPieceKind.King
             && this.From.x == 4
@@ -57,9 +73,6 @@ namespace Fx.Game.Chess
             && this.From.x == 4
             && this.To.x == 2;
 
-        public bool IsCastling => this.Piece.Kind == ChessPieceKind.King
-            && this.From.x == 4
-            && Math.Abs(this.To.x - this.From.x) == 2;
         #endregion
     }
 }

@@ -100,7 +100,6 @@ namespace Fx.Game.Chess
                     }
 
                     var sourcePiece = maybeSourcePiece.Value;
-                    // TODO: simplify above
 
                     switch (sourcePiece.Kind)
                     {
@@ -162,14 +161,38 @@ namespace Fx.Game.Chess
                                     yield return new ChessMove(promotecInto, source, promotionTarget);
                                 }
                             }
-                            //// TODO en passant
+                            // TODO en passant
                             break;
                         case ChessPieceKind.King:
                             foreach (var move in ComputeMoves(source, sourcePiece, board, KING_DIRECTIONS, 1))
                             {
                                 yield return move;
                             }
-                            //// TODO other king moves here
+                            // castling
+                            var rank = CurrentPlayerColor == ChessPieceColor.White ? 0 : 7;
+                            if (source == new Square(4, rank) // king on its original position
+                            //  && this.Board.CastlingAvailable(CurrentPlayerColor)
+                            )
+                            {
+                                var right = Direction.E;
+                                var kingsideRookSquare = this.Board.Board[source + right * 3];
+                                if (!this.Board.Board[source + right * 1].HasValue
+                                    && !this.Board.Board[source + right * 2].HasValue
+                                    && kingsideRookSquare.HasValue && kingsideRookSquare.Value.Kind == ChessPieceKind.Rook)
+                                {
+                                    yield return ChessMove.KingSideCastling(CurrentPlayerColor);
+                                }
+                                var left = Direction.W;
+                                var queensideRookSquare = this.Board.Board[source + left * 4];
+                                if (this.Board.CastlingAvailable(CurrentPlayerColor)
+                                    && !this.Board.Board[source + left * 1].HasValue
+                                    && !this.Board.Board[source + left * 2].HasValue
+                                    && !this.Board.Board[source + left * 3].HasValue
+                                    && queensideRookSquare.HasValue && queensideRookSquare.Value.Kind == ChessPieceKind.Rook)
+                                {
+                                    yield return ChessMove.QueenSideCastling(CurrentPlayerColor);
+                                }
+                            }
                             break;
                         case ChessPieceKind.Knight:
                             foreach (var move in ComputeMoves(source, sourcePiece, board, KNIGHT_DIRECTION, 1))
@@ -229,11 +252,32 @@ namespace Fx.Game.Chess
             clonedBoard[move.From.y, move.From.x] = null;
             clonedBoard[move.To.y, move.To.x] = piece;
 
+            // move rook when castling. Castling is irepresented by the king moving 2 squares horizontally
+            if (move.IsCastling)
+            {
+                if (move.From.x < move.To.x) // castling right i.e. king side, move rook left
+                {
+                    Swap(ref clonedBoard, new Square(7, move.To.y), new Square(5, move.To.y));
+                }
+                else if (move.From.x > move.To.x) // castling right i.e. queen side, move rook right
+                {
+                    Swap(ref clonedBoard, new Square(0, move.To.y), new Square(3, move.To.y));
+                }
+            }
+
             var newBoard = new ChessBoard(clonedBoard);
             var newGameState = new ChessGameState(newBoard);
 
             var game = new ChessGame<TPlayer>(this.players[0], this.players[1], newGameState, (ChessPieceColor)(((int)CurrentPlayerColor + 1) % 2));
             return game;
+        }
+
+        private static void Swap(ref ChessPiece?[,] board, Square square1, Square square2)
+        {
+            var piece1 = board[square1.y, square1.x];
+            var piece2 = board[square2.y, square2.x];
+            board[square1.y, square1.x] = piece2;
+            board[square2.y, square2.x] = piece1;
         }
     }
 }

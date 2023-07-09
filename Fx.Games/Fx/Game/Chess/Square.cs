@@ -21,12 +21,6 @@ namespace Fx.Game.Chess
 
         public override string ToString() => $"{"abcdefgh"[x]}{y + 1}";
 
-        public bool Equals(Square? other)
-        {
-            return other != null && this.x == other.x && this.y == other.y;
-        }
-
-
         public static IEnumerable<Square> All
         {
             get
@@ -44,14 +38,23 @@ namespace Fx.Game.Chess
         public bool IsOnBoard { get => this.x >= 0 && this.y >= 0 && this.x < 8 && this.y < 8; }
 
 
+        public bool Equals(Square? other)
+        {
+            return other is not null && this.x == other.x && this.y == other.y;
+        }
 
         public override bool Equals(object? obj)
         {
             return obj is Square other && Equals(this, other);
         }
+
         public override int GetHashCode()
         {
             return HashCode.Combine(this.x, this.y);
         }
+
+        public static bool operator ==(Square lhs, Square rhs) => lhs.Equals(rhs);
+
+        public static bool operator !=(Square lhs, Square rhs) => !lhs.Equals(rhs);
     }
 }

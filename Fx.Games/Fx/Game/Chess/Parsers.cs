@@ -26,7 +26,6 @@ namespace Fx.Game.Chess
         {
             bool Parse(ReadOnlySpan<char> input, [MaybeNullWhen(false)] out ReadOnlySpan<char> remainder, [MaybeNullWhen(false)] out char value)
             {
-                var _debug = (input.Length > 0 && input[0] == ch, ch, input.ToString(), ch);
                 if (input.Length > 0 && input[0] == ch)
                 {
                     value = ch;
@@ -44,7 +43,6 @@ namespace Fx.Game.Chess
         {
             bool Parse(ReadOnlySpan<char> input, [MaybeNullWhen(false)] out ReadOnlySpan<char> remainder, [MaybeNullWhen(false)] out string value)
             {
-                var _debug = (input.StartsWith(str), str, input.ToString(), str);
                 if (input.StartsWith(str))
                 {
                     value = str;
@@ -65,7 +63,6 @@ namespace Fx.Game.Chess
             bool Parse(ReadOnlySpan<char> input, [MaybeNullWhen(false)] out ReadOnlySpan<char> remainder, [MaybeNullWhen(false)] out string value)
             {
                 var match = regex.Match(input.ToString());
-                var _debug = (match.Success, pattern, input.ToString(), match.Value);
                 if (match.Success)
                 {
                     remainder = input[match.Length..];
