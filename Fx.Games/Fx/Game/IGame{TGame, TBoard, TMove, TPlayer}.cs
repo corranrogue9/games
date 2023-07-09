@@ -12,7 +12,7 @@
     /// <typeparam name="TMove">The type of the moves that the <typeparamref name="TGame"/> uses</typeparam>
     /// <typeparam name="TPlayer">The type of the player that is playing the <typeparamref name="TGame"/></typeparam>
     /// <threadsafety instance="true"/>
-    public interface IGame<out TGame, out TBoard, TMove, TPlayer> where TGame : IGame<TGame, TBoard ,TMove, TPlayer>
+    public interface IGame<out TGame, out TBoard, TMove, TPlayer> where TGame : IGame<TGame, TBoard, TMove, TPlayer>
     {
         /// <summary>
         /// The <typeparamref name="TPlayer"/> whose turn it currently is
@@ -75,6 +75,8 @@
 
     /// <summary>
     /// TODO probably this isnt' enough of a distrubiotn to use that name
+    /// 
+    /// TODO for garrett to explore: if distribution weren't generic, but only the dervied types were, would this actualy give you a convenient way heterogenous generics?
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public abstract class Distribution<T>
@@ -84,6 +86,9 @@
             this.Value = value;
         }
 
+        /// <summary>
+        /// TODO should this go on the base type? it might give the wrong impression, and moving it to the derived types will require callers to understand the distriminated union
+        /// </summary>
         public T Value { get; }
 
         /// <summary>
@@ -100,7 +105,7 @@
         /// <summary>
         /// TODO different name
         /// </summary>
-        public sealed class PartialDistribution : Distribution<T> 
+        public sealed class PartialDistribution : Distribution<T>
         {
             /// <summary>
             /// 
@@ -113,6 +118,7 @@
             {
                 if (liklihood < 0 || liklihood >= 1.0)
                 {
+                    //// TODO don't want 1.0 because then this is no different froma complete distribution
                     throw new ArgumentOutOfRangeException(nameof(liklihood));
                 }
 
@@ -126,14 +132,55 @@
         }
     }
 
+    public static class DistributionExtensions
+    {
+        public static T Sample<T>(this Distribution<T> distribution)
+        {
+            return Sample(distribution, new Random());
+        }
+
+        public static T Sample<T>(this Distribution<T> distribution, Random random)
+        {
+            if (distribution is Distribution<T>.PartialDistribution partialDistribution)
+            {
+                //// TODO next double is exclusive of 1.0, so does this break anything?
+                var weight = random.NextDouble();
+                return Sample(partialDistribution, weight);
+            }
+            else
+            {
+                return distribution.Value;
+            }
+        }
+
+        public static T Sample<T>(this Distribution<T>.PartialDistribution distribution, double weight)
+        {
+            if (weight < distribution.Liklihood)
+            {
+                return distribution.Value;
+            }
+            else
+            {
+                if (distribution.Remainder is Distribution<T>.PartialDistribution partialDistribution)
+                {
+                    return Sample(partialDistribution, weight - distribution.Liklihood); //// TODO just subtraction won't work here i think
+                }
+                else
+                {
+                    return distribution.Remainder.Value;
+                }
+            }
+        }
+    }
+
     public static class GameWithHiddenInformationExtensions
     {
-        public static TGame CommitSpecificMove<TGame, TBoard, TMove, TPlayer, TDistribution>(this IGameWithHiddenInformation<TGame, TBoard, TMove, TPlayer, TDistribution> game, TMove move)
+        public static TGame CommitSpecificMove<TGame, TBoard, TMove, TPlayer, TDistribution>(this IGameWithHiddenInformation<TGame, TBoard, TMove, TPlayer, TDistribution> game, TMove move, Random random)
             where TGame : IGameWithHiddenInformation<TGame, TBoard, TMove, TPlayer, TDistribution>
             where TDistribution : Distribution<TGame>
         {
             var potentialGames = game.ExploreMove(move);
-            return default(TGame);
+            return potentialGames.Sample(random);
         }
     }
 }

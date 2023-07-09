@@ -30,10 +30,44 @@
                 var strategy = strategies[game.CurrentPlayer];
                 displayer.DisplayBoard(game);
                 displayer.DisplayMoves(game);
-                Console.WriteLine($"{DateTime.UtcNow}");
                 var move = strategy.SelectMove(game);
-                Console.WriteLine($"{DateTime.UtcNow}");
                 game = game.CommitMove(move);
+                if (game.Outcome != null)
+                {
+                    break;
+                }
+            }
+
+            displayer.DisplayBoard(game);
+            displayer.DisplayOutcome(game);
+            return game;
+        }
+    }
+
+    public sealed class HiddenDriver<TGame, TBoard, TMove, TPlayer> where TGame : IGameWithHiddenInformation<TGame, TBoard, TMove, TPlayer, Distribution<TGame>>
+    {
+        private readonly IReadOnlyDictionary<TPlayer, IStrategy<TGame, TBoard, TMove, TPlayer>> strategies;
+
+        private readonly IDisplayer<TGame, TBoard, TMove, TPlayer> displayer;
+
+        private readonly Random random;
+
+        public HiddenDriver(IReadOnlyDictionary<TPlayer, IStrategy<TGame, TBoard, TMove, TPlayer>> strategies, IDisplayer<TGame, TBoard, TMove, TPlayer> displayer, Random random)
+        {
+            this.strategies = strategies.ToDictionary();
+            this.displayer = displayer;
+            this.random = random;
+        }
+
+        public TGame Run(TGame game)
+        {
+            while (game.Outcome == null)
+            {
+                var strategy = strategies[game.CurrentPlayer];
+                displayer.DisplayBoard(game);
+                displayer.DisplayMoves(game);
+                var move = strategy.SelectMove(game);
+                game = game.CommitSpecificMove(move, this.random);
                 if (game.Outcome != null)
                 {
                     break;

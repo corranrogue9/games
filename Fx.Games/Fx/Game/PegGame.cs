@@ -1,5 +1,78 @@
-﻿namespace Fx.Game
+﻿using Fx.Displayer;
+
+namespace Fx.Game
 {
+    public sealed class HiddenPegGameDisplayer<TPlayer> : IDisplayer<HiddenPegGame<TPlayer>, PegBoard, PegMove, TPlayer>
+    {
+        private readonly PegGameConsoleDisplayer<TPlayer> displayer;
+
+        public HiddenPegGameDisplayer()
+        {
+            this.displayer = new PegGameConsoleDisplayer<TPlayer>();
+        }
+
+        public void DisplayBoard(HiddenPegGame<TPlayer> game)
+        {
+            this.displayer.DisplayBoard(game.PegGame);
+        }
+
+        public void DisplayMoves(HiddenPegGame<TPlayer> game)
+        {
+            this.displayer.DisplayMoves(game.PegGame);
+        }
+
+        public void DisplayOutcome(HiddenPegGame<TPlayer> game)
+        {
+            this.displayer.DisplayOutcome(game.PegGame);
+        }
+
+        public PegMove ReadMoveSelection(HiddenPegGame<TPlayer> game)
+        {
+            return this.displayer.ReadMoveSelection(game.PegGame);
+        }
+    }
+
+    public sealed class HiddenPegGame<TPlayer> : IGameWithHiddenInformation<HiddenPegGame<TPlayer>, PegBoard, PegMove, TPlayer, Distribution<HiddenPegGame<TPlayer>>>
+    {
+        private readonly PegGame<TPlayer> pegGame;
+
+        public HiddenPegGame(TPlayer player)
+            : this(new PegGame<TPlayer>(player))
+        {
+        }
+
+        private HiddenPegGame(PegGame<TPlayer> pegGame)
+        {
+            this.pegGame = pegGame;
+        }
+
+        internal PegGame<TPlayer> PegGame
+        {
+            get
+            {
+                return this.pegGame;
+            }
+        }
+
+        public TPlayer CurrentPlayer => this.pegGame.CurrentPlayer;
+
+        public IEnumerable<PegMove> Moves => this.pegGame.Moves;
+
+        public PegBoard Board => this.pegGame.Board;
+
+        public Outcome<TPlayer> Outcome => this.pegGame.Outcome;
+
+        public HiddenPegGame<TPlayer> CommitMove(PegMove move)
+        {
+            return this.CommitSpecificMove(move, new Random());
+        }
+
+        public Distribution<HiddenPegGame<TPlayer>> ExploreMove(PegMove move)
+        {
+            return new Distribution<HiddenPegGame<TPlayer>>.CompleteDistribution(new HiddenPegGame<TPlayer>(this.pegGame.CommitMove(move)));
+        }
+    }
+
     public sealed class PegGame<TPlayer> : IGame<PegGame<TPlayer>, PegBoard, PegMove, TPlayer>
     {
         private readonly TPlayer player;

@@ -28,6 +28,7 @@
             (nameof(TwosOneMoveHeuristic12), TwosOneMoveHeuristic12),
             (nameof(MiniPokerHumanVsHuman), MiniPokerHumanVsHuman),
             (nameof(MiniPokerRandomVsRandom), MiniPokerRandomVsRandom),
+            (nameof(HiddenPegsHuman), HiddenPegsHuman),
         };
 
         static void Main(string[] args)
@@ -278,6 +279,21 @@
                 },
                 displayer);
             var game = new MiniPoker<string>(playerA, playerB, random);
+            var result = driver.Run(game);
+        }
+
+        private static void HiddenPegsHuman()
+        {
+            var displayer = new HiddenPegGameDisplayer<string>();
+            var player = "player";
+            var game = new HiddenPegGame<string>(player);
+            var driver = Driver.CreateHidden(
+                new Dictionary<string, IStrategy<HiddenPegGame<string>, PegBoard, PegMove, string>>
+                {
+                    { player, new UserInterfaceStrategy<HiddenPegGame<string>, PegBoard, PegMove, string>(displayer) },
+                },
+                displayer,
+                new Random());
             var result = driver.Run(game);
         }
     }
