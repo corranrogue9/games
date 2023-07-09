@@ -22,6 +22,16 @@ namespace Fx.Game.Chess
             "pppppppp" +
             "rnbqkbnr";
 
+        private static readonly string CHECK =
+            "_______K" +
+            "________" +
+            "P_____n_" +
+            "________" +
+            "________" +
+            "________" +
+            "________" +
+            "________";
+
         public ChessBoard()
         {
             this.Board = new ChessPiece?[8, 8];

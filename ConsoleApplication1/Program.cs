@@ -315,7 +315,7 @@
             {
                 this.maximizeMovesStrategy = MaximizeMovesStrategy.Default<Fx.Game.Chess.ChessGame<TPlayer>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, TPlayer>();
                 this.treeStrategy = new GameTreeDepthStrategy<ChessGame<TPlayer>, ChessGameState, Fx.Game.Chess.ChessMove, TPlayer>(
-                    game => playerComparer.Equals(game.CurrentPlayer, player) && game.Outcome != null ? 1000000 : ChessScore(game, player),
+                    game => ChessGame<TPlayer>.HasACheckMove(ChessPieceColor.Black, game.Board) ? 10000000 : ChessScore(game, player), //// TODO hard-coded piece color
                     Node.TreeFactory);
 
             }
@@ -354,7 +354,7 @@
 
             public void DisplayOutcome(ChessGame<TPlayer> game)
             {
-                throw new NotImplementedException();
+                Console.WriteLine($"{game.Outcome.Winners.First()} won the game! The other player is clearly a loser!");
             }
 
             public Fx.Game.Chess.ChessMove ReadMoveSelection(ChessGame<TPlayer> game)

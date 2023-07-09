@@ -113,7 +113,7 @@ namespace Fx.Game.Chess
             }
         }
 
-        private static bool HasACheckMove(ChessPieceColor playerWhoHasACheckMove, ChessGameState chessGameState)
+        public static bool HasACheckMove(ChessPieceColor playerWhoHasACheckMove, ChessGameState chessGameState)
         {
             return CalculateMoves(playerWhoHasACheckMove, chessGameState)
                 .Where(move => chessGameState.Board[move.To]?.Kind == ChessPieceKind.King) //// TODO we should check the color of the piece too, but the opponent can't move to their own king's square
