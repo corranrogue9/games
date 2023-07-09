@@ -8,7 +8,9 @@ namespace Fx.Game.Chess
     public sealed class ChessGame<TPlayer> : IGame<ChessGame<TPlayer>, ChessGameState, ChessMove, TPlayer>
     {
 
-        private readonly TPlayer[] players;
+        private readonly TPlayer white;
+
+        private readonly TPlayer black;
 
         public ChessGameState Board { get; }
 
@@ -19,18 +21,21 @@ namespace Fx.Game.Chess
 
         private ChessGame(TPlayer white, TPlayer black, ChessGameState newState, ChessPieceColor newCurrentPlayerColor)
         {
-            players = new[] { white, black };
+            this.white = white;
+            this.black = black;
 
             Board = newState;
             CurrentPlayerColor = newCurrentPlayerColor;
         }
 
-        public TPlayer CurrentPlayer => players[(int)CurrentPlayerColor];
+        public TPlayer CurrentPlayer => this.CurrentPlayerColor == ChessPieceColor.Black ? this.black : this.white;
 
         private ChessPieceColor CurrentPlayerColor { get; }
 
+        private ChessPieceColor OpponentPlayerColor => (ChessPieceColor)((((int)this.CurrentPlayerColor) + 1) % 2);
+
         public IReadOnlyDictionary<TPlayer, ChessPieceColor> PlayerColors => new Dictionary<TPlayer, ChessPieceColor>
-        { {this.players[0], ChessPieceColor.White }, {this.players[1], ChessPieceColor.Black } };
+        { {this.white, ChessPieceColor.White }, {this.black, ChessPieceColor.Black } };
 
         private static readonly Direction[] QUEEN_DIRECTIONS = new Direction[]
         {
@@ -93,122 +98,146 @@ namespace Fx.Game.Chess
         {
             get
             {
-                var board = Board.Board;
-                //// TODO we don't need this; we should have a lookup of currently populated spaces
-                foreach (Square source in Square.All)
+                var currentPlayerMoves = CalculateMoves(this.CurrentPlayerColor, this.Board);
+
+                return currentPlayerMoves.Where(move => !HasACheckMove(this.OpponentPlayerColor, this.CommitMove(move).Board));
+
+                if (HasACheckMove(this.OpponentPlayerColor, this.Board))
                 {
-                    var maybeSourcePiece = board[source];
-                    if (maybeSourcePiece == null || maybeSourcePiece.Value.Color != CurrentPlayerColor)
-                    {
-                        continue;
-                    }
+                    return currentPlayerMoves.Where(move => !HasACheckMove(this.OpponentPlayerColor, this.CommitMove(move).Board));
+                }
+                else
+                {
+                    return currentPlayerMoves;
+                }
+            }
+        }
 
-                    var sourcePiece = maybeSourcePiece.Value;
+        private static bool HasACheckMove(ChessPieceColor playerWhoHasACheckMove, ChessGameState chessGameState)
+        {
+            return CalculateMoves(playerWhoHasACheckMove, chessGameState)
+                .Where(move => chessGameState.Board[move.To]?.Kind == ChessPieceKind.King) //// TODO we should check the color of the piece too, but the opponent can't move to their own king's square
+                .Any();
+        }
 
-                    switch (sourcePiece.Kind)
-                    {
-                        case ChessPieceKind.Queen:
-                            foreach (var move in ComputeMoves(source, sourcePiece, board, QUEEN_DIRECTIONS, 7))
-                            {
-                                yield return move;
-                            }
-                            break;
-                        case ChessPieceKind.Bishop:
-                            foreach (var move in ComputeMoves(source, sourcePiece, board, BISHOP_DIRECTIONS, 7))
-                            {
-                                yield return move;
-                            }
-                            break;
-                        case ChessPieceKind.Rook:
-                            foreach (var move in ComputeMoves(source, sourcePiece, board, ROOK_DIRECTIONS, 7))
-                            {
-                                yield return move;
-                            }
-                            break;
-                        case ChessPieceKind.Pawn:
-                            //// TODO possible bugs: do pawns capture when moving forward?
-                            var forward = new Direction(0, CurrentPlayerColor == ChessPieceColor.White ? 1 : -1);
-                            var startingRank = CurrentPlayerColor == ChessPieceColor.White ? 1 : 6;
-                            var finalRank = CurrentPlayerColor == ChessPieceColor.White ? 7 : 0;
+        private static IEnumerable<ChessMove> CalculateMoves(ChessPieceColor currentPlayerColor, ChessGameState chessGameState)
+        {
+            //// TODO implement being in check
+            var board = chessGameState.Board;
+            //// TODO we don't need this; we should have a lookup of currently populated spaces
+            foreach (Square source in Square.All)
+            {
+                var maybeSourcePiece = board[source];
+                if (maybeSourcePiece == null || maybeSourcePiece.Value.Color != currentPlayerColor)
+                {
+                    continue;
+                }
 
-                            // single step move
-                            var singleStep = source + forward;
-                            if (singleStep.IsOnBoard
-                                && !Board.Board.TryGetPiece(singleStep, out var _)
-                                && singleStep.y != finalRank)
+                var sourcePiece = maybeSourcePiece.Value;
+
+                switch (sourcePiece.Kind)
+                {
+                    case ChessPieceKind.Queen:
+                        foreach (var move in ComputeMoves(source, sourcePiece, board, QUEEN_DIRECTIONS, 7))
+                        {
+                            yield return move;
+                        }
+                        break;
+                    case ChessPieceKind.Bishop:
+                        foreach (var move in ComputeMoves(source, sourcePiece, board, BISHOP_DIRECTIONS, 7))
+                        {
+                            yield return move;
+                        }
+                        break;
+                    case ChessPieceKind.Rook:
+                        foreach (var move in ComputeMoves(source, sourcePiece, board, ROOK_DIRECTIONS, 7))
+                        {
+                            yield return move;
+                        }
+                        break;
+                    case ChessPieceKind.Pawn:
+                        //// TODO possible bugs: do pawns capture when moving forward?
+                        var forward = new Direction(0, currentPlayerColor == ChessPieceColor.White ? 1 : -1);
+                        var startingRank = currentPlayerColor == ChessPieceColor.White ? 1 : 6;
+                        var finalRank = currentPlayerColor == ChessPieceColor.White ? 7 : 0;
+
+                        // single step move
+                        var singleStep = source + forward;
+                        if (singleStep.IsOnBoard
+                            && !board.TryGetPiece(singleStep, out var _)
+                            && singleStep.y != finalRank)
+                        {
+                            yield return new ChessMove(sourcePiece, source, singleStep);
+                        };
+
+                        // initial two step moves
+                        if (source.y == startingRank && !board[source + forward].HasValue)
+                        {
+                            yield return new ChessMove(sourcePiece, source, source + forward * 2);
+                        }
+
+                        // capture opponent's piece
+                        foreach (Direction dir in new[] { new Direction(1, forward.dy), new Direction(-1, forward.dy) })
+                        {
+                            var target = source + dir;
+                            if (target.IsOnBoard && board.TryGetPiece(target, out var targetPiece) && targetPiece.Color != currentPlayerColor)
                             {
-                                yield return new ChessMove(sourcePiece, source, singleStep);
+                                yield return new ChessMove(sourcePiece, source, target);
                             };
-
-                            // initial two step moves
-                            if (source.y == startingRank && !Board.Board[source + forward].HasValue)
+                        }
+                        // Promotion
+                        if (source.y == finalRank)
+                        {
+                            var promotionTarget = new Square(source.x, finalRank);
+                            foreach (ChessPieceKind promoteIntoKind in new[] { ChessPieceKind.Queen, ChessPieceKind.Knight })
                             {
-                                yield return new ChessMove(sourcePiece, source, source + forward * 2);
+                                // TODO: ensure that CommitMove understands this as a promotion
+                                var promotecInto = new ChessPiece(currentPlayerColor, promoteIntoKind);
+                                yield return new ChessMove(promotecInto, source, promotionTarget);
                             }
-
-                            // capture opponent's piece
-                            foreach (Direction dir in new[] { new Direction(1, forward.dy), new Direction(-1, forward.dy) })
+                        }
+                        // TODO en passant
+                        break;
+                    case ChessPieceKind.King:
+                        foreach (var move in ComputeMoves(source, sourcePiece, board, KING_DIRECTIONS, 1))
+                        {
+                            yield return move;
+                        }
+                        // castling
+                        var rank = currentPlayerColor == ChessPieceColor.White ? 0 : 7;
+                        if (source == new Square(4, rank) // king on its original position
+                                                          //  && this.Board.CastlingAvailable(CurrentPlayerColor)
+                        )
+                        {
+                            //// TODO the castling logic should use the lookup that is used for the overall moves computation to look for pieces that could possible attack the empty spaces
+                            var right = Direction.E;
+                            var kingsideRookSquare = board[source + right * 3];
+                            if (!board[source + right * 1].HasValue
+                                && !board[source + right * 2].HasValue
+                                && kingsideRookSquare.HasValue && kingsideRookSquare.Value.Kind == ChessPieceKind.Rook)
                             {
-                                var target = source + dir;
-                                if (target.IsOnBoard && Board.Board.TryGetPiece(target, out var targetPiece) && targetPiece.Color != CurrentPlayerColor)
-                                {
-                                    yield return new ChessMove(sourcePiece, source, target);
-                                };
+                                yield return ChessMove.KingSideCastling(currentPlayerColor);
                             }
-                            // Promotion
-                            if (source.y == finalRank)
+                            var left = Direction.W;
+                            var queensideRookSquare = board[source + left * 4];
+                            if (chessGameState.CastlingAvailable(currentPlayerColor)
+                                && !board[source + left * 1].HasValue
+                                && !board[source + left * 2].HasValue
+                                && !board[source + left * 3].HasValue
+                                && queensideRookSquare.HasValue && queensideRookSquare.Value.Kind == ChessPieceKind.Rook)
                             {
-                                var promotionTarget = new Square(source.x, finalRank);
-                                foreach (ChessPieceKind promoteIntoKind in new[] { ChessPieceKind.Queen, ChessPieceKind.Knight })
-                                {
-                                    // TODO: ensure that CommitMove understands this as a promotion
-                                    var promotecInto = new ChessPiece(CurrentPlayerColor, promoteIntoKind);
-                                    yield return new ChessMove(promotecInto, source, promotionTarget);
-                                }
+                                yield return ChessMove.QueenSideCastling(currentPlayerColor);
                             }
-                            // TODO en passant
-                            break;
-                        case ChessPieceKind.King:
-                            foreach (var move in ComputeMoves(source, sourcePiece, board, KING_DIRECTIONS, 1))
-                            {
-                                yield return move;
-                            }
-                            // castling
-                            var rank = CurrentPlayerColor == ChessPieceColor.White ? 0 : 7;
-                            if (source == new Square(4, rank) // king on its original position
-                            //  && this.Board.CastlingAvailable(CurrentPlayerColor)
-                            )
-                            {
-                                //// TODO the castling logic should use the lookup that is used for the overall moves computation to look for pieces that could possible attack the empty spaces
-                                var right = Direction.E;
-                                var kingsideRookSquare = this.Board.Board[source + right * 3];
-                                if (!this.Board.Board[source + right * 1].HasValue
-                                    && !this.Board.Board[source + right * 2].HasValue
-                                    && kingsideRookSquare.HasValue && kingsideRookSquare.Value.Kind == ChessPieceKind.Rook)
-                                {
-                                    yield return ChessMove.KingSideCastling(CurrentPlayerColor);
-                                }
-                                var left = Direction.W;
-                                var queensideRookSquare = this.Board.Board[source + left * 4];
-                                if (this.Board.CastlingAvailable(CurrentPlayerColor)
-                                    && !this.Board.Board[source + left * 1].HasValue
-                                    && !this.Board.Board[source + left * 2].HasValue
-                                    && !this.Board.Board[source + left * 3].HasValue
-                                    && queensideRookSquare.HasValue && queensideRookSquare.Value.Kind == ChessPieceKind.Rook)
-                                {
-                                    yield return ChessMove.QueenSideCastling(CurrentPlayerColor);
-                                }
-                            }
-                            break;
-                        case ChessPieceKind.Knight:
-                            foreach (var move in ComputeMoves(source, sourcePiece, board, KNIGHT_DIRECTION, 1))
-                            {
-                                yield return move;
-                            }
-                            break;
-                        default:
-                            throw new InvalidOperationException($"No piece of kind {sourcePiece.Kind} found");
-                    }
+                        }
+                        break;
+                    case ChessPieceKind.Knight:
+                        foreach (var move in ComputeMoves(source, sourcePiece, board, KNIGHT_DIRECTION, 1))
+                        {
+                            yield return move;
+                        }
+                        break;
+                    default:
+                        throw new InvalidOperationException($"No piece of kind {sourcePiece.Kind} found");
                 }
             }
         }
@@ -244,7 +273,18 @@ namespace Fx.Game.Chess
         }
 
 
-        public Outcome<TPlayer> Outcome => null; //// TODO TODO TODO this and "check" rules
+        public Outcome<TPlayer> Outcome
+        {
+            get
+            {
+                if (this.Moves.Any())
+                {
+                    return null;
+                }
+
+                return new Outcome<TPlayer>(new[] { this.CurrentPlayerColor == ChessPieceColor.White ? this.black : this.white });
+            }
+        }
 
         public ChessGame<TPlayer> CommitMove(ChessMove move)
         {
@@ -275,7 +315,7 @@ namespace Fx.Game.Chess
             var newBoard = new ChessBoard(clonedBoard);
             var newGameState = new ChessGameState(newBoard, this.Board.HalfMoveCount + 1);
 
-            var game = new ChessGame<TPlayer>(this.players[0], this.players[1], newGameState, (ChessPieceColor)(((int)CurrentPlayerColor + 1) % 2));
+            var game = new ChessGame<TPlayer>(this.white, this.black, newGameState, (ChessPieceColor)(((int)CurrentPlayerColor + 1) % 2));
             return game;
         }
 

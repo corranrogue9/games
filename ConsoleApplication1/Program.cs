@@ -265,7 +265,7 @@
         {
             var scores = new Dictionary<ChessPieceKind, int>()
             {
-                { ChessPieceKind.King, 100000000 },
+                { ChessPieceKind.King, 0 },
                 { ChessPieceKind.Pawn, 1},
                 { ChessPieceKind.Knight, 3},
                 { ChessPieceKind.Bishop, 3},
@@ -286,6 +286,8 @@
         {
             //// TODO comparers and tests, kind of like the driver stuff
 
+            var seed = Environment.TickCount;
+            var rng = new Random(seed);
             var displayer = new ChessConsoleDisplayer<string>();
             var tree = "tree";
             var random = "random";
@@ -293,9 +295,9 @@
                 new Dictionary<string, IStrategy<Fx.Game.Chess.ChessGame<string>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, string>>
                 {
                     ////{ computer, new RandomStrategy<Fx.Game.Chess.ChessGame<string>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, string>() },
-                    { random, new RandomStrategy<Fx.Game.Chess.ChessGame<string>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, string>() },
+                    { random, new RandomStrategy<Fx.Game.Chess.ChessGame<string>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, string>(rng) },
                     ////{ tree, new GameTreeDepthStrategy<Fx.Game.Chess.ChessGame<string>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, string>(game => ChessScore(game, tree), Node.TreeFactory) }
-                    { tree, new ChessStrategy<string>(tree) },
+                    { tree, new ChessStrategy<string>(tree, StringComparer.OrdinalIgnoreCase) },
                     // { human, new UserInterfaceStrategy<Fx.Game.Chess.Chess<string>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, string>(displayer) },
                 },
                 displayer);
@@ -309,10 +311,12 @@
 
             private readonly GameTreeDepthStrategy<Fx.Game.Chess.ChessGame<TPlayer>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, TPlayer> treeStrategy;
 
-            public ChessStrategy(TPlayer player)
+            public ChessStrategy(TPlayer player, IEqualityComparer<TPlayer> playerComparer)
             {
                 this.maximizeMovesStrategy = MaximizeMovesStrategy.Default<Fx.Game.Chess.ChessGame<TPlayer>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, TPlayer>();
-                this.treeStrategy = new GameTreeDepthStrategy<ChessGame<TPlayer>, ChessGameState, Fx.Game.Chess.ChessMove, TPlayer>(game => ChessScore(game, player), Node.TreeFactory);
+                this.treeStrategy = new GameTreeDepthStrategy<ChessGame<TPlayer>, ChessGameState, Fx.Game.Chess.ChessMove, TPlayer>(
+                    game => playerComparer.Equals(game.CurrentPlayer, player) && game.Outcome != null ? 1000000 : ChessScore(game, player),
+                    Node.TreeFactory);
 
             }
 
@@ -365,7 +369,8 @@
                         continue;
                     }
 
-                    return moves[selectedMove];
+                    var move = moves[selectedMove];
+                    return move;
                 }
             }
         }

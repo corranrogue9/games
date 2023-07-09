@@ -30,9 +30,8 @@
                 var strategy = strategies[game.CurrentPlayer];
                 displayer.DisplayBoard(game);
                 displayer.DisplayMoves(game);
-                Console.WriteLine($"{DateTime.UtcNow}");
                 var move = strategy.SelectMove(game);
-                Console.WriteLine($"{DateTime.UtcNow}");
+                Console.WriteLine($"{game.CurrentPlayer} selected {move}"); //// TODO move.tostring cannot be relied on
                 game = game.CommitMove(move);
                 if (game.Outcome != null)
                 {
