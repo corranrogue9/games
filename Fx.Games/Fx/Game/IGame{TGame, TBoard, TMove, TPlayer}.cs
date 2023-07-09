@@ -43,7 +43,9 @@
         Outcome<TPlayer> Outcome { get; }
     }
 
-    public interface IGameWithHiddenInformation<out TGame, out TBoard, TMove, TPlayer, out TDistribution> : IGame<TGame, TBoard, TMove, TPlayer> where TGame : IGameWithHiddenInformation<TGame, TBoard, TMove, TPlayer, TDistribution> where TDistribution : Distribution<TGame>
+    public interface IGameWithHiddenInformation<out TGame, out TBoard, TMove, TPlayer, out TDistribution> : IGame<TGame, TBoard, TMove, TPlayer>
+        where TGame : IGameWithHiddenInformation<TGame, TBoard, TMove, TPlayer, TDistribution>
+        where TDistribution : Distribution<TGame>
     {
         /// <summary>
         /// TODO why does the tdistribution type parameter get around the covariance issue?
@@ -163,7 +165,7 @@
             {
                 if (distribution.Remainder is Distribution<T>.PartialDistribution partialDistribution)
                 {
-                    return Sample(partialDistribution, weight - distribution.Liklihood); //// TODO just subtraction won't work here i think
+                    return Sample(partialDistribution, (weight - distribution.Liklihood) / distribution.Liklihood); //// TODO just subtraction won't work here i think
                 }
                 else
                 {

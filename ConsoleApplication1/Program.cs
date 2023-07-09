@@ -31,8 +31,35 @@
             (nameof(HiddenPegsHuman), HiddenPegsHuman),
         };
 
+        public static Distribution<T> Generate<T>(IEnumerable<(double, T)> weights)
+        {
+            using (var enumerator = weights.GetEnumerator())
+            {
+                enumerator.
+            }
+        }
+
         static void Main(string[] args)
         {
+            new Distribution<int>.PartialDistribution(
+                0.56, 3, new Distribution<int>.PartialDistribution(0.15, 2, new Distribution<int>.CompleteDistribution(4)));
+
+
+
+            var distribution = new Distribution<int>.PartialDistribution(
+                0.25, 1, new Distribution<int>.PartialDistribution(
+                0.07, 2, new Distribution<int>.PartialDistribution(
+                0.56, 3, new Distribution<int>.CompleteDistribution(
+                /*0.12, */4))));
+            var value11 = distribution.Sample(0.0);
+            var value12 = distribution.Sample(0.25);
+            var value21 = distribution.Sample(0.26);
+            var value22 = distribution.Sample(0.32);
+            var value31 = distribution.Sample(0.33);
+            var value32 = distribution.Sample(0.88);
+            var value41 = distribution.Sample(0.89);
+            var value42 = distribution.Sample(1.0);
+
             for (int i = 0; true; ++i)
             {
                 var sku = GetSkuFromArgsOrConsole(args, i);
