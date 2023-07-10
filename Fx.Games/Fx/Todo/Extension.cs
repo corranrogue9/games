@@ -6,6 +6,7 @@
 
     using Fx.Game;
     using Fx.Tree;
+    using Fx.TreeFactory;
 
     /// <summary>
     /// 
@@ -41,6 +42,16 @@
             this ITree<IGame<TGame, TBoard, TMove, TPlayer>> gameTree,
             TPlayer player,
             IEqualityComparer<TPlayer> playerComparer) //// TODO wouldn't it be nice if there were a igametree and this was an extension on that?
+            where TGame : IGame<TGame, TBoard, TMove, TPlayer>
+        {
+            return Decide(gameTree, player, playerComparer, Node.TreeFactory);
+        }
+
+        public static ITree<(IGame<TGame, TBoard, TMove, TPlayer>, TMove, (DecisionTreeStatus, double))> Decide<TGame, TBoard, TMove, TPlayer>(
+            this ITree<IGame<TGame, TBoard, TMove, TPlayer>> gameTree,
+            TPlayer player,
+            IEqualityComparer<TPlayer> playerComparer,
+            ITreeFactory treeFactory) //// TODO wouldn't it be nice if there were a igametree and this was an extension on that?
             where TGame : IGame<TGame, TBoard, TMove, TPlayer>
         {
             return gameTree.Select(
@@ -79,7 +90,20 @@
                         }
                     }
                 },
-                Node.TreeFactory);
+                treeFactory);
+        }
+
+        private sealed class Factory : ITreeFactory
+        {
+            public ITree<T> CreateInner<T>(T value, IEnumerable<ITree<T>> children)
+            {
+                throw new NotImplementedException();
+            }
+
+            public ITree<T> CreateLeaf<T>(T value)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }
