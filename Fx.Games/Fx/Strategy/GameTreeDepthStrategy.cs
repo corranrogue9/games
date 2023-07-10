@@ -32,9 +32,12 @@
             return game.Moves.Maximum(move =>
             {
                 var testGame = game.CommitMove(move);
-                return testGame
+                var score = testGame
                     .ToTree<TGame, TBoard, TMove, TPlayer>(2)
-                    .Fold(this.selector, (game, scores) => scores.Max());
+                    .DepthTree(this.treeFactory)
+                    .Select(tuple => (tuple.Depth, this.selector(tuple.Value)), Node.TreeFactory)
+                    .Fold(tuple => tuple.Item2 / tuple.Depth, (game, scores) => scores.Max()); //// TODO is there a cheaper way to accommodate picking the shortest path for tied scores? i think that this algorithm might not always pick the highest score...
+                return score;
             });
         }
     }

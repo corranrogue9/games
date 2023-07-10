@@ -286,7 +286,7 @@
         {
             //// TODO comparers and tests, kind of like the driver stuff
 
-            var seed = Environment.TickCount;
+            var seed = -2056050046; //// Environment.TickCount;
             var rng = new Random(seed);
             var displayer = new ChessConsoleDisplayer<string>();
             var tree = "tree";
@@ -309,14 +309,17 @@
         {
             private readonly MaximizeMovesStrategy<Fx.Game.Chess.ChessGame<TPlayer>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, TPlayer> maximizeMovesStrategy;
 
-            private readonly GameTreeDepthStrategy<Fx.Game.Chess.ChessGame<TPlayer>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, TPlayer> treeStrategy;
+            private readonly GameTreeDepthStrategy<Fx.Game.Chess.ChessGame<TPlayer>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, TPlayer> gameTreeStrategy;
+
+            private readonly DecisionTreeStrategy<Fx.Game.Chess.ChessGame<TPlayer>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, TPlayer> decisionTreeStrategy;
 
             public ChessStrategy(TPlayer player, IEqualityComparer<TPlayer> playerComparer)
             {
                 this.maximizeMovesStrategy = MaximizeMovesStrategy.Default<Fx.Game.Chess.ChessGame<TPlayer>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, TPlayer>();
-                this.treeStrategy = new GameTreeDepthStrategy<ChessGame<TPlayer>, ChessGameState, Fx.Game.Chess.ChessMove, TPlayer>(
-                    game => game.Board.Board.Board.Cast<ChessPiece?>().Where(piece => piece?.Color == ChessPieceColor.White && piece?.Kind != ChessPieceKind.King).Any() ? ChessScore(game, player) : (game.Outcome != null ? 100000 : ChessScore(game, player)), //// TODO hard-coded piece color
+                this.gameTreeStrategy = new GameTreeDepthStrategy<ChessGame<TPlayer>, ChessGameState, Fx.Game.Chess.ChessMove, TPlayer>(
+                    game =>  ChessScore(game, player),
                     Node.TreeFactory);
+                this.decisionTreeStrategy = new DecisionTreeStrategy<ChessGame<TPlayer>, ChessGameState, Fx.Game.Chess.ChessMove, TPlayer>(player, playerComparer);
 
             }
 
@@ -327,9 +330,15 @@
                     return this.maximizeMovesStrategy.SelectMove(game);
                 }
                 else*/
+                //// TODO hard-coded piece color
+                ////if (game.Board.Board.Board.Cast<ChessPiece?>().Where(piece => piece?.Color == ChessPieceColor.White && piece?.Kind != ChessPieceKind.King).Any())
                 {
-                    return this.treeStrategy.SelectMove(game);
+                    return this.gameTreeStrategy.SelectMove(game);
                 }
+                /*else
+                {
+                    return this.decisionTreeStrategy.SelectMove(game);
+                }*/
             }
         }
 

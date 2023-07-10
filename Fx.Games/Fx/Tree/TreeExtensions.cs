@@ -35,14 +35,14 @@
             return tree.Fold(nodeValue => 0, (nodeValue, nodes) => nodes.Max());
         }
 
-        public static ITree<int> DepthTree<T>(this ITree<T> tree, ITreeFactory treeFactory)
+        public static ITree<(int Depth, T Value)> DepthTree<T>(this ITree<T> tree, ITreeFactory treeFactory)
         {
             return tree.DepthTree(treeFactory, 0);
         }
 
-        private static ITree<int> DepthTree<T>(this ITree<T> tree, ITreeFactory treeFactory, int depth)
+        private static ITree<(int Depth, T Value)> DepthTree<T>(this ITree<T> tree, ITreeFactory treeFactory, int depth)
         {
-            return treeFactory.CreateInner(depth, tree.Children.Select(child => child.DepthTree(treeFactory, depth + 1)));
+            return treeFactory.CreateInner((depth, tree.Value), tree.Children.Select(child => child.DepthTree(treeFactory, depth + 1)));
         }
 
         public static IEnumerable<T> Leaves<T>(this ITree<T> tree)

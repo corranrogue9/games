@@ -157,9 +157,9 @@ namespace Fx.Game.Chess
                         break;
                     case ChessPieceKind.Pawn:
                         //// TODO possible bugs: do pawns capture when moving forward?
-                        var forward = new Direction(0, currentPlayerColor == ChessPieceColor.White ? 1 : -1);
-                        var startingRank = currentPlayerColor == ChessPieceColor.White ? 1 : 6;
-                        var finalRank = currentPlayerColor == ChessPieceColor.White ? 7 : 0;
+                        var forward = new Direction(0, sourcePiece.Color == ChessPieceColor.White ? 1 : -1);
+                        var startingRank = sourcePiece.Color == ChessPieceColor.White ? 1 : 6;
+                        var finalRank = sourcePiece.Color == ChessPieceColor.White ? 7 : 0;
 
                         // single step move
                         var singleStep = source + forward;
@@ -277,7 +277,7 @@ namespace Fx.Game.Chess
         {
             get
             {
-                if (this.Moves.Any())
+                if (this.Moves.Any()) //// TODO if the player has no moves, but isn't in check, then it's actually a draw...
                 {
                     return null;
                 }
