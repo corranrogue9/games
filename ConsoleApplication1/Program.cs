@@ -2,7 +2,10 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
+    using System.Numerics;
+    using System.Runtime.CompilerServices;
     using System.Runtime.Versioning;
     using Fx.Displayer;
     using Fx.Driver;
@@ -297,14 +300,160 @@
                     ////{ computer, new RandomStrategy<Fx.Game.Chess.ChessGame<string>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, string>() },
                     ////{ random, new RandomStrategy<Fx.Game.Chess.ChessGame<string>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, string>(rng) },
                     { random, new GameTreeDepthStrategy<Fx.Game.Chess.ChessGame<string>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, string>(game => ChessScore(game, tree), Node.TreeFactory, 2) },
-                    { tree, new GameTreeDepthStrategy<Fx.Game.Chess.ChessGame<string>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, string>(game => ChessScore(game, tree), Node.TreeFactory, 3) },
-                    { "test", new DecisionTreeStrategy<Fx.Game.Chess.ChessGame<string>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, string>("test", StringComparer.OrdinalIgnoreCase) },
+                    ////{ tree, new GameTreeDepthStrategy<Fx.Game.Chess.ChessGame<string>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, string>(game => ChessScore(game, tree), Node.TreeFactory, 3) },
+                    ////{ "test", new DecisionTreeStrategy<Fx.Game.Chess.ChessGame<string>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, string>("test", StringComparer.OrdinalIgnoreCase) },
+                    { tree, new FixedCountStrategy<Fx.Game.Chess.ChessGame<string>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, string>(100, rng, tree, StringComparer.OrdinalIgnoreCase, EqualityComparer<Fx.Game.Chess.ChessMove>.Default, EqualityComparer<Fx.Game.Chess.ChessGame<string>>.Default) },
                     ////{ tree, new ChessStrategy<string>(tree, StringComparer.OrdinalIgnoreCase) },
                     // { human, new UserInterfaceStrategy<Fx.Game.Chess.Chess<string>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, string>(displayer) },
                 },
                 displayer);
             var game = new Fx.Game.Chess.ChessGame<string>(random, tree);
             var result = driver.Run(game);
+        }
+
+        public sealed class ChessComparer<TPlayer> : IEqualityComparer<ChessGame<TPlayer>>
+        {
+            public bool Equals(ChessGame<TPlayer>? x, ChessGame<TPlayer>? y)
+            {
+                return x.Equals(y);
+            }
+
+            public int GetHashCode([DisallowNull] ChessGame<TPlayer> obj)
+            {
+                var hashcode = 0;
+                for (int i = 0; i < 8; ++i)
+                {
+                    for (int j = 0; j < 8; ++j)
+                    {
+                        hashcode ^= obj.Board.Board.Board[i, j].GetHashCode();
+                    }
+                }
+
+                return hashcode;
+            }
+        }
+
+        public sealed class FixedCountStrategy<TGame, TBoard, TMove, TPlayer> : IStrategy<TGame, TBoard, TMove, TPlayer> where TGame : IGame<TGame, TBoard, TMove, TPlayer>
+        {
+            private readonly int count;
+
+            private readonly Random random;
+
+            private readonly TPlayer player; //// TODO should this be a property on istrategy?
+
+            private readonly IEqualityComparer<TPlayer> playerComparer;
+
+            private readonly IEqualityComparer<TMove> moveComparer;
+
+            private readonly IEqualityComparer<TGame> gameComparer;
+
+            private sealed class NewComparer : IEqualityComparer<(TGame, TMove)>
+            {
+                private readonly IEqualityComparer<TMove> moveComparer;
+
+                private readonly IEqualityComparer<TGame> gameComparer;
+
+                public NewComparer(IEqualityComparer<TMove> moveComparer, IEqualityComparer<TGame> gameComparer)
+                {
+                    this.moveComparer = moveComparer;
+                    this.gameComparer = gameComparer;
+                }
+
+                public bool Equals((TGame, TMove) x, (TGame, TMove) y)
+                {
+                    return this.gameComparer.Equals(x.Item1, y.Item1) && this.moveComparer.Equals(x.Item2, y.Item2);
+                }
+
+                public int GetHashCode([DisallowNull] (TGame, TMove) obj)
+                {
+                    return this.gameComparer.GetHashCode(obj.Item1) ^ this.moveComparer.GetHashCode(obj.Item2);
+                }
+            }
+
+            public FixedCountStrategy(int count, Random random, TPlayer player, IEqualityComparer<TPlayer> playerComparer, IEqualityComparer<TMove> moveComparer, IEqualityComparer<TGame> gameComparer)
+            {
+                this.count = count;
+                this.random = random;
+                this.player = player;
+                this.playerComparer = playerComparer;
+                this.moveComparer = moveComparer;
+                this.gameComparer = gameComparer;
+            }
+
+            public TMove SelectMove(TGame game)
+            {
+                if (game.Outcome != null)
+                {
+                    throw new InvalidOperationException("TODO");
+                }
+
+                var oldGame = game;
+                var moveScores = new Dictionary<TMove, List<WinnabilityScore<TGame, TBoard, TMove, TPlayer>>>(this.moveComparer);
+                ////var selectedMoves = new Dictionary<TGame, List<TMove>>(this.gameComparer);
+                for (int i = 0; i < this.count; ++i)
+                {
+                    TMove originalMove = random.Choose(game.Moves.ToList());
+                    var move = originalMove;
+                    while (game.Outcome == null)
+                    {
+                        /*if (!selectedMoves.TryGetValue(game, out var previouslySelectedMoves))
+                        {
+                            previouslySelectedMoves = new List<TMove>();
+                            selectedMoves[game] = previouslySelectedMoves;
+                        }*/
+
+                        var moves = game.Moves;
+                        ////var elligibleMoves = moves.Where(move => !previouslySelectedMoves.Contains(move, this.moveComparer)).ToList();
+                        var elligibleMoves = moves.ToList();
+
+                        move = random.Choose(elligibleMoves);
+                        ////previouslySelectedMoves.Add(move);
+                        game = game.CommitMove(move);
+                    }
+
+                    var score = ComputeScore2(game, this.player, this.playerComparer);
+                    if (!moveScores.TryGetValue(originalMove, out var scores))
+                    {
+                        scores = new List<WinnabilityScore<TGame, TBoard, TMove, TPlayer>>();
+                        moveScores[originalMove] = scores;
+                    }
+
+                    scores.Add(score);
+                    game = oldGame;
+                }
+
+                var val = moveScores.Maximum(kvp => kvp.Value.Average(score => score.Score.Score)).Key;
+                return val;
+            }
+        }
+
+        public static WinnabilityScore<TGame, TBoard, TMove, TPlayer> ComputeScore2<TGame, TBoard, TMove, TPlayer>(IGame<TGame, TBoard, TMove, TPlayer> game, TPlayer player, IEqualityComparer<TPlayer> playerComparer) where TGame : IGame<TGame, TBoard, TMove, TPlayer>
+        {
+            return new WinnabilityScore<TGame, TBoard, TMove, TPlayer>()
+            {
+                Game = game,
+                Move = default(TMove),
+                Score =
+                    game.Outcome?.Winners.Contains(player, playerComparer) == true ? new WinnabilityScore<TGame, TBoard, TMove, TPlayer>.SafeScore() { Status = DecisionTreeStatus.Win, Score = 1.0 } :
+                    game.Outcome?.Winners.Any() == false ? new WinnabilityScore<TGame, TBoard, TMove, TPlayer>.SafeScore() { Status = DecisionTreeStatus.Draw, Score = 0.0 } :
+                    new WinnabilityScore<TGame, TBoard, TMove, TPlayer>.SafeScore() { Status = DecisionTreeStatus.Lose, Score = -1.0 },
+            };
+        }
+
+        public sealed class WinnabilityScore<TGame, TBoard, TMove, TPlayer> where TGame : IGame<TGame, TBoard, TMove, TPlayer>
+        {
+            public IGame<TGame, TBoard, TMove, TPlayer> Game { get; set; }
+        
+            public TMove Move { get; set; }
+
+            public SafeScore Score { get; set; }
+
+            public sealed class SafeScore
+            {
+                public DecisionTreeStatus Status { get; set; }
+
+                public double Score { get; set; }
+            }
         }
 
         private sealed class ChessStrategy<TPlayer> : IStrategy<Fx.Game.Chess.ChessGame<TPlayer>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, TPlayer>

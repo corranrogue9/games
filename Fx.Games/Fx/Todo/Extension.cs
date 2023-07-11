@@ -105,5 +105,31 @@
                 throw new NotImplementedException();
             }
         }
+
+        public static void asdf()
+        {
+            var stuff = new[] { "asdF" };
+
+            if (stuff.Any(out var first, out var remainder))
+            {
+            }
+        }
+
+        public static bool Any<T>(this IEnumerable<T> source, out T first, out IEnumerable<T> remainder)
+        {
+            using (var enumerator = source.GetEnumerator())
+            {
+                if (!enumerator.MoveNext())
+                {
+                    first = default;
+                    remainder = default;
+                    return false;
+                }
+
+                first = enumerator.Current;
+                remainder = source.Skip(1); //// TODO
+                return true;
+            }
+        }
     }
 }

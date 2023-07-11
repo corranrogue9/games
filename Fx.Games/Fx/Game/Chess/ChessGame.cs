@@ -5,7 +5,7 @@ namespace Fx.Game.Chess
 
 
     /// <threadsafety static="true" instance="true"/>
-    public sealed class ChessGame<TPlayer> : IGame<ChessGame<TPlayer>, ChessGameState, ChessMove, TPlayer>
+    public sealed class ChessGame<TPlayer> : IGame<ChessGame<TPlayer>, ChessGameState, ChessMove, TPlayer>, IEquatable<ChessGame<TPlayer>>
     {
 
         private readonly TPlayer white;
@@ -272,17 +272,31 @@ namespace Fx.Game.Chess
             }
         }
 
-
         public Outcome<TPlayer> Outcome
         {
             get
             {
+                if (this.Board.HalfMoveCount > 1000) //// TODO correctly compute this
+                {
+                    return new Outcome<TPlayer>(Enumerable.Empty<TPlayer>());
+                }
+
                 if (this.Moves.Any()) //// TODO if the player has no moves, but isn't in check, then it's actually a draw...
                 {
                     return null;
                 }
-
-                return new Outcome<TPlayer>(new[] { this.CurrentPlayerColor == ChessPieceColor.White ? this.black : this.white });
+                else if (HasACheckMove(this.OpponentPlayerColor, this.Board))
+                {
+                    return new Outcome<TPlayer>(new[] { this.OpponentPlayerColor == ChessPieceColor.White ? this.black : this.white }); //// TODO fix this
+                }
+                else if (HasACheckMove(this.CurrentPlayerColor, this.Board))
+                {
+                    return new Outcome<TPlayer>(new[] { this.CurrentPlayerColor == ChessPieceColor.White ? this.black : this.white }); //// TODO fix this
+                }
+                else
+                {
+                    return new Outcome<TPlayer>(Enumerable.Empty<TPlayer>());
+                }
             }
         }
 
@@ -325,6 +339,22 @@ namespace Fx.Game.Chess
             var piece2 = board[square2.y, square2.x];
             board[square1.y, square1.x] = piece2;
             board[square2.y, square2.x] = piece1;
+        }
+
+        public bool Equals(ChessGame<TPlayer>? other)
+        {
+            for (int i = 0; i < 8; ++i)
+            {
+                for (int j = 0; j < 8; ++j)
+                {
+                    if (this.Board.Board.Board[i, j] != other.Board.Board.Board[i, j])
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
         }
     }
 }

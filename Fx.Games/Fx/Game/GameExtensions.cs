@@ -12,19 +12,38 @@
 
         public static ITree<IGame<TGame, TBoard, TMove, TPlayer>> ToTree<TGame, TBoard, TMove, TPlayer>(this IGame<TGame, TBoard, TMove, TPlayer> game, ITreeFactory treeFactory) where TGame : IGame<TGame, TBoard, TMove, TPlayer>
         {
-            return game.ToTree(-1, treeFactory);
+            return ToTree(game, treeFactory, EqualityComparer<IGame<TGame, TBoard, TMove, TPlayer>>.Default);
         }
 
-        internal static ITree<IGame<TGame, TBoard, TMove, TPlayer>> ToTree<TGame, TBoard, TMove, TPlayer>(this IGame<TGame, TBoard, TMove, TPlayer> game, int depth, ITreeFactory treeFactory) where TGame : IGame<TGame, TBoard, TMove, TPlayer>
+        public static ITree<IGame<TGame, TBoard, TMove, TPlayer>> ToTree<TGame, TBoard, TMove, TPlayer>(this IGame<TGame, TBoard, TMove, TPlayer> game, ITreeFactory treeFactory, IEqualityComparer<IGame<TGame, TBoard, TMove, TPlayer>> gameComparer) where TGame : IGame<TGame, TBoard, TMove, TPlayer>
         {
+            return game.ToTree(-1, treeFactory, new HashSet<IGame<TGame, TBoard, TMove, TPlayer>>(gameComparer));
+        }
+
+        internal static ITree<IGame<TGame, TBoard, TMove, TPlayer>> ToTree<TGame, TBoard, TMove, TPlayer>(
+            this IGame<TGame, TBoard, TMove, TPlayer> game,
+            int depth,
+            ITreeFactory treeFactory, 
+            HashSet<IGame<TGame, TBoard, TMove, TPlayer>> games) where TGame : IGame<TGame, TBoard, TMove, TPlayer>
+        {
+            ////var pointer = new Pointer<ITree<IGame<TGame, TBoard, TMove, TPlayer>>>();
             if (game.Outcome == null && depth != 0)
             {
-                return treeFactory.CreateInner(game, game.Moves.Select(move => game.CommitMove(move).ToTree(depth - 1, treeFactory)));
+                var tree = treeFactory.CreateInner(game, game.Moves.Select(move => game.CommitMove(move)).Where(newGame => !games.Contains(newGame)).Select(newGame => newGame.ToTree(depth - 1, treeFactory, games)));
+                ////pointer.Value = tree;
+                return tree;
             }
             else
             {
-                return treeFactory.CreateLeaf(game);
+                var tree = treeFactory.CreateLeaf(game);
+                ////pointer.Value = tree;
+                return tree;
             }
+        }
+
+        private sealed class Pointer<T>
+        {
+            public T Value { get; set; }
         }
 
         public static ITree<TGame> ToTree<TGame, TBoard, TMove, TPlayer>(this TGame game) where TGame : IGame<TGame, TBoard, TMove, TPlayer>
