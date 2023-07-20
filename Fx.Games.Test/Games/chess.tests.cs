@@ -184,7 +184,7 @@ namespace Fx.Game.Chess
         public void BoardParserTest(string input)
         {
             var board = FENParser.ParseBoard(input);
-            // System.Console.WriteLine(board);
+            System.Console.WriteLine("{0}", board);
             System.Console.WriteLine("{0:F}", board);
             System.Console.WriteLine("{0}", board.ToString("F"));
 
