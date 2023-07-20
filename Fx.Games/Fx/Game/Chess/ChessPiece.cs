@@ -6,6 +6,10 @@ namespace Fx.Game.Chess
 
     public enum ChessPieceColor { White, Black }
 
+    public static class ChessPieceColorExtensions
+    {
+        public static ChessPieceColor Opponent(this ChessPieceColor self) => self == ChessPieceColor.White ? ChessPieceColor.Black : ChessPieceColor.White;
+    }
 
     public enum ChessPieceKind { King, Queen, Knight, Bishop, Rook, Pawn }
 

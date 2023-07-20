@@ -15,24 +15,23 @@ namespace Fx.Game.Chess
         public ChessGameState Board { get; }
 
         public ChessGame(TPlayer white, TPlayer black)
-            : this(white, black, new ChessGameState(), ChessPieceColor.White)
+            : this(white, black, new ChessGameState())
         {
         }
 
-        private ChessGame(TPlayer white, TPlayer black, ChessGameState newState, ChessPieceColor newCurrentPlayerColor)
+        private ChessGame(TPlayer white, TPlayer black, ChessGameState newState)
         {
             this.white = white;
             this.black = black;
 
             Board = newState;
-            CurrentPlayerColor = newCurrentPlayerColor;
         }
 
-        public TPlayer CurrentPlayer => this.CurrentPlayerColor == ChessPieceColor.Black ? this.black : this.white;
+        public TPlayer CurrentPlayer => this.Board.Active == ChessPieceColor.Black ? this.black : this.white;
 
-        private ChessPieceColor CurrentPlayerColor { get; }
+        // private ChessPieceColor CurrentPlayerColor { get; }
 
-        private ChessPieceColor OpponentPlayerColor => (ChessPieceColor)((((int)this.CurrentPlayerColor) + 1) % 2);
+        // private ChessPieceColor OpponentPlayerColor => (ChessPieceColor)((((int)this.CurrentPlayerColor) + 1) % 2);
 
         public IReadOnlyDictionary<TPlayer, ChessPieceColor> PlayerColors => new Dictionary<TPlayer, ChessPieceColor>
         { {this.white, ChessPieceColor.White }, {this.black, ChessPieceColor.Black } };
@@ -98,13 +97,13 @@ namespace Fx.Game.Chess
         {
             get
             {
-                var currentPlayerMoves = CalculateMoves(this.CurrentPlayerColor, this.Board);
+                var currentPlayerMoves = CalculateMoves(this.Board.Active, this.Board);
 
-                return currentPlayerMoves.Where(move => !HasACheckMove(this.OpponentPlayerColor, this.CommitMove(move).Board));
+                return currentPlayerMoves.Where(move => !HasACheckMove(this.Board.Active.Opponent(), this.CommitMove(move).Board));
 
-                if (HasACheckMove(this.OpponentPlayerColor, this.Board))
+                if (HasACheckMove(this.Board.Active.Opponent(), this.Board))
                 {
-                    return currentPlayerMoves.Where(move => !HasACheckMove(this.OpponentPlayerColor, this.CommitMove(move).Board));
+                    return currentPlayerMoves.Where(move => !HasACheckMove(this.Board.Active.Opponent(), this.CommitMove(move).Board));
                 }
                 else
                 {
@@ -212,7 +211,8 @@ namespace Fx.Game.Chess
                             //// TODO the castling logic should use the lookup that is used for the overall moves computation to look for pieces that could possible attack the empty spaces
                             var right = Direction.E;
                             var kingsideRookSquare = board[source + right * 3];
-                            if (!board[source + right * 1].HasValue
+                            if (chessGameState.IsCastlingAvailable(currentPlayerColor, false)
+                                && !board[source + right * 1].HasValue
                                 && !board[source + right * 2].HasValue
                                 && kingsideRookSquare.HasValue && kingsideRookSquare.Value.Kind == ChessPieceKind.Rook)
                             {
@@ -220,7 +220,7 @@ namespace Fx.Game.Chess
                             }
                             var left = Direction.W;
                             var queensideRookSquare = board[source + left * 4];
-                            if (chessGameState.CastlingAvailable(currentPlayerColor)
+                            if (chessGameState.IsCastlingAvailable(currentPlayerColor, true)
                                 && !board[source + left * 1].HasValue
                                 && !board[source + left * 2].HasValue
                                 && !board[source + left * 3].HasValue
@@ -282,7 +282,7 @@ namespace Fx.Game.Chess
                     return null;
                 }
 
-                return new Outcome<TPlayer>(new[] { this.CurrentPlayerColor == ChessPieceColor.White ? this.black : this.white });
+                return new Outcome<TPlayer>(new[] { this.Board.Active == ChessPieceColor.White ? this.black : this.white });
             }
         }
 
@@ -313,9 +313,9 @@ namespace Fx.Game.Chess
             }
 
             var newBoard = new ChessBoard(clonedBoard);
-            var newGameState = new ChessGameState(newBoard, this.Board.HalfMoveCount + 1);
+            var newGameState = new ChessGameState(newBoard, this.Board.CastlingAvailability, this.Board.Active.Opponent(), this.Board.HalfMoveClock + 1, this.Board.FullMoveNumber + 1);
 
-            var game = new ChessGame<TPlayer>(this.white, this.black, newGameState, (ChessPieceColor)(((int)CurrentPlayerColor + 1) % 2));
+            var game = new ChessGame<TPlayer>(this.white, this.black, newGameState);
             return game;
         }
 

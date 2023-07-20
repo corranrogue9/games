@@ -114,6 +114,26 @@ namespace Fx.Game.Chess
             return Parse;
         }
 
+        public delegate bool Try<T>(string? s, out T value);
+
+        public static Parser<T> TrySelect<T>(this Parser<string> parser, Try<T> selector)
+        {
+            bool Parse(ReadOnlySpan<char> input, out ReadOnlySpan<char> remainder, [MaybeNullWhen(false)] out T value)
+            {
+                if (parser(input, out var rem, out var str) && selector(str, out var val))
+                {
+                    value = val;
+                    remainder = rem;
+                    return true;
+                }
+                value = default;
+                remainder = default;
+                return false;
+            }
+            return Parse;
+        }
+
+
         public static Parser<U> SelectMany<S, T, U>(this Parser<S> first, Func<S, Parser<T>> second, Func<S, T, U> selector)
         {
             bool Parse(ReadOnlySpan<char> input, out ReadOnlySpan<char> remainder, [MaybeNullWhen(false)] out U value)

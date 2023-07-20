@@ -61,13 +61,13 @@ namespace Fx.Game.Chess
         {
             return format switch
             {
-                "S" => ToGrid(),
+                "S" => ToGrid(true),
                 "F" => ToFen(),
-                _ => ToGrid()
+                _ => ToGrid(false)
             };
         }
 
-        private string ToGrid()
+        private string ToGrid(bool contrast)
         {
             TextWriter writer = new StringWriter();
 
@@ -78,12 +78,17 @@ namespace Fx.Game.Chess
                 writer.Write("\x1b[90m{0}\x1b[0m ", rank + 1);
                 for (var file = 0; file < 8; file++)
                 {
-                    var piece = Board[rank, file];
-                    // no color
-                    // writer.Write(Board[rank, file]?.Symbol() ?? '_');
-                    // with contrasting colors
-                    var color = piece == null ? 37 : piece?.Color == ChessPieceColor.White ? 33 : 31;
-                    writer.Write("\x1b[{0}m{1}\x1b[0m", color, Board[rank, file]?.Symbol() ?? '_');
+                    if (contrast)
+                    {
+                        var piece = Board[rank, file];
+                        // with contrasting colors
+                        var color = piece == null ? 37 : piece?.Color == ChessPieceColor.White ? 33 : 31;
+                        writer.Write("\x1b[{0}m{1}\x1b[0m", color, Board[rank, file]?.Symbol() ?? '_');
+                    }
+                    else
+                    {
+                        writer.Write(Board[rank, file]?.Symbol() ?? '_');
+                    }
                     writer.Write(' ');
                 }
                 writer.WriteLine(" \x1b[90m{0}\x1b[0m", rank + 1);
@@ -111,8 +116,8 @@ namespace Fx.Game.Chess
                             count += 1;
                             file += 1;
                         } while (file < 8 && Board[rank, file] == null);
-                        writer.Write("{0}", count);
                         file -= 1;
+                        writer.Write("{0}", count);
                     }
                     else
                     {

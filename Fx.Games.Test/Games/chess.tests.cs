@@ -184,11 +184,20 @@ namespace Fx.Game.Chess
         public void BoardParserTest(string input)
         {
             var board = FENParser.ParseBoard(input);
-            System.Console.WriteLine("{0}", board);
+            System.Console.WriteLine("{0:S}", board);
             System.Console.WriteLine("{0:F}", board);
-            System.Console.WriteLine("{0}", board.ToString("F"));
 
             Assert.AreEqual(input, board.ToString("F"));
+        }
+
+        [DataTestMethod]
+        [TestCategory("Board")]
+        [DataRow("kbK5/pp6/1P6/8/8/8/8/R7 w - -")]
+        public void FenParserTest(string input)
+        {
+            var game = FENParser.ParseGame(input);
+            System.Console.WriteLine("{0:S}", game.Board);
+            System.Console.WriteLine("{0:F}", game.Board);
         }
     }
 }
