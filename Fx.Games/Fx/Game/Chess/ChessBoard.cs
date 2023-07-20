@@ -4,7 +4,7 @@ using System.Drawing;
 namespace Fx.Game.Chess
 {
 
-    public sealed class ChessBoard
+    public sealed class ChessBoard : IFormattable
     {
         public ChessPiece?[,] Board { get; }
 
@@ -50,7 +50,24 @@ namespace Fx.Game.Chess
             }
         }
 
-        public override string ToString()
+        public override string ToString() => ToString("S");
+
+        public string ToString(string? format)
+        {
+            return ToString(format, null);
+        }
+
+        public string ToString(string? format, IFormatProvider? formatProvider)
+        {
+            return format switch
+            {
+                "S" => ToGrid(),
+                "F" => ToFen(),
+                _ => ToGrid()
+            };
+        }
+
+        private string ToGrid()
         {
             TextWriter writer = new StringWriter();
 
@@ -76,6 +93,36 @@ namespace Fx.Game.Chess
             return writer.ToString()!;
         }
 
+
+        private string ToFen()
+        {
+            TextWriter writer = new StringWriter();
+            for (var rank = 7; rank > -1; rank--)
+            {
+                if (rank != 7) { writer.Write("/"); }
+                for (var file = 0; file < 8; file++)
+                {
+                    var piece = Board[rank, file];
+                    if (piece == null)
+                    {
+                        var count = 0;
+                        do
+                        {
+                            count += 1;
+                            file += 1;
+                        } while (file < 8 && Board[rank, file] == null);
+                        writer.Write("{0}", count);
+                        file -= 1;
+                    }
+                    else
+                    {
+                        writer.Write("{0}", piece.Value.Symbol());
+                    }
+                }
+            }
+            return writer.ToString()!;
+        }
+
         public ChessPiece? this[Square coordinate]
         {
             get { return this.Board[coordinate.y, coordinate.x]; }
@@ -95,5 +142,7 @@ namespace Fx.Game.Chess
                 return true;
             }
         }
+
+
     }
 }

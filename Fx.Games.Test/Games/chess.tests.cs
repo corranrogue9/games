@@ -139,6 +139,9 @@ namespace Fx.Game.Chess
 
 
         [DataTestMethod]
+
+
+        [TestCategory("Play")]
         [DataRow("1. e4 e6 2. d4 b6")]
         [DataRow("1. e4 e6 2. d4 b6 3. a3 Bb7 4. Nc3 Nh6 5. Bxh6 gxh6 6. Be2 Qg5 7. Bg4 h5 8. Nf3 Qg6 9. Nh4 Qg5 10. Bxh5 Qxh4 11. Qf3 Kd8 12. Qxf7 Nc6 13. Qe8# 1-0")]
         [DataRow("1. e4 e6 2. d4 d5 3. Nc3 Nf6 4. Bg5 Be7 5. Bxf6 Bxf6 6. e5 Be7 7. Qg4 O-O 8. Bd3 f5 9. Qg3 c5 10. Nf3 Qb6 11. Na4 Qb4+ 12. Nc3 Qxb2 13. Kd2 cxd4 14. Nxd4 Bb4 15. Bb5 a6 16. Rhb1 Qxc3+ 17. Qxc3 Bxc3+ 18. Kxc3 axb5 19. Rxb5 Nc6 20. Nxc6 bxc6 21. Rc5 Bd7 22. a4 Ra6 23. a5 Rfa8 24. Kd4 g5 25. Ra4 h5 26. h3 f4 27. f3 Kf7 28. Kd3 Ke7 29. Ke2 Be8 30. Kf2 Kd7 31. g3 fxg3+ 32. Kxg3 Bg6 33. Ra2 Bf5 34. h4 g4 35. fxg4 Bxg4 36. Kf4 Rf8+ 37. Kg5 Rf5+ 38. Kh6 Rxe5 39. Ra4 Kd6 40. Rc3 c5 41. Rg3 c4 42. Kg7 Kc5 43. Kf6 Re2 44. Ke7 Rxc2 45. Rxg4 hxg4 46. h5 Rh2 47. Ra3 0-1")]
@@ -167,6 +170,7 @@ namespace Fx.Game.Chess
 
 
         [DataTestMethod]
+        [TestCategory("Board")]
         [DataRow("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR")]
         // https://www.wikiwand.com/en/Forsyth%E2%80%93Edwards_Notation#Examples
         [DataRow("rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR")]
@@ -174,13 +178,17 @@ namespace Fx.Game.Chess
         // https://database.lichess.org/#puzzles
         [DataRow("q3k1nr/1pp1nQpp/3p4/1P2p3/4P3/B1PP1b2/B5PP/5K2")]
         // https://www.sparkchess.com/chess-puzzles/milan-vidmar-vs-max-euwe.html
-        [DataRow("6k1/5p2/1p5p/p4Np1/5q2/Q6P/PPr5/3R3K w - - 1 0")]
+        [DataRow("6k1/5p2/1p5p/p4Np1/5q2/Q6P/PPr5/3R3K")]
         // https://www.sparkchess.com/chess-puzzles/paul-morphys-problem.html
-        [DataRow("kbK5/pp6/1P6/8/8/8/8/R7 w - -")]
+        [DataRow("kbK5/pp6/1P6/8/8/8/8/R7")]
         public void BoardParserTest(string input)
         {
             var board = FENParser.ParseBoard(input);
-            System.Console.WriteLine(board);
+            // System.Console.WriteLine(board);
+            System.Console.WriteLine("{0:F}", board);
+            System.Console.WriteLine("{0}", board.ToString("F"));
+
+            Assert.AreEqual(input, board.ToString("F"));
         }
     }
 }
