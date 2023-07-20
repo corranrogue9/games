@@ -2,7 +2,6 @@ namespace Fx.Game.Chess
 {
 
 
-
     // https://en.wikipedia.org/wiki/Algebraic_notation_(chess)
     public class SANParser
     {

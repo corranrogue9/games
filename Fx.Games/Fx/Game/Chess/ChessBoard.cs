@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Drawing;
 
 namespace Fx.Game.Chess
 {
@@ -12,6 +13,22 @@ namespace Fx.Game.Chess
             this.Board = board;
         }
 
+        public ChessBoard(IEnumerable<IEnumerable<ChessPiece?>> pieces)
+        {
+            this.Board = new ChessPiece?[8, 8];
+            var i = 0;
+            foreach (var row in pieces)
+            {
+                var j = 0;
+                foreach (var piece in row)
+                {
+                    this.Board[i, j] = piece;
+                    j += 1;
+                }
+                i += 1;
+            }
+        }
+
         private static readonly string INITIAL =
             "RNBQKBNR" +
             "PPPPPPPP" +
@@ -21,16 +38,6 @@ namespace Fx.Game.Chess
             "________" +
             "pppppppp" +
             "rnbqkbnr";
-
-        private static readonly string CHECK =
-            "_______K" +
-            "________" +
-            "P_____n_" +
-            "________" +
-            "________" +
-            "________" +
-            "________" +
-            "________";
 
         public ChessBoard()
         {
@@ -47,19 +54,24 @@ namespace Fx.Game.Chess
         {
             TextWriter writer = new StringWriter();
 
-            writer.WriteLine("\x1b[31;90m{0}\x1b[0m", "  a b c d e f g h");
+            writer.WriteLine("\x1b[90m{0}\x1b[0m", "  a b c d e f g h");
             // rank 8 on top (-> white at bottom)
             for (var rank = 7; rank > -1; rank--)
             {
-                writer.Write("\x1b[31;90m{0}\x1b[0m ", rank + 1);
+                writer.Write("\x1b[90m{0}\x1b[0m ", rank + 1);
                 for (var file = 0; file < 8; file++)
                 {
-                    writer.Write(Board[rank, file]?.Symbol() ?? '_');
+                    var piece = Board[rank, file];
+                    // no color
+                    // writer.Write(Board[rank, file]?.Symbol() ?? '_');
+                    // with contrasting colors
+                    var color = piece == null ? 37 : piece?.Color == ChessPieceColor.White ? 33 : 31;
+                    writer.Write("\x1b[{0}m{1}\x1b[0m", color, Board[rank, file]?.Symbol() ?? '_');
                     writer.Write(' ');
                 }
-                writer.WriteLine(" \x1b[31;90m{0}\x1b[0m", rank + 1);
+                writer.WriteLine(" \x1b[90m{0}\x1b[0m", rank + 1);
             }
-            writer.WriteLine("\x1b[31;90m{0}\x1b[0m", "  a b c d e f g h");
+            writer.WriteLine("\x1b[90m{0}\x1b[0m", "  a b c d e f g h");
 
             return writer.ToString()!;
         }

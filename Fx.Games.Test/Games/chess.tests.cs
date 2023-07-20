@@ -164,6 +164,19 @@ namespace Fx.Game.Chess
                 }
             }
         }
+
+
+        [DataTestMethod]
+        [DataRow("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR")]
+        // https://www.wikiwand.com/en/Forsyth%E2%80%93Edwards_Notation#Examples
+        [DataRow("rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR")]
+        [DataRow("rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R")]
+        // [DataRow("2B5/2p1B1nn/2PR2p1/1K2k3/1p2p3/2b1P3/5R2/8 w - - 0 1")]
+        public void BoardParserTest(string input)
+        {
+            var board = FENParser.ParseBoard(input);
+            System.Console.WriteLine(board);
+        }
     }
 }
 

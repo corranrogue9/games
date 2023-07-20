@@ -241,5 +241,58 @@ namespace Fx.Game.Chess
             return ParseEoi;
         }
 
+        public static Parser<IReadOnlyList<T>> Repeated<T>(this Parser<T> parser)
+        {
+            bool Parse(ReadOnlySpan<char> input, out ReadOnlySpan<char> remainder, [MaybeNullWhen(false)] out IReadOnlyList<T> value)
+            {
+                var res = new List<T>();
+
+                while (parser(input, out var rem, out var item))
+                {
+                    input = rem;
+                    res.Add(item);
+                }
+                value = res;
+                remainder = input;
+                return true;
+            }
+
+            return Parse;
+        }
+
+        public static Parser<IReadOnlyList<T>> SeparatedBy<T, S>(this Parser<T> parser, Parser<S> separator)
+        {
+            bool Parse(ReadOnlySpan<char> input, out ReadOnlySpan<char> remainder, [MaybeNullWhen(false)] out IReadOnlyList<T> value)
+            {
+                var res = new List<T>();
+
+                if (parser(input, out remainder, out var item))
+                {
+                    res.Add(item);
+                }
+                input = remainder;
+                while (separator(input, out remainder, out _))
+                {
+                    input = remainder;
+                    if (parser(input, out remainder, out item))
+                    {
+                        input = remainder;
+                        res.Add(item);
+                    }
+                    else
+                    {
+                        value = default;
+                        remainder = input;
+                        return false;
+                    }
+                }
+                value = res;
+                remainder = input;
+                return true;
+            }
+
+            return Parse;
+        }
+
     }
 }

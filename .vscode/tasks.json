@@ -36,6 +36,18 @@
                 "${workspaceFolder}/ConsoleApplication1/ConsoleApplication1.csproj"
             ],
             "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "test",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "test",
+                "-l",
+                "\"console;verbosity=detailed\"",
+                "${workspaceFolder}/Fx.Games.Test/Fx.Games.Test.csproj"
+            ],
+            "problemMatcher": "$msCompile"
         }
     ]
 }
