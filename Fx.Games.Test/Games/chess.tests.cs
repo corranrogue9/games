@@ -171,7 +171,12 @@ namespace Fx.Game.Chess
         // https://www.wikiwand.com/en/Forsyth%E2%80%93Edwards_Notation#Examples
         [DataRow("rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR")]
         [DataRow("rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R")]
-        // [DataRow("2B5/2p1B1nn/2PR2p1/1K2k3/1p2p3/2b1P3/5R2/8 w - - 0 1")]
+        // https://database.lichess.org/#puzzles
+        [DataRow("q3k1nr/1pp1nQpp/3p4/1P2p3/4P3/B1PP1b2/B5PP/5K2")]
+        // https://www.sparkchess.com/chess-puzzles/milan-vidmar-vs-max-euwe.html
+        [DataRow("6k1/5p2/1p5p/p4Np1/5q2/Q6P/PPr5/3R3K w - - 1 0")]
+        // https://www.sparkchess.com/chess-puzzles/paul-morphys-problem.html
+        [DataRow("kbK5/pp6/1P6/8/8/8/8/R7 w - -")]
         public void BoardParserTest(string input)
         {
             var board = FENParser.ParseBoard(input);
