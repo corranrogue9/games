@@ -80,14 +80,21 @@ namespace Fx.Game.Chess
                 {
                     if (contrast)
                     {
-                        var piece = Board[rank, file];
                         // with contrasting colors
-                        var color = piece == null ? 37 : piece?.Color == ChessPieceColor.White ? 33 : 31;
-                        writer.Write("\x1b[{0}m{1}\x1b[0m", color, Board[rank, file]?.Symbol() ?? '_');
+                        var piece = Board[rank, file];
+                        if (piece == null)
+                        {
+                            writer.Write(".");
+                        }
+                        else
+                        {
+                            var color = piece.Value.Color == ChessPieceColor.White ? 33 : 31;
+                            writer.Write("\x1b[{0}m{1}\x1b[0m", color, piece.Value.Symbol());
+                        }
                     }
                     else
                     {
-                        writer.Write(Board[rank, file]?.Symbol() ?? '_');
+                        writer.Write(Board[rank, file]?.Symbol() ?? '.');
                     }
                     writer.Write(' ');
                 }

@@ -49,6 +49,17 @@ namespace Fx.Game.Chess
 
         static readonly Parser<ChessPieceColor> Active =
                 Parsers.Regex("[wb]").Select(s => s == "w" ? ChessPieceColor.White : s == "b" ? ChessPieceColor.Black : throw new InvalidDataException($"invalid active player {s}"));
+        public static readonly Parser<char> Rank =
+                   Parsers.Regex("[a-h]").Select(c => c[0]);
+
+        public static readonly Parser<short> File =
+            Parsers.Regex("[1-8]").Select(c => (short)(c[0] - '0'));
+
+        static readonly Parser<Square?> EnPasant =
+                Parsers.Alternatives(
+                    Parsers.Char('-').Select(_ => default(Square?)),
+                     Parsers.Tuple(Rank, File).Select(t => (Square?)new Square(t.Item1, t.Item2))
+                );
 
         static readonly Parser<int> Number =
             Parsers.Regex("[wb]").TrySelect<int>(Int32.TryParse);
@@ -57,10 +68,10 @@ namespace Fx.Game.Chess
                    from board in Board.Token()
                    from active in Active.Token()
                    from avail in Castling.Token()
-                   from epTarget in Parsers.Char('-')
-                   from halfMoveCount in Number.Token().Optional()
-                   from fullmove in Number.Token().Optional()
-                   select new ChessGameState(board, avail, active, halfMoveCount, fullmove);
+                   from epTarget in EnPasant // TODO
+                   from halfMoveClock in Number.Token().Optional()
+                   from fullMoveNumber in Number.Token().Optional()
+                   select new ChessGameState(board, avail, active, halfMoveClock, fullMoveNumber);
 
 
         static IEnumerable<ChessPiece?> FromFENChar(char ch)

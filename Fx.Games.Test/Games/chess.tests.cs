@@ -193,6 +193,7 @@ namespace Fx.Game.Chess
         [DataTestMethod]
         [TestCategory("Board")]
         [DataRow("kbK5/pp6/1P6/8/8/8/8/R7 w - -")]
+        [DataRow("rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2")]
         public void FenParserTest(string input)
         {
             var game = FENParser.ParseGame(input);
