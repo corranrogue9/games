@@ -2,8 +2,6 @@ namespace Fx.Game.Chess
 {
     using System.Diagnostics;
     using System.Text.RegularExpressions;
-    using Fx.Game.Chess;
-    using Microsoft.VisualBasic;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]
@@ -200,6 +198,7 @@ namespace Fx.Game.Chess
             System.Console.WriteLine("{0:S}", game.Board);
             System.Console.WriteLine("{0:F}", game.Board);
         }
+
     }
 }
 

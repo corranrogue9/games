@@ -227,6 +227,11 @@ namespace Fx.Game.Chess
 
         public static Parser<T> Alternatives<T>(params Parser<T>[] parsers)
         {
+            return Alternatives(parsers.AsEnumerable());
+        }
+
+        public static Parser<T> Alternatives<T>(IEnumerable<Parser<T>> parsers)
+        {
             bool ParseAlternatives(ReadOnlySpan<char> input, out ReadOnlySpan<char> remainder, [MaybeNullWhen(false)] out T value)
             {
                 foreach (var parser in parsers)
@@ -314,5 +319,73 @@ namespace Fx.Game.Chess
             return Parse;
         }
 
+        /// <summary>
+        /// creates a parser that can parse any of the given parsers, in any order
+        /// and each element parser is recognizing text at most once.
+        /// </summary>
+        /// <param name="parsers"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static Parser<HashSet<T>> Unordered<T>(params Parser<T>[] parsers)
+        {
+            var p = Alternatives(parsers);
+            bool Parse(ReadOnlySpan<char> input, out ReadOnlySpan<char> remainder, [MaybeNullWhen(false)] out HashSet<T> value)
+            {
+                var res = new HashSet<T>();
+                while (p(input, out var rem, out var item))
+                {
+                    res.Add(item);
+                    input = rem;
+
+                }
+                value = res;
+                remainder = input;
+                return true;
+            }
+            return Parse;
+        }
+
+        /// <summary>
+        /// creates a parser that can parse any of the given parsers, in any order
+        /// and each element parser is recognizing text at most once.
+        /// </summary>
+        /// <param name="parsers"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static Parser<HashSet<T>> Unordered2<T>(params Parser<T>[] parsers)
+        {
+            return Unordered2(parsers.AsEnumerable());
+        }
+
+        public static Parser<HashSet<T>> Unordered2<T>(IEnumerable<Parser<T>> parsers)
+        {
+            bool Parse(ReadOnlySpan<char> input, out ReadOnlySpan<char> remainder, [MaybeNullWhen(false)] out HashSet<T> value)
+            {
+                var parserSet = parsers.ToList(); ;
+                var res = new HashSet<T>();
+                while (parserSet.Count > 0)
+                {
+                    var found = false;
+                    for (int i = parserSet.Count - 1; i >= 0; i--)
+                    {
+                        var parser = parserSet[i];
+                        if (parser(input, out var remainder1, out var item))
+                        {
+                            res.Add(item);
+                            parserSet.RemoveAt(i);
+                            found = true;
+                        }
+                    }
+                    if (!found)
+                    {
+                        break;
+                    }
+                }
+                value = res;
+                remainder = input;
+                return true;
+            }
+            return Parse;
+        }
     }
 }
