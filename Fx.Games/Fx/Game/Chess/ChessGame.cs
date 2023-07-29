@@ -300,6 +300,11 @@ namespace Fx.Game.Chess
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="move"></param>
+        /// <returns></returns>
         public ChessGame<TPlayer> CommitMove(ChessMove move)
         {
             /*if (!this.Moves.Contains(move)) //// TODO is this equatable?
