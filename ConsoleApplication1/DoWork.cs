@@ -57,14 +57,22 @@ namespace ConsoleApplication1
         public static void Stuff4(IGat2<Dog, Bar<Dog>> gat)
         {
             DogGat2Work(gat);
-            AnimalGat2Work(gat);
+            AnimalGat2Work(gat); // doesn't compile because bar<dog> cant be converted to bar<animal> because bar is not covariant
         }
 
         public static void DogGat2Work(IGat2<Dog, Bar<Dog>> gat)
         {
         }
 
-        public static void AnimalGat2Work(IGat2<Animal, Bar<Dog>> gat)
+        public static void AnimalGat2Work(IGat2<Animal, Bar<Animal>> gat)
+        {
+        }
+
+        public static void AnimalDogGat2Work(IGat2<Dachshund, Bar<Dog>> gat) // doesn't compile because T2 is expected to be bar<dachshund> and bar<dog> can't be converted to bar<dachshund> because bar is not covariant
+        {
+        }
+
+        public static void AnimalDogGat2Work(IGat2<Dog, Bar<Dachshund>> gat) // doesn't compile because T2 is expected to be bar<dog> and bar<dachshund> can't be converted to bar<dog> because bar is not covariant
         {
         }
     }
