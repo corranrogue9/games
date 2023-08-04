@@ -56,15 +56,15 @@ namespace ConsoleApplication1
 
         public static void Stuff4(IGat2<Dog, Bar<Dog>> gat)
         {
-            DogGatWork(gat);
-            AnimalGatWork(gat);
+            DogGat2Work(gat);
+            AnimalGat2Work(gat);
         }
 
         public static void DogGat2Work(IGat2<Dog, Bar<Dog>> gat)
         {
         }
 
-        public static void AnimalGat2Work(IGat2<Animal, Bar<Animal>> gat)
+        public static void AnimalGat2Work(IGat2<Animal, Bar<Dog>> gat)
         {
         }
     }
