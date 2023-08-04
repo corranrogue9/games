@@ -30,6 +30,8 @@
 
         static void Main(string[] args)
         {
+            DoWork.Stuff();
+
             for (int i = 0; true; ++i)
             {
                 var sku = GetSkuFromArgsOrConsole(args, i);
