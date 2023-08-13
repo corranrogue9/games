@@ -30,6 +30,8 @@
 
         static void Main(string[] args)
         {
+            Fx.Linq.RangedEnumerableExtensions.Test();
+
             DoWork.Stuff();
 
             for (int i = 0; true; ++i)
