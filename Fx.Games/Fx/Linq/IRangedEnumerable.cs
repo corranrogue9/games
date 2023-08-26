@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Data;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Numerics;
 
 namespace Fx.Linq
@@ -135,16 +136,6 @@ n >= log2(count + 3) - 3
                 ++i;
                 bufferLength *= 2;
             }
-        }
-
-        public static int BufferLength(int bufferIndex)
-        {
-            if (bufferIndex == 0)
-            {
-                return 4;
-            }
-
-            return 2 * BufferLength(bufferIndex - 1);
         }
 
         public static T[] ToArray<T>(this IRangedEnumerable<T> self, bool overallocate)
