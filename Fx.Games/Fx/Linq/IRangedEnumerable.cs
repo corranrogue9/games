@@ -9,22 +9,413 @@ namespace Fx.Linq
 {
     public static class RangedEnumerableExtensions
     {
-        public static IRangedEnumerable<TResult> Select<TSource, TResult>(
-            this IRangedEnumerable<TSource> self, 
-            Func<TSource, TResult> selector)
+        public static bool All<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, bool> predicate)
         {
-            return RangedEnumerable.Create(self.Select(selector), self.Range);
+            if (self.Range.Maximum == 0)
+            {
+                return true;
+            }
+
+            return self.AsEnumerable().All(predicate);
         }
 
-        public static IRangedEnumerable<T> Concat<T>(this IRangedEnumerable<T> first, IRangedEnumerable<T> second)
+        public static bool Any<TSource>(this IRangedEnumerable<TSource> self)
         {
-            return RangedEnumerable.Create(first.Concat(second), first.Range.Concat(second.Range));
+            if (self.Range.Minimum > 0)
+            {
+                return true;
+            }
+            else if (self.Range.Maximum == 0)
+            {
+                return false;
+            }
+
+            return self.AsEnumerable().Any();
         }
 
-        public static IRangedEnumerable<T> Where<T>(this IRangedEnumerable<T> self, Func<T, bool> predicate)
+        public static bool Any<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, bool> predicate)
         {
-            return RangedEnumerable.Create(self.Where(predicate), new Range(0, self.Range.Maximum));
+            if (self.Range.Maximum == 0)
+            {
+                return false;
+            }
+
+            return self.AsEnumerable().Any(predicate);
         }
+
+        public static IRangedEnumerable<TSource> Append<TSource>(this IRangedEnumerable<TSource> self, TSource element)
+        {
+            return RangedEnumerable.Create(self.AsEnumerable().Append(element), self.Range.Append());
+        }
+
+        public static IRangedEnumerable<TSource[]> Chunk<TSource>(this IRangedEnumerable<TSource> self, int size)
+        {
+            return RangedEnumerable.Create(self.AsEnumerable().Chunk(size), self.Range.Append)
+            throw new NotImplementedException();
+        }
+
+        public static IRangedEnumerable<TSource> Concat<TSource>(this IRangedEnumerable<TSource> first, IRangedEnumerable<TSource> second)
+        {
+            return RangedEnumerable.Create(first.AsEnumerable().Concat(second), first.Range.Concat(second.Range));
+        }
+
+        public static bool Contains<TSource>(this IRangedEnumerable<TSource> self, TSource value, IEqualityComparer<TSource>? comparer) { throw new NotImplementedException(); }
+
+        public static bool Contains<TSource>(this IRangedEnumerable<TSource> self, TSource value) { throw new NotImplementedException(); }
+
+        public static int Count<TSource>(this IRangedEnumerable<TSource> self) { throw new NotImplementedException(); }
+
+        public static int Count<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, bool> predicate) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TSource?> DefaultIfEmpty<TSource>(this IRangedEnumerable<TSource> self) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TSource> DefaultIfEmpty<TSource>(this IRangedEnumerable<TSource> self, TSource defaultValue) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TSource> Distinct<TSource>(this IRangedEnumerable<TSource> self) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TSource> Distinct<TSource>(this IRangedEnumerable<TSource> self, IEqualityComparer<TSource>? comparer) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TSource> DistinctBy<TSource, TKey>(this IRangedEnumerable<TSource> self, Func<TSource, TKey> keySelector) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TSource> DistinctBy<TSource, TKey>(this IRangedEnumerable<TSource> self, Func<TSource, TKey> keySelector, IEqualityComparer<TKey>? comparer) { throw new NotImplementedException(); }
+
+        public static TSource ElementAt<TSource>(this IRangedEnumerable<TSource> self, Index index) { throw new NotImplementedException(); }
+
+        public static TSource ElementAt<TSource>(this IRangedEnumerable<TSource> self, int index) { throw new NotImplementedException(); }
+
+        public static TSource? ElementAtOrDefault<TSource>(this IRangedEnumerable<TSource> self, Index index) { throw new NotImplementedException(); }
+
+        public static TSource? ElementAtOrDefault<TSource>(this IRangedEnumerable<TSource> self, int index) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TResult> Empty<TResult>() { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TSource> Except<TSource>(this IRangedEnumerable<TSource> first, IRangedEnumerable<TSource> second) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TSource> Except<TSource>(this IRangedEnumerable<TSource> first, IRangedEnumerable<TSource> second, IEqualityComparer<TSource>? comparer) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TSource> ExceptBy<TSource, TKey>(this IRangedEnumerable<TSource> first, IRangedEnumerable<TKey> second, Func<TSource, TKey> keySelector) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TSource> ExceptBy<TSource, TKey>(this IRangedEnumerable<TSource> first, IRangedEnumerable<TKey> second, Func<TSource, TKey> keySelector, IEqualityComparer<TKey>? comparer) { throw new NotImplementedException(); }
+
+        public static TSource First<TSource>(this IRangedEnumerable<TSource> self) { throw new NotImplementedException(); }
+
+        public static TSource First<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, bool> predicate) { throw new NotImplementedException(); }
+
+        public static TSource? FirstOrDefault<TSource>(this IRangedEnumerable<TSource> self) { throw new NotImplementedException(); }
+
+        public static TSource FirstOrDefault<TSource>(this IRangedEnumerable<TSource> self, TSource defaultValue) { throw new NotImplementedException(); }
+
+        public static TSource? FirstOrDefault<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, bool> predicate) { throw new NotImplementedException(); }
+
+        public static TSource FirstOrDefault<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, bool> predicate, TSource defaultValue) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TResult> GroupBy<TSource, TKey, TElement, TResult>(this IRangedEnumerable<TSource> self, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, Func<TKey, IRangedEnumerable<TElement>, TResult> resultSelector, IEqualityComparer<TKey>? comparer) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TResult> GroupBy<TSource, TKey, TElement, TResult>(this IRangedEnumerable<TSource> self, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, Func<TKey, IRangedEnumerable<TElement>, TResult> resultSelector) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TResult> GroupBy<TSource, TKey, TResult>(this IRangedEnumerable<TSource> self, Func<TSource, TKey> keySelector, Func<TKey, IRangedEnumerable<TSource>, TResult> resultSelector, IEqualityComparer<TKey>? comparer) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TResult> GroupBy<TSource, TKey, TResult>(this IRangedEnumerable<TSource> self, Func<TSource, TKey> keySelector, Func<TKey, IRangedEnumerable<TSource>, TResult> resultSelector) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<IGrouping<TKey, TSource>> GroupBy<TSource, TKey>(this IRangedEnumerable<TSource> self, Func<TSource, TKey> keySelector) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<IGrouping<TKey, TElement>> GroupBy<TSource, TKey, TElement>(this IRangedEnumerable<TSource> self, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<IGrouping<TKey, TSource>> GroupBy<TSource, TKey>(this IRangedEnumerable<TSource> self, Func<TSource, TKey> keySelector, IEqualityComparer<TKey>? comparer) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<IGrouping<TKey, TElement>> GroupBy<TSource, TKey, TElement>(this IRangedEnumerable<TSource> self, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, IEqualityComparer<TKey>? comparer) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TResult> GroupJoin<TOuter, TInner, TKey, TResult>(this IRangedEnumerable<TOuter> outer, IRangedEnumerable<TInner> inner, Func<TOuter, TKey> outerKeySelector, Func<TInner, TKey> innerKeySelector, Func<TOuter, IRangedEnumerable<TInner>, TResult> resultSelector, IEqualityComparer<TKey>? comparer) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TResult> GroupJoin<TOuter, TInner, TKey, TResult>(this IRangedEnumerable<TOuter> outer, IRangedEnumerable<TInner> inner, Func<TOuter, TKey> outerKeySelector, Func<TInner, TKey> innerKeySelector, Func<TOuter, IRangedEnumerable<TInner>, TResult> resultSelector) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TSource> Intersect<TSource>(this IRangedEnumerable<TSource> first, IRangedEnumerable<TSource> second, IEqualityComparer<TSource>? comparer) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TSource> Intersect<TSource>(this IRangedEnumerable<TSource> first, IRangedEnumerable<TSource> second) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TSource> IntersectBy<TSource, TKey>(this IRangedEnumerable<TSource> first, IRangedEnumerable<TKey> second, Func<TSource, TKey> keySelector) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TSource> IntersectBy<TSource, TKey>(this IRangedEnumerable<TSource> first, IRangedEnumerable<TKey> second, Func<TSource, TKey> keySelector, IEqualityComparer<TKey>? comparer) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TResult> Join<TOuter, TInner, TKey, TResult>(this IRangedEnumerable<TOuter> outer, IRangedEnumerable<TInner> inner, Func<TOuter, TKey> outerKeySelector, Func<TInner, TKey> innerKeySelector, Func<TOuter, TInner, TResult> resultSelector) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TResult> Join<TOuter, TInner, TKey, TResult>(this IRangedEnumerable<TOuter> outer, IRangedEnumerable<TInner> inner, Func<TOuter, TKey> outerKeySelector, Func<TInner, TKey> innerKeySelector, Func<TOuter, TInner, TResult> resultSelector, IEqualityComparer<TKey>? comparer) { throw new NotImplementedException(); }
+
+        public static TSource Last<TSource>(this IRangedEnumerable<TSource> self) { throw new NotImplementedException(); }
+
+        public static TSource Last<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, bool> predicate) { throw new NotImplementedException(); }
+
+        public static TSource? LastOrDefault<TSource>(this IRangedEnumerable<TSource> self) { throw new NotImplementedException(); }
+
+        public static TSource LastOrDefault<TSource>(this IRangedEnumerable<TSource> self, TSource defaultValue) { throw new NotImplementedException(); }
+
+        public static TSource? LastOrDefault<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, bool> predicate) { throw new NotImplementedException(); }
+
+        public static TSource LastOrDefault<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, bool> predicate, TSource defaultValue) { throw new NotImplementedException(); }
+
+        public static long LongCount<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, bool> predicate) { throw new NotImplementedException(); }
+
+        public static long LongCount<TSource>(this IRangedEnumerable<TSource> self) { throw new NotImplementedException(); }
+
+        public static long Max<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, long> selector) { throw new NotImplementedException(); }
+
+        public static decimal Max<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, decimal> selector) { throw new NotImplementedException(); }
+
+        public static double Max<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, double> selector) { throw new NotImplementedException(); }
+
+        public static int Max<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, int> selector) { throw new NotImplementedException(); }
+
+        public static decimal? Max<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, decimal?> selector) { throw new NotImplementedException(); }
+
+        public static TSource? Max<TSource>(this IRangedEnumerable<TSource> self, IComparer<TSource>? comparer) { throw new NotImplementedException(); }
+
+        public static int? Max<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, int?> selector) { throw new NotImplementedException(); }
+
+        public static long? Max<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, long?> selector) { throw new NotImplementedException(); }
+
+        public static float? Max<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, float?> selector) { throw new NotImplementedException(); }
+
+        public static TResult? Max<TSource, TResult>(this IRangedEnumerable<TSource> self, Func<TSource, TResult> selector) { throw new NotImplementedException(); }
+
+        public static double? Max<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, double?> selector) { throw new NotImplementedException(); }
+
+        public static TSource? Max<TSource>(this IRangedEnumerable<TSource> self) { throw new NotImplementedException(); }
+
+        public static float Max<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, float> selector) { throw new NotImplementedException(); }
+
+        public static float Max(this IRangedEnumerable<float> self) { throw new NotImplementedException(); }
+
+        public static float? Max(this IRangedEnumerable<float?> self) { throw new NotImplementedException(); }
+
+        public static long? Max(this IRangedEnumerable<long?> self) { throw new NotImplementedException(); }
+
+        public static int? Max(this IRangedEnumerable<int?> self) { throw new NotImplementedException(); }
+
+        public static double? Max(this IRangedEnumerable<double?> self) { throw new NotImplementedException(); }
+
+        public static decimal? Max(this IRangedEnumerable<decimal?> self) { throw new NotImplementedException(); }
+
+        public static long Max(this IRangedEnumerable<long> self) { throw new NotImplementedException(); }
+
+        public static int Max(this IRangedEnumerable<int> self) { throw new NotImplementedException(); }
+
+        public static double Max(this IRangedEnumerable<double> self) { throw new NotImplementedException(); }
+
+        public static decimal Max(this IRangedEnumerable<decimal> self) { throw new NotImplementedException(); }
+
+        public static TSource? MaxBy<TSource, TKey>(this IRangedEnumerable<TSource> self, Func<TSource, TKey> keySelector) { throw new NotImplementedException(); }
+
+        public static TSource? MaxBy<TSource, TKey>(this IRangedEnumerable<TSource> self, Func<TSource, TKey> keySelector, IComparer<TKey>? comparer) { throw new NotImplementedException(); }
+
+        public static decimal Min(this IRangedEnumerable<decimal> self) { throw new NotImplementedException(); }
+
+        public static TResult? Min<TSource, TResult>(this IRangedEnumerable<TSource> self, Func<TSource, TResult> selector) { throw new NotImplementedException(); }
+
+        public static float Min<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, float> selector) { throw new NotImplementedException(); }
+
+        public static float? Min<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, float?> selector) { throw new NotImplementedException(); }
+
+        public static int? Min<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, int?> selector) { throw new NotImplementedException(); }
+
+        public static double? Min<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, double?> selector) { throw new NotImplementedException(); }
+
+        public static decimal? Min<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, decimal?> selector) { throw new NotImplementedException(); }
+
+        public static long Min<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, long> selector) { throw new NotImplementedException(); }
+
+        public static int Min<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, int> selector) { throw new NotImplementedException(); }
+
+        public static decimal Min<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, decimal> selector) { throw new NotImplementedException(); }
+
+        public static TSource? Min<TSource>(this IRangedEnumerable<TSource> self, IComparer<TSource>? comparer) { throw new NotImplementedException(); }
+
+        public static TSource? Min<TSource>(this IRangedEnumerable<TSource> self) { throw new NotImplementedException(); }
+
+        public static long? Min<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, long?> selector) { throw new NotImplementedException(); }
+
+        public static double Min<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, double> selector) { throw new NotImplementedException(); }
+
+        public static float Min(this IRangedEnumerable<float> self) { throw new NotImplementedException(); }
+
+        public static float? Min(this IRangedEnumerable<float?> self) { throw new NotImplementedException(); }
+
+        public static long? Min(this IRangedEnumerable<long?> self) { throw new NotImplementedException(); }
+
+        public static int? Min(this IRangedEnumerable<int?> self) { throw new NotImplementedException(); }
+
+        public static double? Min(this IRangedEnumerable<double?> self) { throw new NotImplementedException(); }
+
+        public static decimal? Min(this IRangedEnumerable<decimal?> self) { throw new NotImplementedException(); }
+
+        public static double Min(this IRangedEnumerable<double> self) { throw new NotImplementedException(); }
+
+        public static long Min(this IRangedEnumerable<long> self) { throw new NotImplementedException(); }
+
+        public static int Min(this IRangedEnumerable<int> self) { throw new NotImplementedException(); }
+
+        public static TSource? MinBy<TSource, TKey>(this IRangedEnumerable<TSource> self, Func<TSource, TKey> keySelector, IComparer<TKey>? comparer) { throw new NotImplementedException(); }
+
+        public static TSource? MinBy<TSource, TKey>(this IRangedEnumerable<TSource> self, Func<TSource, TKey> keySelector) { throw new NotImplementedException(); }
+
+        public static IOrderedEnumerable<TSource> OrderBy<TSource, TKey>(this IRangedEnumerable<TSource> self, Func<TSource, TKey> keySelector, IComparer<TKey>? comparer) { throw new NotImplementedException(); }
+
+        public static IOrderedEnumerable<TSource> OrderBy<TSource, TKey>(this IRangedEnumerable<TSource> self, Func<TSource, TKey> keySelector) { throw new NotImplementedException(); }
+
+        public static IOrderedEnumerable<TSource> OrderByDescending<TSource, TKey>(this IRangedEnumerable<TSource> self, Func<TSource, TKey> keySelector) { throw new NotImplementedException(); }
+
+        public static IOrderedEnumerable<TSource> OrderByDescending<TSource, TKey>(this IRangedEnumerable<TSource> self, Func<TSource, TKey> keySelector, IComparer<TKey>? comparer) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TSource> Prepend<TSource>(this IRangedEnumerable<TSource> self, TSource element) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<int> Range(int start, int count) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TResult> Repeat<TResult>(TResult element, int count) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TSource> Reverse<TSource>(this IRangedEnumerable<TSource> self) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TResult> Select<TSource, TResult>(this IRangedEnumerable<TSource> self, Func<TSource, int, TResult> selector) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TResult> Select<TSource, TResult>(this IRangedEnumerable<TSource> self, Func<TSource, TResult> selector)
+        {
+            return RangedEnumerable.Create(self.AsEnumerable().Select(selector), self.Range);
+        }
+
+        public static IRangedEnumerable<TResult> SelectMany<TSource, TResult>(this IRangedEnumerable<TSource> self, Func<TSource, int, IRangedEnumerable<TResult>> selector) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TResult> SelectMany<TSource, TCollection, TResult>(this IRangedEnumerable<TSource> self, Func<TSource, IRangedEnumerable<TCollection>> collectionSelector, Func<TSource, TCollection, TResult> resultSelector) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TResult> SelectMany<TSource, TCollection, TResult>(this IRangedEnumerable<TSource> self, Func<TSource, int, IRangedEnumerable<TCollection>> collectionSelector, Func<TSource, TCollection, TResult> resultSelector) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TResult> SelectMany<TSource, TResult>(this IRangedEnumerable<TSource> self, Func<TSource, IRangedEnumerable<TResult>> selector) { throw new NotImplementedException(); }
+
+        public static bool SequenceEqual<TSource>(this IRangedEnumerable<TSource> first, IRangedEnumerable<TSource> second) { throw new NotImplementedException(); }
+
+        public static bool SequenceEqual<TSource>(this IRangedEnumerable<TSource> first, IRangedEnumerable<TSource> second, IEqualityComparer<TSource>? comparer) { throw new NotImplementedException(); }
+
+        public static TSource Single<TSource>(this IRangedEnumerable<TSource> self) { throw new NotImplementedException(); }
+
+        public static TSource Single<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, bool> predicate) { throw new NotImplementedException(); }
+
+        public static TSource SingleOrDefault<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, bool> predicate, TSource defaultValue) { throw new NotImplementedException(); }
+
+        public static TSource SingleOrDefault<TSource>(this IRangedEnumerable<TSource> self, TSource defaultValue) { throw new NotImplementedException(); }
+
+        public static TSource? SingleOrDefault<TSource>(this IRangedEnumerable<TSource> self) { throw new NotImplementedException(); }
+
+        public static TSource? SingleOrDefault<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, bool> predicate) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TSource> Skip<TSource>(this IRangedEnumerable<TSource> self, int count) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TSource> SkipLast<TSource>(this IRangedEnumerable<TSource> self, int count) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TSource> SkipWhile<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, bool> predicate) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TSource> SkipWhile<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, int, bool> predicate) { throw new NotImplementedException(); }
+
+        public static int Sum<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, int> selector) { throw new NotImplementedException(); }
+
+        public static long Sum<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, long> selector) { throw new NotImplementedException(); }
+
+        public static decimal? Sum<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, decimal?> selector) { throw new NotImplementedException(); }
+
+        public static long? Sum<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, long?> selector) { throw new NotImplementedException(); }
+
+        public static int? Sum<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, int?> selector) { throw new NotImplementedException(); }
+
+        public static double Sum<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, double> selector) { throw new NotImplementedException(); }
+
+        public static float? Sum<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, float?> selector) { throw new NotImplementedException(); }
+
+        public static float Sum<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, float> selector) { throw new NotImplementedException(); }
+
+        public static double? Sum<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, double?> selector) { throw new NotImplementedException(); }
+
+        public static decimal Sum<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, decimal> selector) { throw new NotImplementedException(); }
+
+        public static long? Sum(this IRangedEnumerable<long?> self) { throw new NotImplementedException(); }
+
+        public static float? Sum(this IRangedEnumerable<float?> self) { throw new NotImplementedException(); }
+
+        public static int? Sum(this IRangedEnumerable<int?> self) { throw new NotImplementedException(); }
+
+        public static double? Sum(this IRangedEnumerable<double?> self) { throw new NotImplementedException(); }
+
+        public static decimal? Sum(this IRangedEnumerable<decimal?> self) { throw new NotImplementedException(); }
+
+        public static long Sum(this IRangedEnumerable<long> self) { throw new NotImplementedException(); }
+
+        public static int Sum(this IRangedEnumerable<int> self) { throw new NotImplementedException(); }
+
+        public static double Sum(this IRangedEnumerable<double> self) { throw new NotImplementedException(); }
+
+        public static decimal Sum(this IRangedEnumerable<decimal> self) { throw new NotImplementedException(); }
+
+        public static float Sum(this IRangedEnumerable<float> self) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TSource> Take<TSource>(this IRangedEnumerable<TSource> self, Range range) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TSource> Take<TSource>(this IRangedEnumerable<TSource> self, int count) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TSource> TakeLast<TSource>(this IRangedEnumerable<TSource> self, int count) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TSource> TakeWhile<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, bool> predicate) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TSource> TakeWhile<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, int, bool> predicate) { throw new NotImplementedException(); }
+
+        public static IOrderedEnumerable<TSource> ThenBy<TSource, TKey>(this IOrderedEnumerable<TSource> self, Func<TSource, TKey> keySelector) { throw new NotImplementedException(); }
+
+        public static IOrderedEnumerable<TSource> ThenBy<TSource, TKey>(this IOrderedEnumerable<TSource> self, Func<TSource, TKey> keySelector, IComparer<TKey>? comparer) { throw new NotImplementedException(); }
+
+        public static IOrderedEnumerable<TSource> ThenByDescending<TSource, TKey>(this IOrderedEnumerable<TSource> self, Func<TSource, TKey> keySelector) { throw new NotImplementedException(); }
+
+        public static IOrderedEnumerable<TSource> ThenByDescending<TSource, TKey>(this IOrderedEnumerable<TSource> self, Func<TSource, TKey> keySelector, IComparer<TKey>? comparer) { throw new NotImplementedException(); }
+
+        public static TSource[] ToArray<TSource>(this IRangedEnumerable<TSource> self) { throw new NotImplementedException(); }
+
+        public static Dictionary<TKey, TSource> ToDictionary<TSource, TKey>(this IRangedEnumerable<TSource> self, Func<TSource, TKey> keySelector) where TKey : notnull { throw new NotImplementedException(); }
+
+        public static Dictionary<TKey, TSource> ToDictionary<TSource, TKey>(this IRangedEnumerable<TSource> self, Func<TSource, TKey> keySelector, IEqualityComparer<TKey>? comparer) where TKey : notnull { throw new NotImplementedException(); }
+
+        public static Dictionary<TKey, TElement> ToDictionary<TSource, TKey, TElement>(this IRangedEnumerable<TSource> self, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector) where TKey : notnull { throw new NotImplementedException(); }
+
+        public static Dictionary<TKey, TElement> ToDictionary<TSource, TKey, TElement>(this IRangedEnumerable<TSource> self, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, IEqualityComparer<TKey>? comparer) where TKey : notnull { throw new NotImplementedException(); }
+
+        public static HashSet<TSource> ToHashSet<TSource>(this IRangedEnumerable<TSource> self, IEqualityComparer<TSource>? comparer) { throw new NotImplementedException(); }
+
+        public static HashSet<TSource> ToHashSet<TSource>(this IRangedEnumerable<TSource> self) { throw new NotImplementedException(); }
+
+        public static List<TSource> ToList<TSource>(this IRangedEnumerable<TSource> self) { throw new NotImplementedException(); }
+
+        public static ILookup<TKey, TElement> ToLookup<TSource, TKey, TElement>(this IRangedEnumerable<TSource> self, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, IEqualityComparer<TKey>? comparer) { throw new NotImplementedException(); }
+
+        public static ILookup<TKey, TElement> ToLookup<TSource, TKey, TElement>(this IRangedEnumerable<TSource> self, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector) { throw new NotImplementedException(); }
+
+        public static ILookup<TKey, TSource> ToLookup<TSource, TKey>(this IRangedEnumerable<TSource> self, Func<TSource, TKey> keySelector) { throw new NotImplementedException(); }
+
+        public static ILookup<TKey, TSource> ToLookup<TSource, TKey>(this IRangedEnumerable<TSource> self, Func<TSource, TKey> keySelector, IEqualityComparer<TKey>? comparer) { throw new NotImplementedException(); }
+
+        public static bool TryGetNonEnumeratedCount<TSource>(this IRangedEnumerable<TSource> self, out int count) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TSource> Union<TSource>(this IRangedEnumerable<TSource> first, IRangedEnumerable<TSource> second) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TSource> Union<TSource>(this IRangedEnumerable<TSource> first, IRangedEnumerable<TSource> second, IEqualityComparer<TSource>? comparer) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TSource> UnionBy<TSource, TKey>(this IRangedEnumerable<TSource> first, IRangedEnumerable<TSource> second, Func<TSource, TKey> keySelector) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TSource> UnionBy<TSource, TKey>(this IRangedEnumerable<TSource> first, IRangedEnumerable<TSource> second, Func<TSource, TKey> keySelector, IEqualityComparer<TKey>? comparer) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TSource> Where<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, bool> predicate)
+        {
+            return RangedEnumerable.Create(self.AsEnumerable().Where(predicate), new Range(0, self.Range.Maximum));
+        }
+
+        public static IRangedEnumerable<TSource> Where<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, int, bool> predicate) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<(TFirst First, TSecond Second, TThird Third)> Zip<TFirst, TSecond, TThird>(this IRangedEnumerable<TFirst> first, IRangedEnumerable<TSecond> second, IRangedEnumerable<TThird> third) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<(TFirst First, TSecond Second)> Zip<TFirst, TSecond>(this IRangedEnumerable<TFirst> first, IRangedEnumerable<TSecond> second) { throw new NotImplementedException(); }
+
+        public static IRangedEnumerable<TResult> Zip<TFirst, TSecond, TResult>(this IRangedEnumerable<TFirst> first, IRangedEnumerable<TSecond> second, Func<TFirst, TSecond, TResult> resultSelector) { throw new NotImplementedException(); }
 
         //// TODO start of non ranged enumerable extensions
         public static IRangedEnumerable<T> Where<T>(this IReadOnlyCollection<T> self, Func<T, bool> predicate)
@@ -32,11 +423,6 @@ namespace Fx.Linq
             return RangedEnumerable.Create(self.Where(predicate), new Range(0, self.Count));
         }
         //// TODO end of non ranged enumerable extensions
-
-        public static bool Any<T>(this IRangedEnumerable<T> self)
-        {
-            return self.Range.Minimum > 0;
-        }
 
         public static void Test()
         {
@@ -276,7 +662,7 @@ range - (1 - 4^i) / (1 - 4) <= 0
                 }*/
             }
         }
-        
+
         private static class RangedEnumerable
         {
             public static RangedEnumerable<T> Create<T>(IEnumerable<T> enumerable, Range range)
@@ -293,6 +679,7 @@ range - (1 - 4^i) / (1 - 4) <= 0
 
             public RangedEnumerable(IEnumerable<T> enumerable, Range range)
             {
+                //// TODO doing it this way means that you must allocate a new Range every time an extension is called, but the caller doesn't necessarily use the range, so what you couild do is have a class per extension and then you only return the range if needed (and it can be cached since it's idempotent); this would also let the classes be structs and reduce those allocations too
                 this.enumerable = enumerable;
                 this.range = range;
             }
@@ -312,6 +699,16 @@ range - (1 - 4^i) / (1 - 4) <= 0
 
     public static class RangeExtensions
     {
+        public static Range Append(this Range self)
+        {
+            return new Range(self.Minimum + 1, self.Maximum + 1);
+        }
+
+        public static Range Chunk(this Range self, int size)
+        {
+            return new Range(self.Minimum / size)
+        }
+
         public static Range Concat(this Range first, Range second)
         {
             return new Range(first.Minimum + second.Minimum, first.Maximum + second.Maximum);
@@ -322,7 +719,7 @@ range - (1 - 4^i) / (1 - 4) <= 0
     {
         public Range(int minimum, int maximum)
             : this(
-                  minimum < 0 ? throw new ArgumentOutOfRangeException(nameof(minimum)) : (uint)minimum, 
+                  minimum < 0 ? throw new ArgumentOutOfRangeException(nameof(minimum)) : (uint)minimum,
                   maximum < 0 ? throw new ArgumentOutOfRangeException(nameof(maximum)) : (uint)maximum)
         {
         }
@@ -333,7 +730,7 @@ range - (1 - 4^i) / (1 - 4) <= 0
             this.Maximum = maximum;
         }
 
-        public uint Minimum { get; } 
+        public uint Minimum { get; }
 
         public uint Maximum { get; }
     }
