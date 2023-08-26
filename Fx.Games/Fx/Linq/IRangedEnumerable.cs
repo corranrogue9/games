@@ -706,6 +706,7 @@ range - (1 - 4^i) / (1 - 4) <= 0
 
         public static Range Chunk(this Range self, int size)
         {
+            //// TODO do ireadonly collection too
             return new Range(self.Minimum / size)
         }
 
