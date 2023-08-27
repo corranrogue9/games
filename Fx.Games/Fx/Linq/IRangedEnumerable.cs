@@ -50,8 +50,7 @@ namespace Fx.Linq
 
         public static IRangedEnumerable<TSource[]> Chunk<TSource>(this IRangedEnumerable<TSource> self, int size)
         {
-            return RangedEnumerable.Create(self.AsEnumerable().Chunk(size), self.Range.Append)
-            throw new NotImplementedException();
+            return RangedEnumerable.Create(self.AsEnumerable().Chunk(size), self.Range.Chunk(size));
         }
 
         public static IRangedEnumerable<TSource> Concat<TSource>(this IRangedEnumerable<TSource> first, IRangedEnumerable<TSource> second)
@@ -59,17 +58,30 @@ namespace Fx.Linq
             return RangedEnumerable.Create(first.AsEnumerable().Concat(second), first.Range.Concat(second.Range));
         }
 
-        public static bool Contains<TSource>(this IRangedEnumerable<TSource> self, TSource value, IEqualityComparer<TSource>? comparer) { throw new NotImplementedException(); }
+        public static int Count<TSource>(this IRangedEnumerable<TSource> self)
+        {
+            if (self.Range.Minimum == self.Range.Maximum)
+            {
+                return (int)self.Range.Minimum;
+            }
 
-        public static bool Contains<TSource>(this IRangedEnumerable<TSource> self, TSource value) { throw new NotImplementedException(); }
+            return self.AsEnumerable().Count();
+        }
 
-        public static int Count<TSource>(this IRangedEnumerable<TSource> self) { throw new NotImplementedException(); }
+        public static IRangedEnumerable<TSource?> DefaultIfEmpty<TSource>(this IRangedEnumerable<TSource> self)
+        {
+            if (self.Range.Maximum == 0)
+            {
+                return RangedEnumerable.Create(self.AsEnumerable().DefaultIfEmpty(), new Range(1, 1));
+            }
 
-        public static int Count<TSource>(this IRangedEnumerable<TSource> self, Func<TSource, bool> predicate) { throw new NotImplementedException(); }
+            return RangedEnumerable.Create(self.AsEnumerable().DefaultIfEmpty(), self.Range.DefaultIfEmpty());
+        }
 
-        public static IRangedEnumerable<TSource?> DefaultIfEmpty<TSource>(this IRangedEnumerable<TSource> self) { throw new NotImplementedException(); }
-
-        public static IRangedEnumerable<TSource> DefaultIfEmpty<TSource>(this IRangedEnumerable<TSource> self, TSource defaultValue) { throw new NotImplementedException(); }
+        public static IRangedEnumerable<TSource> DefaultIfEmpty<TSource>(this IRangedEnumerable<TSource> self, TSource defaultValue)
+        {
+            throw new NotImplementedException();
+        }
 
         public static IRangedEnumerable<TSource> Distinct<TSource>(this IRangedEnumerable<TSource> self) { throw new NotImplementedException(); }
 
@@ -707,12 +719,17 @@ range - (1 - 4^i) / (1 - 4) <= 0
         public static Range Chunk(this Range self, int size)
         {
             //// TODO do ireadonly collection too
-            return new Range(self.Minimum / size)
+            return new Range(((self.Minimum - 1) / (uint)size) + 1, ((self.Maximum - 1) / (uint)size) + 1);
         }
 
         public static Range Concat(this Range first, Range second)
         {
             return new Range(first.Minimum + second.Minimum, first.Maximum + second.Maximum);
+        }
+
+        public static Range DefaultIfEmpty(this Range self)
+        {
+            return new Range(Math.Max(1, self.Minimum), Math.Max(1, self.Maximum));
         }
     }
 
