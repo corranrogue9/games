@@ -2,8 +2,11 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using System.Runtime.Versioning;
+    using System.Text;
     using Fx.Displayer;
     using Fx.Driver;
     using Fx.Game;
@@ -29,6 +32,7 @@
             (nameof(TwosSevenMovesHeuristic12), TwosSevenMovesHeuristic12),
             (nameof(TwosOneMoveHeuristic12), TwosOneMoveHeuristic12),
             (nameof(Chess), Chess),
+            (nameof(LonghornHumanVsRandom), LonghornHumanVsRandom),
         };
 
         static void Main(string[] args)
@@ -315,6 +319,189 @@
             var result = driver.Run(game);
             Console.WriteLine(seed);
         }
+        }
+
+        private static void LonghornHumanVsRandom()
+        {
+            var displayer = new LonghornConsoleDisplay<string>(_ => _);
+            var seed = 273759000; //// Environment.TickCount;
+            var random = new Random(seed);
+            var exes = "player1";
+            var ohs = "player2";
+            var game = new Longhorn<string>(exes, ohs, random);
+            var driver = Driver.Create(
+                new Dictionary<string, IStrategy<Longhorn<string>, LonghornBoard, LonghornMove, string>>
+                {
+                    ////{ exes, UserInterfaceStrategy.Create(displayer) },
+                    { exes, game.RandomStrategy() },
+                    { ohs, game.RandomStrategy() },
+                },
+                displayer);
+            Console.WriteLine(seed);
+            var result = driver.Run(game);
+            Console.WriteLine(seed);
+        }
+
+        private sealed class LonghornConsoleDisplay<TPlayer> : IDisplayer<Longhorn<TPlayer>, LonghornBoard, LonghornMove, TPlayer>
+        {
+            private readonly Func<TPlayer, string> transcriber;
+
+            public LonghornConsoleDisplay(Func<TPlayer, string> transcriber)
+            {
+                this.transcriber = transcriber;
+            }
+
+            public void DisplayBoard(Longhorn<TPlayer> game)
+            {
+                Console.WriteLine();
+                Console.WriteLine();
+
+                var writer = new Writer();
+                for (int i = 0; i < 3; ++i)
+                {
+                    for (int j = 0; j < 3; ++j)
+                    {
+                        var tile = game.Board.Tiles[i, j];
+
+                        writer.Append(i * 8 + 0, $"hidden gold: {tile.Gold}");
+                        writer.Append(i * 8 + 1, $"green cows: {tile.GreenCows}");
+                        writer.Append(i * 8 + 2, $"black cows: {tile.BlackCows}");
+                        writer.Append(i * 8 + 3, $"white cows: {tile.WhiteCows}");
+                        writer.Append(i * 8 + 4, $"orange cows: {tile.OrangeCows}");
+                        if (game.Board.PlayerLocation.row == i && game.Board.PlayerLocation.column == j)
+                        {
+                            writer.Append(i * 8 + 5, $"CURRENT PLAYER LOCATION!");
+                        }
+                        else
+                        {
+                            writer.Append(i * 8 + 5, string.Empty);
+                        }
+                    }
+                }
+
+                Console.WriteLine(writer.Transcribe());
+            }
+
+            private sealed class Writer
+            {
+                private readonly int columnPadding;
+
+                private readonly Dictionary<int, List<string>> lines;
+
+                private readonly Dictionary<int, int> columnSizes;
+
+                public Writer()
+                    : this(2)
+                {
+                }
+
+                public Writer(int columnPadding)
+                {
+                    this.columnPadding = columnPadding;
+
+                    this.lines = new Dictionary<int, List<string>>();
+                    this.columnSizes = new Dictionary<int, int>();
+                }
+
+                public void Append(int lineNumber, string value)
+                {
+                    if (!this.lines.TryGetValue(lineNumber, out var columns))
+                    {
+                        columns = new List<string>();
+                        this.lines[lineNumber] = columns;
+                    }
+
+                    if (!this.columnSizes.TryGetValue(columns.Count, out var columnSize))
+                    {
+                        columnSize = 0;
+                    }
+
+                    this.columnSizes[columns.Count] = Math.Max(value.Length, columnSize);
+                    columns.Add(value);
+                }
+
+                public string Transcribe()
+                {
+                    var builders = new List<StringBuilder>();
+                    foreach (var (lineNumber, columns) in this.lines)
+                    {
+                        while (lineNumber >= builders.Count)
+                        {
+                            builders.Add(new StringBuilder());
+                        }
+
+                        var builder = builders[lineNumber];
+                        for (int i = 0; i < columns.Count; ++i)
+                        {
+                            var column = columns[i];
+                            builder.Append(column);
+                            var columnSize = this.columnSizes[i];
+                            builder.Append(new string(' ', columnSize - column.Length + this.columnPadding));
+                        }
+                    }
+
+                    var transcriber = new StringBuilder();
+                    foreach (var builder in builders)
+                    {
+                        transcriber.AppendLine(builder.ToString());
+                    }
+
+                    return transcriber.ToString();
+                }
+            }
+
+            public void DisplayMoves(Longhorn<TPlayer> game)
+            {
+                //// TODO ask for coordinates instead of providing all possibilities?
+                Console.WriteLine("Which move would you like to select?");
+                int i = 0;
+                foreach (var move in game.Moves)
+                {
+                    Console.WriteLine($"{i}: take the {move.TakeColor} cows and move to ({move.NewLocation.row}, {move.NewLocation.column})");
+                    ++i;
+                }
+            }
+
+            public void DisplayOutcome(Longhorn<TPlayer> game)
+            {
+                Console.WriteLine($"{string.Join(",", game.Outcome.Winners)} won the game!");
+            }
+
+            public LonghornMove ReadMoveSelection(Longhorn<TPlayer> game)
+            {
+                var moves = game.Moves.ToList();
+                while (true)
+                {
+                    var input = Console.ReadLine();
+                    if (!int.TryParse(input, out var selectedMove) || selectedMove >= moves.Count)
+                    {
+                        Console.WriteLine($"The input '{input}' was not the index of a legal move");
+                        continue;
+                    }
+
+                    Console.WriteLine(selectedMove);
+                    return moves[selectedMove];
+                }
+            }
+        }
+
+        public sealed class ChessComparer<TPlayer> : IEqualityComparer<ChessGame<TPlayer>>
+        {
+            public bool Equals(ChessGame<TPlayer>? x, ChessGame<TPlayer>? y)
+            {
+                return x.Equals(y);
+            }
+
+            public int GetHashCode([DisallowNull] ChessGame<TPlayer> obj)
+            {
+                var hashcode = 0;
+                for (int i = 0; i < 8; ++i)
+                {
+                    for (int j = 0; j < 8; ++j)
+                    {
+                        hashcode ^= obj.Board.Board.Board[i, j].GetHashCode();
+                    }
+                }
 
         private sealed class ChessStrategy<TPlayer> : IStrategy<Fx.Game.Chess.ChessGame<TPlayer>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, TPlayer>
         {
