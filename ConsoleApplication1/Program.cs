@@ -287,7 +287,7 @@
             //// TODO comparers and tests, kind of like the driver stuff
 
             ////var seed = -2056050046; //// Environment.TickCount;
-            var seed = 13916031; //// Environment.TickCount;
+            var seed = Environment.TickCount;
             var rng = new Random(seed);
             var displayer = new ChessConsoleDisplayer<string>();
             var tree = "tree";
@@ -299,7 +299,7 @@
                     { random, new RandomStrategy<Fx.Game.Chess.ChessGame<string>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, string>(rng) },
                     ////{ tree, new GameTreeDepthStrategy<Fx.Game.Chess.ChessGame<string>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, string>(game => ChessScore(game, tree), Node.TreeFactory) }
                     ////{ tree, new ChessStrategy<string>(tree, StringComparer.OrdinalIgnoreCase) },
-                    { tree, new MonteCarloStrategy<ChessGame<string>, ChessGameState, Fx.Game.Chess.ChessMove, string>(tree, 50000, StringComparer.OrdinalIgnoreCase, rng) },
+                    { tree, new MonteCarloStrategy<ChessGame<string>, ChessGameState, Fx.Game.Chess.ChessMove, string>(tree, 20000, StringComparer.OrdinalIgnoreCase, rng) },
                     // { human, new UserInterfaceStrategy<Fx.Game.Chess.Chess<string>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, string>(displayer) },
                 },
                 displayer);
@@ -366,7 +366,7 @@
 
             public void DisplayOutcome(ChessGame<TPlayer> game)
             {
-                Console.WriteLine($"{game.Outcome.Winners.First()} won the game! The other player is clearly a loser!");
+                Console.WriteLine($"{game.Outcome.Winners.FirstOrDefault()} won the game! The other player is clearly a loser!");
             }
 
             public Fx.Game.Chess.ChessMove ReadMoveSelection(ChessGame<TPlayer> game)

@@ -283,6 +283,7 @@ namespace Fx.Game.Chess
                     if (position != null && position != ChessPiece.BlackKing && position != ChessPiece.WhiteKing)
                     {
                         onlyKings = false;
+                        break;
                     }
                 }
 

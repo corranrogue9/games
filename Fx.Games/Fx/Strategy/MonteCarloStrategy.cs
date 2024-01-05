@@ -31,20 +31,19 @@
 
         public TMove SelectMove(TGame game)
         {
-            var outcomes = new Dictionary<int, (int winCount, int sampledCount)>();
+            var outcomes = new Dictionary<int, (double winCount, int sampledCount)>();
             var remainingDecisionsCount = this.decisionCount;
             var moves = game.Moves.ToList();
             while (remainingDecisionsCount > 0)
             {
                 var sampledGame = SampleGame(game, moves);
-                var win = sampledGame.win ? 1 : 0;
                 if (outcomes.TryGetValue(sampledGame.moveIndex, out var counts))
                 {
-                    outcomes[sampledGame.moveIndex] = (counts.winCount + win, counts.sampledCount + 1);
+                    outcomes[sampledGame.moveIndex] = (counts.winCount + sampledGame.winLoseDraw, counts.sampledCount + 1);
                 }
                 else
                 {
-                    outcomes[sampledGame.moveIndex] = (win, 1);
+                    outcomes[sampledGame.moveIndex] = (sampledGame.winLoseDraw, 1);
                 }
 
                 remainingDecisionsCount -= sampledGame.numberOfDecisions;
@@ -54,7 +53,7 @@
             return moves[bestOutcome.Key];
         }
 
-        private (int moveIndex, bool win, int numberOfDecisions) SampleGame(TGame game, IReadOnlyList<TMove> moves)
+        private (int moveIndex, double winLoseDraw, int numberOfDecisions) SampleGame(TGame game, IReadOnlyList<TMove> moves)
         {
             var initialMoveIndex = random.Next(0, moves.Count);
             var initialMove = moves[initialMoveIndex];
@@ -69,7 +68,8 @@
                 ++numberOfDecisions;
             }
 
-            return (initialMoveIndex, game.Outcome.Winners.Contains(this.player, this.playerComparer), numberOfDecisions);
+            var winLoseDraw = game.Outcome.Winners.Any() ? game.Outcome.Winners.Contains(this.player, this.playerComparer) ? 1 : 0 : 0.5;
+            return (initialMoveIndex, winLoseDraw, numberOfDecisions);
         }
     }
 }
