@@ -131,16 +131,20 @@
             var strategyX = new RandomStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>();
             var strategyO = new RandomStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>();
 
+            var seed = Environment.TickCount;
+            var random = new Random(seed);
             var displayer = new TicTacToeConsoleDisplayer<string>(_ => _);
             var game = new TicTacToe<string>(exes, ohs);
             var driver = Driver.Create(
                 new Dictionary<string, IStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>>
                 {
                     { exes, strategyX },
-                    { ohs, strategyO },
+                    ////{ ohs, strategyO },
+                    {ohs, new MonteCarloStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>(ohs, 10000, StringComparer.OrdinalIgnoreCase, random) }
                 },
                 displayer);
             var result = driver.Run(game);
+            Console.WriteLine(seed);
         }
 
         private static void PegsHuman()
@@ -192,15 +196,19 @@
             var displayer = new GobbleConsoleDisplayer<string>(_ => _);
             var exes = "exes";
             var ohs = "ohs";
+            var seed = Environment.TickCount;
+            var random = new Random(seed);
             var game = new Gobble<string>(exes, ohs);
             var driver = Driver.Create(
                 new Dictionary<string, IStrategy<Gobble<string>, GobbleBoard, GobbleMove, string>>
                 {
-                    { exes, new UserInterfaceStrategy<Gobble<string>, GobbleBoard, GobbleMove, string>(displayer) },
+                    ////{ exes, new UserInterfaceStrategy<Gobble<string>, GobbleBoard, GobbleMove, string>(displayer) },
+                    { exes, new MonteCarloStrategy<Gobble<string>, GobbleBoard, GobbleMove, string>(exes, 10000, StringComparer.OrdinalIgnoreCase, random) },
                     { ohs, new RandomStrategy<Gobble<string>, GobbleBoard, GobbleMove, string>() }
                 },
                 displayer);
             var result = driver.Run(game);
+            Console.WriteLine(seed);
         }
 
         private static void GobbleNumberOfMovesHeuristcVsRandom()
