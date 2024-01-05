@@ -202,9 +202,9 @@
             var driver = Driver.Create(
                 new Dictionary<string, IStrategy<Gobble<string>, GobbleBoard, GobbleMove, string>>
                 {
-                    ////{ exes, new UserInterfaceStrategy<Gobble<string>, GobbleBoard, GobbleMove, string>(displayer) },
-                    { exes, new MonteCarloStrategy<Gobble<string>, GobbleBoard, GobbleMove, string>(exes, 10000, StringComparer.OrdinalIgnoreCase, random) },
-                    { ohs, new RandomStrategy<Gobble<string>, GobbleBoard, GobbleMove, string>() }
+                    { exes, new UserInterfaceStrategy<Gobble<string>, GobbleBoard, GobbleMove, string>(displayer) },
+                    { ohs, new MonteCarloStrategy<Gobble<string>, GobbleBoard, GobbleMove, string>(ohs, 100000, StringComparer.OrdinalIgnoreCase, random) },
+                    ////{ ohs, new RandomStrategy<Gobble<string>, GobbleBoard, GobbleMove, string>() }
                 },
                 displayer);
             var result = driver.Run(game);
