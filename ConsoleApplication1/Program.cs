@@ -286,7 +286,8 @@
         {
             //// TODO comparers and tests, kind of like the driver stuff
 
-            var seed = -2056050046; //// Environment.TickCount;
+            ////var seed = -2056050046; //// Environment.TickCount;
+            var seed = 13916031; //// Environment.TickCount;
             var rng = new Random(seed);
             var displayer = new ChessConsoleDisplayer<string>();
             var tree = "tree";
@@ -297,12 +298,14 @@
                     ////{ computer, new RandomStrategy<Fx.Game.Chess.ChessGame<string>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, string>() },
                     { random, new RandomStrategy<Fx.Game.Chess.ChessGame<string>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, string>(rng) },
                     ////{ tree, new GameTreeDepthStrategy<Fx.Game.Chess.ChessGame<string>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, string>(game => ChessScore(game, tree), Node.TreeFactory) }
-                    { tree, new ChessStrategy<string>(tree, StringComparer.OrdinalIgnoreCase) },
+                    ////{ tree, new ChessStrategy<string>(tree, StringComparer.OrdinalIgnoreCase) },
+                    { tree, new MonteCarloStrategy<ChessGame<string>, ChessGameState, Fx.Game.Chess.ChessMove, string>(tree, 50000, StringComparer.OrdinalIgnoreCase, rng) },
                     // { human, new UserInterfaceStrategy<Fx.Game.Chess.Chess<string>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, string>(displayer) },
                 },
                 displayer);
             var game = new Fx.Game.Chess.ChessGame<string>(random, tree);
             var result = driver.Run(game);
+            Console.WriteLine(seed);
         }
 
         private sealed class ChessStrategy<TPlayer> : IStrategy<Fx.Game.Chess.ChessGame<TPlayer>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, TPlayer>

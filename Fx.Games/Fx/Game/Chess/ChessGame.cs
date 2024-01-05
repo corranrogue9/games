@@ -277,6 +277,20 @@ namespace Fx.Game.Chess
         {
             get
             {
+                var onlyKings = true;
+                foreach (var position in this.Board.Board.Board)
+                {
+                    if (position != null && position != ChessPiece.BlackKing && position != ChessPiece.WhiteKing)
+                    {
+                        onlyKings = false;
+                    }
+                }
+
+                if (onlyKings)
+                {
+                    return new Outcome<TPlayer>(Enumerable.Empty<TPlayer>());
+                }
+
                 if (this.Moves.Any()) //// TODO if the player has no moves, but isn't in check, then it's actually a draw...
                 {
                     return null;
