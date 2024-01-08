@@ -333,7 +333,8 @@
                 {
                     ////{ exes, UserInterfaceStrategy.Create(displayer) },
                     { exes, game.RandomStrategy() },
-                    { ohs, game.RandomStrategy() },
+                    ////{ ohs, game.RandomStrategy() },
+                    { ohs, new MonteCarloStrategy<Longhorn<string>, LonghornBoard, LonghornMove, string>(ohs, 100000, StringComparer.OrdinalIgnoreCase, random) },
                 },
                 displayer);
             Console.WriteLine(seed);
