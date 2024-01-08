@@ -319,7 +319,6 @@
             var result = driver.Run(game);
             Console.WriteLine(seed);
         }
-        }
 
         private static void LonghornHumanVsRandom()
         {
