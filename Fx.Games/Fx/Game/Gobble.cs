@@ -61,7 +61,7 @@
             }
         }
 
-        public Outcome<TPlayer> Outcome
+        public WinnersAndLosers<TPlayer> WinnersAndLosers
         {
             get
             {
@@ -77,7 +77,8 @@
 
                         if (win)
                         {
-                            return new Outcome<TPlayer>(new[] { GetPlayerFromPiece(board.Grid[i, 0].Value) });
+                            //// TODO compute the losers and drawers too
+                            return new WinnersAndLosers<TPlayer>(new[] { GetPlayerFromPiece(board.Grid[i, 0].Value) }, Enumerable.Empty<TPlayer>(), Enumerable.Empty<TPlayer>());
                         }
                     }
                 }
@@ -94,22 +95,34 @@
 
                         if (win)
                         {
-                            return new Outcome<TPlayer>(new[] { GetPlayerFromPiece(board.Grid[0, j].Value) });
+                            //// TODO compute the losers and drawers too
+                            return new WinnersAndLosers<TPlayer>(new[] { GetPlayerFromPiece(board.Grid[0, j].Value) }, Enumerable.Empty<TPlayer>(), Enumerable.Empty<TPlayer>());
                         }
                     }
                 }
 
                 if (board.Grid[0, 0].HasValue && ArePiecesSamePlayer(board.Grid[0, 0], board.Grid[1, 1]) && ArePiecesSamePlayer(board.Grid[0, 0], board.Grid[2, 2]))
                 {
-                    return new Outcome<TPlayer>(new[] { GetPlayerFromPiece(board.Grid[1, 1].Value) });
+                    //// TODO compute the losers and drawers too
+                    return new WinnersAndLosers<TPlayer>(new[] { GetPlayerFromPiece(board.Grid[1, 1].Value) }, Enumerable.Empty<TPlayer>(), Enumerable.Empty<TPlayer>());
                 }
 
                 if (board.Grid[2, 0].HasValue && ArePiecesSamePlayer(board.Grid[2, 0], board.Grid[1, 1]) && ArePiecesSamePlayer(board.Grid[2, 0], board.Grid[0, 2]))
                 {
-                    return new Outcome<TPlayer>(new[] { GetPlayerFromPiece(board.Grid[1, 1].Value) });
+                    //// TODO compute the losers and drawers too
+                    return new WinnersAndLosers<TPlayer>(new[] { GetPlayerFromPiece(board.Grid[1, 1].Value) }, Enumerable.Empty<TPlayer>(), Enumerable.Empty<TPlayer>());
                 }
 
-                return Moves.Any() ? null : new Outcome<TPlayer>(Enumerable.Empty<TPlayer>());
+                //// TODO compute the losers and drawers too
+                return Moves.Any() ? new WinnersAndLosers<TPlayer>(Enumerable.Empty<TPlayer>(), Enumerable.Empty<TPlayer>(), Enumerable.Empty<TPlayer>()) : new WinnersAndLosers<TPlayer>(Enumerable.Empty<TPlayer>(), Enumerable.Empty<TPlayer>(), Enumerable.Empty<TPlayer>());
+            }
+        }
+
+        public bool IsGameOver
+        {
+            get
+            {
+                return this.WinnersAndLosers.Winners.Any() || this.WinnersAndLosers.Losers.Any() || this.WinnersAndLosers.Drawers.Any();
             }
         }
 

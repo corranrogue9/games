@@ -55,13 +55,15 @@
             }
         }
 
-        public Outcome<TPlayer> Outcome
+        public WinnersAndLosers<TPlayer> WinnersAndLosers
         {
             get
             {
                 throw new NotImplementedException();
             }
         }
+
+        public bool IsGameOver => throw new NotImplementedException();
 
         public Amazons<TPlayer> CommitMove(ChessMove move)
         {

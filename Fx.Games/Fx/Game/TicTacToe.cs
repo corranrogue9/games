@@ -57,7 +57,7 @@
             }
         }
 
-        public Outcome<TPlayer> Outcome
+        public WinnersAndLosers<TPlayer> WinnersAndLosers
         {
             get
             {
@@ -73,7 +73,8 @@
 
                         if (win)
                         {
-                            return new Outcome<TPlayer>(new[] { GetPlayerFromPiece(board.Grid[i, 0]) });
+                            //// TODO compute the losers and drawers too
+                            return new WinnersAndLosers<TPlayer>(new[] { GetPlayerFromPiece(board.Grid[i, 0]) }, Enumerable.Empty<TPlayer>(), Enumerable.Empty<TPlayer>());
                         }
                     }
                 }
@@ -90,19 +91,22 @@
 
                         if (win)
                         {
-                            return new Outcome<TPlayer>(new[] { GetPlayerFromPiece(board.Grid[0, j]) });
+                            //// TODO compute the losers and drawers too
+                            return new WinnersAndLosers<TPlayer>(new[] { GetPlayerFromPiece(board.Grid[0, j]) }, Enumerable.Empty<TPlayer>(), Enumerable.Empty<TPlayer>());
                         }
                     }
                 }
 
                 if (board.Grid[0, 0] != TicTacToePiece.Empty && board.Grid[0, 0] == board.Grid[1, 1] && board.Grid[0, 0] == board.Grid[2, 2])
                 {
-                    return new Outcome<TPlayer>(new[] { GetPlayerFromPiece(board.Grid[1, 1]) });
+                    //// TODO compute the losers and drawers too
+                    return new WinnersAndLosers<TPlayer>(new[] { GetPlayerFromPiece(board.Grid[1, 1]) }, Enumerable.Empty<TPlayer>(), Enumerable.Empty<TPlayer>());
                 }
 
                 if (board.Grid[2, 0] != TicTacToePiece.Empty && board.Grid[2, 0] == board.Grid[1, 1] && board.Grid[2, 0] == board.Grid[0, 2])
                 {
-                    return new Outcome<TPlayer>(new[] { GetPlayerFromPiece(board.Grid[1, 1]) });
+                    //// TODO compute the losers and drawers too
+                    return new WinnersAndLosers<TPlayer>(new[] { GetPlayerFromPiece(board.Grid[1, 1]) }, Enumerable.Empty<TPlayer>(), Enumerable.Empty<TPlayer>());
                 }
 
                 foreach (var piece in board.Grid)
@@ -110,12 +114,22 @@
                     if (piece == TicTacToePiece.Empty)
                     {
                         // no one has won the game, and there are empty spaces, so the game is continuing
-                        return null;
+                        //// TODO compute the losers and drawers too
+                        return new WinnersAndLosers<TPlayer>(Enumerable.Empty<TPlayer>(), Enumerable.Empty<TPlayer>(), Enumerable.Empty<TPlayer>());
                     }
                 }
 
                 // no one has won the game, and there are no empty spaces, so the game is a draw
-                return new Outcome<TPlayer>(Enumerable.Empty<TPlayer>());
+                //// TODO compute the losers and drawers too
+                return new WinnersAndLosers<TPlayer>(Enumerable.Empty<TPlayer>(), Enumerable.Empty<TPlayer>(), Enumerable.Empty<TPlayer>());
+            }
+        }
+
+        public bool IsGameOver
+        {
+            get
+            {
+                return this.WinnersAndLosers.Winners.Any() || this.WinnersAndLosers.Losers.Any() || this.WinnersAndLosers.Drawers.Any();
             }
         }
 

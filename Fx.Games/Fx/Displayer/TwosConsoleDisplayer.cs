@@ -55,7 +55,14 @@
                 throw new ArgumentNullException(nameof(game));
             }
 
-            game.Outcome.Winners.ApplyToEmptyOrPopulated(() => Console.WriteLine("The game was a draw..."), winner => Console.WriteLine($"{this.playerToString(winner)} wins!"));
+            if (game.WinnersAndLosers.Losers.Any())
+            {
+                Console.WriteLine($"{game.WinnersAndLosers.Losers.First()} lost the game; what a loser!");
+            }
+            else if (game.WinnersAndLosers.Winners.Any())
+            {
+                Console.WriteLine($"{game.WinnersAndLosers.Winners.First()} won the game; that's amazing because this game never ends!");
+            }
         }
 
         public void DisplayMoves(Twos<TPlayer> game)

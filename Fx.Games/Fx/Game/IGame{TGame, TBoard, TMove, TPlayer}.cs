@@ -38,6 +38,8 @@
         /// <summary>
         /// The results of the game as of the current state. <see langword="null"/> indicates that the game has not yet ended. //// TODO games can have players with an outcome without the game being over (for example, players can have already lost the game without the game being over)
         /// </summary>
-        Outcome<TPlayer> Outcome { get; }
+        WinnersAndLosers<TPlayer> WinnersAndLosers { get; }
+
+        bool IsGameOver { get; } //// TODO do we like this name?
     }
 }
