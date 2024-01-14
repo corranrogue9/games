@@ -8,6 +8,10 @@ public static class Program
     {
         // SetTraceLogging();
 
+
+        //// TODO install the virtual GPU on host cld05 - https://social.technet.microsoft.com/wiki/contents/articles/31771.server-2016-experience-guide-enabling-opengl-support-for-vgpu.aspx
+        //// TODO then get the driver installed on the guest os odat04
+
         var grid = new SquareGrid((8, 8), 80, (20, 20), true);
 
         var minSize = (X: grid.Size.X * grid.SquareSize + 2 * grid.Margin.X, Y: grid.Size.Y * grid.SquareSize + 2 * grid.Margin.Y);
