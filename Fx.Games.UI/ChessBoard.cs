@@ -1,8 +1,6 @@
-
-
 namespace Games;
 
-internal class ChessBoard
+public class ChessBoard
 {
     private readonly Piece?[,] grid;
 
@@ -20,11 +18,12 @@ internal class ChessBoard
         };
     }
 
-    public Piece? this[int file, int rank] { get => grid[file, rank]; }
+    public Piece? this[int file, int rank] { get => grid[rank, file]; }
+
     public Piece? this[Coordinate coordinate]
     {
-        get => grid[coordinate.File, coordinate.Rank];
-        private set => grid[coordinate.File, coordinate.Rank] = value;
+        get => grid[coordinate.Rank, coordinate.File];
+        private set => grid[coordinate.Rank, coordinate.File] = value;
     }
 
     public IEnumerable<Move> Moves(Coordinate origin)
@@ -89,7 +88,7 @@ internal class ChessBoard
     private IEnumerable<Move> PawnMoves(Coordinate origin, Piece piece)
     {
         var fwd = piece.Player == PlayerColor.White ? new Coordinate(0, -1) : new Coordinate(0, 1);
-        var initialFile = piece.Player == PlayerColor.White ? 6 : 1;
+        var initialRank = piece.Player == PlayerColor.White ? 6 : 1;
 
         var destination = origin + fwd;
         // one forward
@@ -98,7 +97,7 @@ internal class ChessBoard
             yield return new Move(origin, destination, false);
         }
         // two forward if on initial rank
-        if (origin.File == initialFile)
+        if (origin.Rank == initialRank)
         {
             destination = origin + fwd * 2;
             if (OnBoard(destination) && this[destination] == null)
@@ -107,9 +106,9 @@ internal class ChessBoard
             }
         }
         // capture to left or right 
-        foreach (var x in new[] { 1, -1 })
+        foreach (var lr in new[] { 1, -1 })
         {
-            destination = origin + fwd + new Coordinate(x, 0);
+            destination = origin + fwd + new Coordinate(lr, 0);
             if (!OnBoard(destination)) { continue; }
             var destinationPiece = this[destination];
             if (destinationPiece != null && destinationPiece.Value.Player != piece.Player)
@@ -131,13 +130,15 @@ internal class ChessBoard
             if (!OnBoard(destination)) { continue; } // off board
 
             var destinationPiece = this[destination];
-            if (destinationPiece?.Player == piece?.Player)
+            if (destinationPiece == null)
             {
-                continue;
-            }
 
-            var isCapture = destinationPiece != null && destinationPiece?.Player != piece?.Player;
-            yield return (destination, isCapture);
+                yield return (destination, false);
+            }
+            else if (destinationPiece.Value.Player != piece.Value.Player)
+            {
+                yield return (destination, true);
+            }
         }
     }
 
@@ -156,29 +157,39 @@ internal class ChessBoard
                 var destinationPiece = this[destination];
                 if (destinationPiece == null)
                 {
+                    // if this reached a an empty square, 
+                    // return a non-capturing move and continue the inner loop
                     yield return (destination, false);
                 }
                 else if (destinationPiece.Value.Player != piece.Value.Player)
                 {
+                    // if this reached a piece with the opponent's color, 
+                    // return a capturing move and end the inner loop
                     yield return (destination, true);
                     break;
                 }
                 else if (destinationPiece.Value.Player == piece.Value.Player)
                 {
+                    // if this reached a piece with the player's  color, 
+                    // return nothing and end the inner loop
                     break;
                 }
             }
         }
     }
 
-    private static bool OnBoard(Coordinate c) => c.Rank >= 0 && c.Rank < 8 && c.File >= 0 && c.File < 8;
+    private static bool OnBoard(Coordinate c) => c.File >= 0 && c.File < 8 && c.Rank >= 0 && c.Rank < 8;
 
     private static IEnumerable<Coordinate> OffsetsFromLeap((int M, int N) leap)
     {
         var (m, n) = leap;
-        if (m == n)
+        if (m == 0)
         {
-            return [(m, n), (m, -n), (-m, n), (-m, -n)];
+            return [(m, n), (m, -n), (n, m), (-n, m)];
+        }
+        else if (n == 0)
+        {
+            return [(m, n), (-m, n), (n, m), (n, -m)];
         }
         else
         {
@@ -204,5 +215,30 @@ internal class ChessBoard
 }
 
 
-internal record struct Move(Coordinate Origin, Coordinate Destination, bool Capture)
-{ }
+public static class ChessBoardExtensions
+{
+    public static string ToFEN(this ChessBoard board)
+    {
+        var s = new StringBuilder();
+        for (int y = 0; y < 8; y++)
+        {
+            if (y != 0) { s.Append('/'); }
+            for (int x = 0; x < 8; x++)
+            {
+                var piece = board[x, y];
+                if (piece == null)
+                {
+                    int k = x;
+                    while (k < 8 && board[k, y] == null) { k += 1; }
+                    s.Append(k - x);
+                    x = k - 1;
+                }
+                else
+                {
+                    s.Append(piece.Value.Symbol);
+                }
+            }
+        }
+        return s.ToString();
+    }
+}

@@ -1,6 +1,3 @@
-using System.Collections;
-using System.Diagnostics;
-
 namespace Games;
 
 public enum PlayerColor { Black, White };
@@ -9,6 +6,7 @@ public enum PieceKind { king, Queen, Rook, Bishop, Knight, Pawn };
 
 public readonly record struct Piece(PlayerColor Player, PieceKind Kind) : IFormattable
 {
+
     public static readonly Piece BlackKing = new(PlayerColor.Black, PieceKind.king);
     public static readonly Piece BlackQueen = new(PlayerColor.Black, PieceKind.Queen);
     public static readonly Piece BlackBishop = new(PlayerColor.Black, PieceKind.Bishop);
@@ -23,19 +21,17 @@ public readonly record struct Piece(PlayerColor Player, PieceKind Kind) : IForma
     public static readonly Piece WhiteRook = new(PlayerColor.White, PieceKind.Rook);
     public static readonly Piece WhitePawn = new(PlayerColor.White, PieceKind.Pawn);
 
-    // public override string ToString()
-    // {
-    //     return base.ToString();
-    // }
 
     public string ToString(string? format, IFormatProvider? formatProvider)
     {
         return format switch
         {
-            "A" => SYMBOL[6 * (int)this.Player + (int)this.Kind].ToString(),
+            "A" => this.Symbol,
             _ => $"{Enum.GetName<PlayerColor>(this.Player)} {Enum.GetName<PieceKind>(this.Kind)}",
         };
     }
+
+    public string Symbol => SYMBOL[6 * (int)this.Player + (int)this.Kind].ToString();
 
     static readonly char[] SYMBOL = ['k', 'q', 'r', 'b', 'n', 'p', 'K', 'Q', 'R', 'B', 'N', 'P'];
 }

@@ -24,7 +24,7 @@ public static class Program
         var pieces = ChessPieceTextures.FromFile("resources/chess_spritesheet.png");
 
         var board = new ChessBoard();
-        (Coordinate Origin, IEnumerable<Move> Moves)? selected = null;
+        Selection? selected = null;
 
         // Main game loop
         while (!RAY.WindowShouldClose()) // Detect window close button or ESC key
@@ -37,10 +37,10 @@ public static class Program
 
                 if (RAY.IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_LEFT))
                 {
-                    if (grid.TryGetSquareUnderMouse(out var c))
+                    if (grid.TryGetSquareUnderMouse(out var selectedCoordinate))
                     {
                         // check if a move's destination is selected
-                        if (selected != null && selected.Value.Moves.TryFind(move => move.Destination == c, out var mv))
+                        if (selected != null && selected.Value.Moves.TryFind(move => move.Destination == selectedCoordinate, out var mv))
                         {
                             if (board.Commit(mv, out var capture))
                             {
@@ -50,7 +50,12 @@ public static class Program
                         }
                         else
                         {
-                            selected = (c, board.Moves(c));
+                            Console.WriteLine("selected {0}", selectedCoordinate);
+
+                            selected = (selectedCoordinate, board.Moves(selectedCoordinate));
+                            System.Console.WriteLine("{0}: {1}",
+                                board.ToFEN(),
+                                string.Join(", ", selected.Value.Moves.Select(m => m.ToString("A", null))));
                         }
                     }
                     else
@@ -83,14 +88,10 @@ public static class Program
 
     private static void Highlight(SquareGrid checkers, Coordinate dest, Color color)
     {
-        // var rect = new Rectangle(
-        //                         checkers.Margin.X + checkers.SquareSize * dest.Rank + checkers.SquareSize * .05f,
-        //                         checkers.Margin.X + checkers.SquareSize * dest.File + checkers.SquareSize * .05f,
-        //                         checkers.SquareSize * .9f,
-        //                         checkers.SquareSize * .9f);
+
         var center = (
-            X: checkers.Margin.X + checkers.SquareSize * dest.Rank + checkers.SquareSize / 2,
-            Y: checkers.Margin.X + checkers.SquareSize * dest.File + checkers.SquareSize / 2
+            X: checkers.Margin.X + checkers.SquareSize * dest.File + checkers.SquareSize / 2,
+            Y: checkers.Margin.X + checkers.SquareSize * dest.Rank + checkers.SquareSize / 2
         );
         var actual = new Color(color.r, color.g, color.b, (byte)127);
         // RAY.DrawRectangleRounded(rect, 0.2f, 0xFF, actual);
@@ -99,14 +100,14 @@ public static class Program
 
     private static void DrawPieces(SquareGrid checkers, ChessPieceTextures pieces, ChessBoard board)
     {
-        for (int i = 0; i < checkers.Size.X; i++)
+        for (int y = 0; y < checkers.Size.Y; y++)
         {
-            for (int j = 0; j < checkers.Size.Y; j++)
+            for (int x = 0; x < checkers.Size.X; x++)
             {
-                var piece = board[j, i];
+                var piece = board[x, y];
                 if (piece != null)
                 {
-                    checkers.DrawPiece(pieces, piece.Value, (i, j));
+                    checkers.DrawPiece(pieces, piece.Value, (x, y));
                 }
             }
         }
@@ -137,5 +138,45 @@ public static class Program
             var callback = (delegate* unmanaged[Cdecl]<TraceLogLevel, nint, nint, void>)&CustomLogging;
             RAY.SetTraceLogCallback((delegate* unmanaged[Cdecl]<int, void*, void*, void>)callback);
         }
+    }
+}
+
+internal struct Selection
+{
+    public Coordinate Origin;
+    public IEnumerable<Move> Moves;
+
+    public Selection(Coordinate origin, IEnumerable<Move> moves)
+    {
+        Origin = origin;
+        Moves = moves;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return obj is Selection other &&
+               Origin.Equals(other.Origin) &&
+               EqualityComparer<IEnumerable<Move>>.Default.Equals(Moves, other.Moves);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Origin, Moves);
+    }
+
+    public void Deconstruct(out Coordinate origin, out IEnumerable<Move> moves)
+    {
+        origin = Origin;
+        moves = Moves;
+    }
+
+    public static implicit operator (Coordinate Origin, IEnumerable<Move> Moves)(Selection value)
+    {
+        return (value.Origin, value.Moves);
+    }
+
+    public static implicit operator Selection((Coordinate Origin, IEnumerable<Move> Moves) value)
+    {
+        return new Selection(value.Origin, value.Moves);
     }
 }
