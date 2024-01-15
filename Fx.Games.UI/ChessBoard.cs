@@ -1,6 +1,6 @@
 namespace Games;
 
-public class ChessBoard
+public class ChessBoard : IFormattable
 {
     private readonly Piece?[,] grid;
 
@@ -212,12 +212,22 @@ public class ChessBoard
         captured = destinationPiece ?? default;
         return destinationPiece != null;
     }
+
+    public string ToString(string? format, IFormatProvider? formatProvider)
+    {
+        return format switch
+        {
+            "F" => this.ToFenString()!,
+            "FEN" => this.ToFenString()!,
+            _ => this.ToString()!,
+        };
+    }
 }
 
 
 public static class ChessBoardExtensions
 {
-    public static string ToFEN(this ChessBoard board)
+    public static string ToFenString(this ChessBoard board)
     {
         var s = new StringBuilder();
         for (int y = 0; y < 8; y++)

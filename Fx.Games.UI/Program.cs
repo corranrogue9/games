@@ -53,9 +53,10 @@ public static class Program
                             Console.WriteLine("selected {0}", selectedCoordinate);
 
                             selected = (selectedCoordinate, board.Moves(selectedCoordinate));
-                            System.Console.WriteLine("{0}: {1}",
-                                board.ToFEN(),
-                                string.Join(", ", selected.Value.Moves.Select(m => m.ToString("A", null))));
+                            File.AppendAllText("log.txt", String.Format("{0:FEN}: {1:A} > [{2}]\r\n",
+                                board,
+                                selected.Value.Origin,
+                                string.Join(", ", selected.Value.Moves.Select(m => $"{m.Destination:A}{(m.Capture ? "x" : "")}"))));
                         }
                     }
                     else
