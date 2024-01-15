@@ -18,11 +18,16 @@
             (nameof(TicTacToeHumanVsDecisionTree), TicTacToeHumanVsDecisionTree),
             (nameof(TicTacToeDecisionTreeVsHuman), TicTacToeDecisionTreeVsHuman),
             (nameof(TicTacToeTwoRandom), TicTacToeTwoRandom),
+            (nameof(TicTacToeDecisionTreeVsRandom), TicTacToeDecisionTreeVsRandom),
+            (nameof(TicTacToeMonteCarloVsRandom), TicTacToeMonteCarloVsRandom),
+            (nameof(TicTacToeMonteCarloVsDecisionTree), TicTacToeMonteCarloVsDecisionTree),
             (nameof(PegsHuman), PegsHuman),
             (nameof(PegsDecisionTree), PegsDecisionTree),
+            (nameof(PegsMonteCarlo), PegsMonteCarlo),
             (nameof(GobbleHumanVsHuman), GobbleHumanVsHuman),
             (nameof(GobbleHumanVsRandom), GobbleHumanVsRandom),
             (nameof(GobbleNumberOfMovesHeuristcVsRandom), GobbleNumberOfMovesHeuristcVsRandom),
+            (nameof(GobbleMonteCarloVsRandom), GobbleMonteCarloVsRandom),
             (nameof(TwosHuman), TwosHuman),
             (nameof(TwosSevenMovesHeuristic12), TwosSevenMovesHeuristic12),
             (nameof(TwosOneMoveHeuristic12), TwosOneMoveHeuristic12),
@@ -126,6 +131,59 @@
             var result = driver.Run(game);
         }
 
+        private static void TicTacToeDecisionTreeVsRandom()
+        {
+            var exes = "exes";
+            var ohs = "ohs";
+            var players = new[] { exes, ohs };
+            var displayer = new TicTacToeConsoleDisplayer<string>(_ => _);
+            var game = new TicTacToe<string>(exes, ohs);
+            var driver = Driver.Create(
+                new Dictionary<string, IStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>>
+                {
+                    { exes, new DecisionTreeStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>(exes, StringComparer.OrdinalIgnoreCase) },
+                    { ohs, new RandomStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>() },
+                },
+                displayer);
+            var result = driver.Run(game);
+        }
+
+        private static void TicTacToeMonteCarloVsRandom()
+        {
+            var exes = "exes";
+            var ohs = "ohs";
+            var players = new[] { exes, ohs };
+            var displayer = new TicTacToeConsoleDisplayer<string>(_ => _);
+            var random = new Random();
+            var game = new TicTacToe<string>(exes, ohs);
+            var driver = Driver.Create(
+                new Dictionary<string, IStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>>
+                {
+                    { exes, new MonteCarloStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>(exes, 1000000, StringComparer.Ordinal, random) },
+                    { ohs, new RandomStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>() },
+                },
+                displayer);
+            var result = driver.Run(game);
+        }
+
+        private static void TicTacToeMonteCarloVsDecisionTree()
+        {
+            var exes = "exes";
+            var ohs = "ohs";
+            var players = new[] { exes, ohs };
+            var displayer = new TicTacToeConsoleDisplayer<string>(_ => _);
+            var random = new Random();
+            var game = new TicTacToe<string>(exes, ohs);
+            var driver = Driver.Create(
+                new Dictionary<string, IStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>>
+                {
+                    { exes, new MonteCarloStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>(exes, 1000000, StringComparer.Ordinal, random) },
+                    { ohs, new DecisionTreeStrategy<TicTacToe<string>, TicTacToeBoard, TicTacToeMove, string>(ohs, StringComparer.OrdinalIgnoreCase) },
+                },
+                displayer);
+            var result = driver.Run(game);
+        }
+
         private static void PegsHuman()
         {
             var displayer = new PegGameConsoleDisplayer<string>();
@@ -149,6 +207,21 @@
                 new Dictionary<string, IStrategy<PegGame<string>, PegBoard, PegMove, string>>
                 {
                     { computer, new GameTreeDepthStrategy<PegGame<string>, PegBoard, PegMove, string>(game => game.ToTree().Decide(computer, StringComparer.OrdinalIgnoreCase).Value.Item3.Item2, Node.TreeFactory) },
+                },
+                displayer);
+            var result = driver.Run(game);
+        }
+
+        private static void PegsMonteCarlo()
+        {
+            var displayer = new PegGameConsoleDisplayer<string>();
+            var computer = "computer";
+            var random = new Random();
+            var game = new PegGame<string>(computer);
+            var driver = Driver.Create(
+                new Dictionary<string, IStrategy<PegGame<string>, PegBoard, PegMove, string>>
+                {
+                    { computer, new MonteCarloStrategy<PegGame<string>, PegBoard, PegMove, string>(computer, 100000, StringComparer.OrdinalIgnoreCase, random) },
                 },
                 displayer);
             var result = driver.Run(game);
@@ -196,6 +269,23 @@
                 new Dictionary<string, IStrategy<Gobble<string>, GobbleBoard, GobbleMove, string>>
                 {
                     { exes, new HeuristicStrategy<Gobble<string>, GobbleBoard, GobbleMove, string>() },
+                    { ohs, new RandomStrategy<Gobble<string>, GobbleBoard, GobbleMove, string>() }
+                },
+                displayer);
+            var result = driver.Run(game);
+        }
+
+        private static void GobbleMonteCarloVsRandom()
+        {
+            var displayer = new GobbleConsoleDisplayer<string>(_ => _);
+            var exes = "exes";
+            var ohs = "ohs";
+            var random = new Random();
+            var game = new Gobble<string>(exes, ohs);
+            var driver = Driver.Create(
+                new Dictionary<string, IStrategy<Gobble<string>, GobbleBoard, GobbleMove, string>>
+                {
+                    { exes, new MonteCarloStrategy<Gobble<string>, GobbleBoard, GobbleMove, string>(exes, 1000000, StringComparer.OrdinalIgnoreCase, random) },
                     { ohs, new RandomStrategy<Gobble<string>, GobbleBoard, GobbleMove, string>() }
                 },
                 displayer);
