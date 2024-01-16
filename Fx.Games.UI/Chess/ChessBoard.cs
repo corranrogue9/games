@@ -1,32 +1,32 @@
-namespace Games;
+namespace Games.Chess;
 
 public class ChessBoard : IFormattable
 {
-    private readonly Piece?[,] grid;
+    private readonly ChessPiece?[,] grid;
 
     public ChessBoard()
     {
-        grid = new Piece?[8, 8] {
-            {Piece.BlackRook, Piece.BlackKnight,  Piece.BlackBishop, Piece.BlackQueen, Piece.BlackKing,  Piece.BlackBishop,  Piece.BlackKnight,  Piece.BlackRook},
-            {Piece.BlackPawn, Piece.BlackPawn,  Piece.BlackPawn, Piece.BlackPawn,  Piece.BlackPawn,  Piece.BlackPawn,  Piece.BlackPawn,  Piece.BlackPawn},
+        grid = new ChessPiece?[8, 8] {
+            {ChessPiece.BlackRook, ChessPiece.BlackKnight,  ChessPiece.BlackBishop, ChessPiece.BlackQueen, ChessPiece.BlackKing,  ChessPiece.BlackBishop,  ChessPiece.BlackKnight,  ChessPiece.BlackRook},
+            {ChessPiece.BlackPawn, ChessPiece.BlackPawn,  ChessPiece.BlackPawn, ChessPiece.BlackPawn,  ChessPiece.BlackPawn,  ChessPiece.BlackPawn,  ChessPiece.BlackPawn,  ChessPiece.BlackPawn},
             {null, null, null, null, null, null, null, null},
             {null, null, null, null, null, null, null, null},
             {null, null, null, null, null, null, null, null},
             {null, null, null, null, null, null, null, null},
-            {Piece.WhitePawn, Piece.WhitePawn, Piece.WhitePawn,  Piece.WhitePawn,  Piece.WhitePawn,  Piece.WhitePawn,  Piece.WhitePawn,  Piece.WhitePawn},
-            {Piece.WhiteRook, Piece.WhiteKnight,  Piece.WhiteBishop,    Piece.WhiteQueen, Piece.WhiteKing, Piece.WhiteBishop,  Piece.WhiteKnight,  Piece.WhiteRook}
+            {ChessPiece.WhitePawn, ChessPiece.WhitePawn, ChessPiece.WhitePawn,  ChessPiece.WhitePawn,  ChessPiece.WhitePawn,  ChessPiece.WhitePawn,  ChessPiece.WhitePawn,  ChessPiece.WhitePawn},
+            {ChessPiece.WhiteRook, ChessPiece.WhiteKnight,  ChessPiece.WhiteBishop,    ChessPiece.WhiteQueen, ChessPiece.WhiteKing, ChessPiece.WhiteBishop,  ChessPiece.WhiteKnight,  ChessPiece.WhiteRook}
         };
     }
 
-    public Piece? this[int file, int rank] { get => grid[rank, file]; }
+    public ChessPiece? this[int file, int rank] { get => grid[rank, file]; }
 
-    public Piece? this[Coordinate coordinate]
+    public ChessPiece? this[Coordinate coordinate]
     {
         get => grid[coordinate.Rank, coordinate.File];
         private set => grid[coordinate.Rank, coordinate.File] = value;
     }
 
-    public IEnumerable<Move> Moves(Coordinate origin)
+    public IEnumerable<ChessMove> Moves(Coordinate origin)
     {
         var piece = this[origin];
         if (!piece.HasValue) { yield break; }
@@ -36,42 +36,42 @@ public class ChessBoard : IFormattable
                 var destinations = LeaperDestinations(origin, (1, 2));
                 foreach (var (dest, capture) in destinations)
                 {
-                    yield return new Move(origin, dest, capture);
+                    yield return new ChessMove(origin, dest, capture);
                 }
                 break;
             case PieceKind.Bishop:
                 destinations = RiderDestinations(origin, (1, 1));
                 foreach (var (dest, capture) in destinations)
                 {
-                    yield return new Move(origin, dest, capture);
+                    yield return new ChessMove(origin, dest, capture);
                 }
                 break;
             case PieceKind.Rook:
                 destinations = RiderDestinations(origin, (1, 0));
                 foreach (var (dest, capture) in destinations)
                 {
-                    yield return new Move(origin, dest, capture);
+                    yield return new ChessMove(origin, dest, capture);
                 }
                 break;
             case PieceKind.Queen:
                 destinations = RiderDestinations(origin, (1, 0)).Concat(RiderDestinations(origin, (1, 1)));
                 foreach (var (dest, capture) in destinations)
                 {
-                    yield return new Move(origin, dest, capture);
+                    yield return new ChessMove(origin, dest, capture);
                 }
                 break;
             case PieceKind.king:
                 destinations = LeaperDestinations(origin, (1, 0)).Concat(LeaperDestinations(origin, (1, 1)));
                 foreach (var (dest, capture) in destinations)
                 {
-                    yield return new Move(origin, dest, capture);
+                    yield return new ChessMove(origin, dest, capture);
                 }
                 // https://en.wikipedia.org/wiki/Castling
                 var startingSquare = new Coordinate(4, piece.Value.Player == PlayerColor.White ? 7 : 0);
                 if (origin == startingSquare)
                 {
-                    yield return new Move(origin, origin + new Coordinate(2, 0), false);
-                    yield return new Move(origin, origin + new Coordinate(-2, 0), false);
+                    yield return new ChessMove(origin, origin + new Coordinate(2, 0), false);
+                    yield return new ChessMove(origin, origin + new Coordinate(-2, 0), false);
                 }
                 break;
             case PieceKind.Pawn:
@@ -85,7 +85,7 @@ public class ChessBoard : IFormattable
         }
     }
 
-    private IEnumerable<Move> PawnMoves(Coordinate origin, Piece piece)
+    private IEnumerable<ChessMove> PawnMoves(Coordinate origin, ChessPiece piece)
     {
         var fwd = piece.Player == PlayerColor.White ? new Coordinate(0, -1) : new Coordinate(0, 1);
         var initialRank = piece.Player == PlayerColor.White ? 6 : 1;
@@ -94,7 +94,7 @@ public class ChessBoard : IFormattable
         // one forward
         if (OnBoard(destination) && this[destination] == null)
         {
-            yield return new Move(origin, destination, false);
+            yield return new ChessMove(origin, destination, false);
         }
         // two forward if on initial rank
         if (origin.Rank == initialRank)
@@ -102,7 +102,7 @@ public class ChessBoard : IFormattable
             destination = origin + fwd * 2;
             if (OnBoard(destination) && this[destination] == null)
             {
-                yield return new Move(origin, destination, false);
+                yield return new ChessMove(origin, destination, false);
             }
         }
         // capture to left or right 
@@ -113,7 +113,7 @@ public class ChessBoard : IFormattable
             var destinationPiece = this[destination];
             if (destinationPiece != null && destinationPiece.Value.Player != piece.Player)
             {
-                yield return new Move(origin, destination, true);
+                yield return new ChessMove(origin, destination, true);
             }
         }
     }
@@ -197,7 +197,7 @@ public class ChessBoard : IFormattable
         }
     }
 
-    public bool Commit(Move mv, [MaybeNullWhen(false)] out Piece captured)
+    public bool Commit(ChessMove mv, [MaybeNullWhen(false)] out ChessPiece captured)
     {
         var piece = this[mv.Origin];
         Debug.Assert(piece != null);

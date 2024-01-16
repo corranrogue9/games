@@ -1,7 +1,3 @@
-
-
-using System.Diagnostics.CodeAnalysis;
-
 namespace Games;
 
 public static class EnumerableExtensions
@@ -17,5 +13,14 @@ public static class EnumerableExtensions
         }
         found = default;
         return false;
+    }
+
+    public static IEnumerable<(T, int)> Enumerate<T>(this IEnumerable<T> items)
+    {
+        var i = 0;
+        foreach (var item in items)
+        {
+            yield return (item, i++);
+        }
     }
 }

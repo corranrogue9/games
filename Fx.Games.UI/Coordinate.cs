@@ -1,6 +1,14 @@
 namespace Games;
 
-public record struct Coordinate(int File, int Rank) : IFormattable
+public record struct Coordinate(
+    /// <summary>
+    /// X coordinate
+    /// </summary
+    int File,
+    /// <summary>
+    /// Y coordinate
+    /// </summary
+    int Rank) : IFormattable
 {
     public static implicit operator (int File, int Rank)(Coordinate value)
     {
