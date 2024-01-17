@@ -2,23 +2,33 @@
 namespace Games;
 
 
-public enum Game { Chess, Backgammon, TicTacToe };
+public enum Game { Chess, TicTacToe, Gobble };
 
 public class CommandLineArgs(Game chess)
 {
     public static CommandLineArgs FromArgs(string[] args)
     {
-        var result = new CommandLineArgs(Game.TicTacToe);
+        var result = new CommandLineArgs(Game.Gobble);
 
         for (int i = 0; i < args.Length; i++)
         {
             switch (args[i])
             {
                 case "-c":
+                case "-chess":
                     result.Game = Game.Chess;
                     break;
-                case "-b":
-                    result.Game = Game.Backgammon;
+                // case "-b":
+                // case "--backgammon":
+                //     result.Game = Game.Backgammon;
+                //     break;
+                case "-t":
+                case "--tictactoe":
+                    result.Game = Game.TicTacToe;
+                    break;
+                case "-g":
+                case "--gobble":
+                    result.Game = Game.Gobble;
                     break;
             }
         }
@@ -45,6 +55,10 @@ public static class Program
 
             case Game.TicTacToe:
                 new TicTacToe.TicTacToeApp().Run();
+                break;
+
+            case Game.Gobble:
+                new Gobble.GobbleApp(540, 30).Run();
                 break;
         }
     }

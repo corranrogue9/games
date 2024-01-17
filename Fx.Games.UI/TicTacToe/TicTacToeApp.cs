@@ -7,9 +7,9 @@ public class TicTacToeApp()
     internal void Run()
     {
         // SetTraceLogging();
-        RAY.InitWindow(680, 680, "FX.Games");
+        Ray.InitWindow(680, 680, "FX.Games");
 
-        var texture = RAY.LoadTexture("resources/tictactoe_spritesheet.png");
+        var texture = Ray.LoadTexture("resources/tictactoe_spritesheet.png");
         var sprites = new SpriteSet<Piece>(
             texture, [
                 (Piece.O, new Rectangle(0, 0, 150, 150)),
@@ -18,7 +18,7 @@ public class TicTacToeApp()
         Console.WriteLine("constructed sprites");
         var grid = new SquareGrid<Piece>((3, 3), 200, (20, 20), true)
         {
-            Font = RAY.LoadFontEx("resources/coolvetica rg.otf", 32, 256),
+            Font = Ray.LoadFontEx("resources/coolvetica rg.otf", 32, [], 256),
             SpriteSet = sprites
         };
 
@@ -26,14 +26,14 @@ public class TicTacToeApp()
 
 
         // Main game loop
-        while (!RAY.WindowShouldClose()) // Detect window close button or ESC key
+        while (!Ray.WindowShouldClose()) // Detect window close button or ESC key
         {
             try
             {
-                RAY.BeginDrawing();
-                RAY.ClearBackground(RAY.DARKGRAY);
+                Ray.BeginDrawing();
+                Ray.ClearBackground(Color.DARKGRAY);
 
-                if (RAY.IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_LEFT))
+                if (Ray.IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_LEFT))
                 {
                     if (grid.TryGetSquareUnderMouse(out var selectedCoordinate))
                     {
@@ -61,19 +61,19 @@ public class TicTacToeApp()
 
                 // // if (selected.HasValue)
                 // // {
-                // //     Highlight(grid, selected.Value.Origin, RAY.GREEN);
+                // //     Highlight(grid, selected.Value.Origin, Ray.GREEN);
                 // //     foreach (var move in selected.Value.Moves)
                 // //     {
-                // //         Highlight(grid, move.Destination, move.Capture ? RAY.RED : RAY.YELLOW);
+                // //         Highlight(grid, move.Destination, move.Capture ? Ray.RED : Ray.YELLOW);
                 // //     }
                 // // }
             }
             finally
             {
-                RAY.EndDrawing();
+                Ray.EndDrawing();
             }
         }
 
-        RAY.CloseWindow();
+        Ray.CloseWindow();
     }
 }

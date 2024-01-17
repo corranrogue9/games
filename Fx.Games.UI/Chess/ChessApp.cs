@@ -4,45 +4,44 @@ public class ChessApp()
 {
     public void Run()
     {
-        // SetTraceLogging();
-        RAY.InitWindow(680, 680, "FX.Games");
+        Ray.InitWindow(680, 680, "FX.Games");
 
-        var texture = RAY.LoadTexture("resources/chess_spritesheet.png");
+        var texture = Ray.LoadTexture("resources/chess_spritesheet.png");
         var sprites = new SpriteSet<ChessPiece>(
             texture,
             from c in Enum.GetValues<PlayerColor>()
             from p in Enum.GetValues<PieceKind>()
-            select (new ChessPiece(c, p), new Rectangle(texture.height * ((int)c * 6 + (int)p), 0, texture.height, texture.height))
+            select (new ChessPiece(c, p), new Rectangle(texture.Height * ((int)c * 6 + (int)p), 0, texture.Width, texture.Height))
         );
 
         var grid = new SquareGrid<ChessPiece>((8, 8), 80, (20, 20), true)
         {
-            Font = RAY.LoadFontEx("resources/coolvetica rg.otf", 32, 256),
+            Font = Raylib.LoadFontEx("resources/coolvetica rg.otf", 32, null, 256),
             SpriteSet = sprites
         };
 
         var minSize = (X: grid.Size.X * grid.SquareSize + 2 * grid.Margin.X, Y: grid.Size.Y * grid.SquareSize + 2 * grid.Margin.Y);
-        RAY.InitWindow(680, 680, "FX.Games");
-        RAY.SetWindowMinSize(minSize.X, minSize.Y);
-        RAY.SetWindowState(ConfigFlags.FLAG_WINDOW_RESIZABLE);
-        RAY.SetTargetFPS(60);
+        Ray.InitWindow(680, 680, "FX.Games");
+        Ray.SetWindowMinSize(minSize.X, minSize.Y);
+        Ray.SetWindowState(ConfigFlags.FLAG_WINDOW_RESIZABLE);
+        Ray.SetTargetFPS(24);
 
-        // var fnt = RAY.LoadFontEx("resources/coolvetica rg.otf", 32, 256);
+        // var fnt = Ray.LoadFontEx("resources/coolvetica rg.otf", 32, 256);
         // var pieces = ChessPieceTextures.FromFile("resources/chess_spritesheet.png");
 
         var board = new ChessBoard();
         Selection? selected = null;
 
         // Main game loop
-        while (!RAY.WindowShouldClose()) // Detect window close button or ESC key
+        while (!Ray.WindowShouldClose()) // Detect window close button or ESC key
         {
             try
             {
-                RAY.BeginDrawing();
-                RAY.ClearBackground(RAY.DARKGRAY);
-                // RAY.DrawFPS(10, 10);
+                Ray.BeginDrawing();
+                Ray.ClearBackground(Color.DARKGRAY);
+                // Ray.DrawFPS(10, 10);
 
-                if (RAY.IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_LEFT))
+                if (Ray.IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_LEFT))
                 {
                     if (grid.TryGetSquareUnderMouse(out var selectedCoordinate))
                     {
@@ -78,20 +77,20 @@ public class ChessApp()
 
                 if (selected.HasValue)
                 {
-                    Highlight(grid, selected.Value.Origin, RAY.GREEN);
+                    Highlight(grid, selected.Value.Origin, Color.GREEN);
                     foreach (var move in selected.Value.Moves)
                     {
-                        Highlight(grid, move.Destination, move.Capture ? RAY.RED : RAY.YELLOW);
+                        Highlight(grid, move.Destination, move.Capture ? Color.RED : Color.YELLOW);
                     }
                 }
             }
             finally
             {
-                RAY.EndDrawing();
+                Ray.EndDrawing();
             }
         }
 
-        RAY.CloseWindow();
+        Ray.CloseWindow();
     }
 
     private static void Highlight(SquareGrid<ChessPiece> grid, Coordinate dest, Color color)
@@ -101,9 +100,9 @@ public class ChessApp()
             X: grid.Margin.X + grid.SquareSize * dest.File + grid.SquareSize / 2,
             Y: grid.Margin.X + grid.SquareSize * dest.Rank + grid.SquareSize / 2
         );
-        var actual = new Color(color.r, color.g, color.b, (byte)127);
-        // RAY.DrawRectangleRounded(rect, 0.2f, 0xFF, actual);
-        RAY.DrawCircle(center.X, center.Y, grid.SquareSize / 4, actual);
+        var actual = Raylib_cs.Raylib.Fade(color, 0.5f);
+        // Ray.DrawRectangleRounded(rect, 0.2f, 0xFF, actual);
+        Ray.DrawCircle(center.X, center.Y, grid.SquareSize / 4, actual);
     }
 
     private static void DrawPieces(SquareGrid<ChessPiece> grid, ChessBoard board)
@@ -121,32 +120,6 @@ public class ChessApp()
         }
     }
 
-    private static void SetTraceLogging()
-    {
-        // Unmanaged callback with Cdecl calling convention.
-        [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
-        unsafe static void CustomLogging(TraceLogLevel level, nint a, nint b)
-        {
-            // if (level <= LOG.LOG_INFO) return;
-            switch (level)
-            {
-                case LOG_DEBUG: Console.ForegroundColor = ConsoleColor.White; break;
-                case LOG_INFO: Console.ForegroundColor = ConsoleColor.Yellow; break;
-                case LOG_WARNING: Console.ForegroundColor = ConsoleColor.DarkYellow; break;
-                case LOG_ERROR: Console.ForegroundColor = ConsoleColor.Red; break;
-                default: break;
-            }
-
-            var aa = Marshal.PtrToStringAnsi(a)!;
-            Console.Error.WriteLine("{0}: {1}", level, aa);
-        }
-
-        unsafe
-        {
-            var callback = (delegate* unmanaged[Cdecl]<TraceLogLevel, nint, nint, void>)&CustomLogging;
-            RAY.SetTraceLogCallback((delegate* unmanaged[Cdecl]<int, void*, void*, void>)callback);
-        }
-    }
 }
 
 

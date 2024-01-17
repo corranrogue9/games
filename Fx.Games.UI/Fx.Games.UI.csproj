@@ -11,8 +11,7 @@
 
 
   <ItemGroup>
-    <PackageReference Include="Raylib-CsLo" Version="4.2.0.9" />
+    <PackageReference Include="Raylib-cs" Version="5.0.0" />
   </ItemGroup>
-
 
 </Project>
