@@ -36,6 +36,21 @@ public class ChessDisplayer : IDisplayer<Fx.Game.TicTacToe<string>, Fx.Game.TicT
 
         var board = new ChessBoard();
 
+        try
+        {
+            Ray.BeginDrawing();
+            Ray.ClearBackground(Color.DARKGRAY);
+            // Ray.DrawFPS(10, 10);
+
+            grid.DrawGrid();
+
+            ChessApp.DrawPieces(grid, board);
+        }
+        finally
+        {
+            Ray.EndDrawing();
+        }
+
         this.disposed = false;
     }
 
@@ -176,7 +191,7 @@ public class ChessApp()
         Ray.DrawCircle(center.X, center.Y, grid.SquareSize / 4, actual);
     }
 
-    private static void DrawPieces(SquareGrid<ChessPiece> grid, ChessBoard board)
+    public static void DrawPieces(SquareGrid<ChessPiece> grid, ChessBoard board)
     {
         for (int y = 0; y < grid.Size.Y; y++)
         {
