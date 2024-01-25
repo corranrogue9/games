@@ -1,4 +1,74 @@
+using Fx.Displayer;
+using Fx.Game;
+
 namespace Games.Chess;
+
+public class ChessDisplayer : IDisplayer<Fx.Game.TicTacToe<string>, Fx.Game.TicTacToeBoard, Fx.Game.TicTacToeMove, string>, IDisposable
+{
+    private bool disposed;
+
+    public ChessDisplayer()
+    {
+        Ray.InitWindow(680, 680, "FX.Games");
+
+        var texture = Ray.LoadTexture("resources/chess_spritesheet.png");
+        var sprites = new SpriteSet<ChessPiece>(
+            texture,
+            from c in Enum.GetValues<PlayerColor>()
+            from p in Enum.GetValues<PieceKind>()
+            select (new ChessPiece(c, p), new Rectangle(texture.Height * ((int)c * 6 + (int)p), 0, texture.Width, texture.Height))
+        );
+
+        var grid = new SquareGrid<ChessPiece>((8, 8), 80, (20, 20), true)
+        {
+            Font = Raylib.LoadFontEx("resources/coolvetica rg.otf", 32, null, 256),
+            SpriteSet = sprites
+        };
+
+        var minSize = (X: grid.Size.X * grid.SquareSize + 2 * grid.Margin.X, Y: grid.Size.Y * grid.SquareSize + 2 * grid.Margin.Y);
+        Ray.InitWindow(680, 680, "FX.Games");
+        Ray.SetWindowMinSize(minSize.X, minSize.Y);
+        Ray.SetWindowState(ConfigFlags.FLAG_WINDOW_RESIZABLE);
+        Ray.SetTargetFPS(24);
+
+        // var fnt = Ray.LoadFontEx("resources/coolvetica rg.otf", 32, 256);
+        // var pieces = ChessPieceTextures.FromFile("resources/chess_spritesheet.png");
+
+        var board = new ChessBoard();
+
+        this.disposed = false;
+    }
+
+    public void DisplayBoard(TicTacToe<string> game)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void DisplayMoves(TicTacToe<string> game)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void DisplayOutcome(TicTacToe<string> game)
+    {
+        throw new NotImplementedException();
+    }
+
+    public TicTacToeMove ReadMoveSelection(TicTacToe<string> game)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Dispose()
+    {
+        if (this.disposed)
+        {
+            return;
+        }
+
+        Ray.CloseWindow();
+    }
+}
 
 public class ChessApp()
 {
