@@ -41,22 +41,23 @@ public class ChessDisplayer : IDisplayer<Fx.Game.TicTacToe<string>, Fx.Game.TicT
 
     public void DisplayBoard(TicTacToe<string> game)
     {
-        throw new NotImplementedException();
+        new TicTacToeConsoleDisplayer<string>(_ => _).DisplayBoard(game);
     }
 
     public void DisplayMoves(TicTacToe<string> game)
     {
-        throw new NotImplementedException();
+        new TicTacToeConsoleDisplayer<string>(_ => _).DisplayMoves(game);
     }
 
     public void DisplayOutcome(TicTacToe<string> game)
     {
-        throw new NotImplementedException();
+
+        new TicTacToeConsoleDisplayer<string>(_ => _).DisplayOutcome(game);
     }
 
     public TicTacToeMove ReadMoveSelection(TicTacToe<string> game)
     {
-        throw new NotImplementedException();
+        return new TicTacToeConsoleDisplayer<string>(_ => _).ReadMoveSelection(game);
     }
 
     public void Dispose()
