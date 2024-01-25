@@ -2,7 +2,6 @@
 {
     using System;
     using System.Linq;
-
     using Fx.Game;
 
     public sealed class TicTacToeConsoleDisplayer<TPlayer> : IDisplayer<TicTacToe<TPlayer>, TicTacToeBoard, TicTacToeMove, TPlayer>
@@ -61,7 +60,9 @@
                 throw new ArgumentNullException(nameof(game));
             }
 
-            game.Outcome.Winners.ApplyToEmptyOrPopulated(() => Console.WriteLine("The game was a draw..."), winner => Console.WriteLine($"{this.playerToString(winner)} wins!"));
+            game.WinnersAndLosers.Winners.ApplyToEmptyOrPopulated(
+                () => Console.WriteLine("The game was a draw..."), 
+                winner => Console.WriteLine($"{this.playerToString(winner)} wins!"));
         }
 
         public void DisplayMoves(TicTacToe<TPlayer> game)

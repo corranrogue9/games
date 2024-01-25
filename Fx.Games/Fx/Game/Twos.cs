@@ -214,16 +214,16 @@
             }
         }
 
-        public Outcome<TPlayer> Outcome
+        public WinnersAndLosers<TPlayer> WinnersAndLosers
         {
             get
             {
                 if (!this.LegalMoves.Any())
                 {
-                    return new Outcome<TPlayer>(Enumerable.Empty<TPlayer>());
+                    return new WinnersAndLosers<TPlayer>(Enumerable.Empty<TPlayer>(), new[] { this.player }, Enumerable.Empty<TPlayer>());
                 }
 
-                return null;
+                return new WinnersAndLosers<TPlayer>(Enumerable.Empty<TPlayer>(), Enumerable.Empty<TPlayer>(), Enumerable.Empty<TPlayer>());
             }
         }
 
@@ -242,6 +242,14 @@
         }
 
         public IEnumerable<TwosDirection> Moves => this.LegalMoves;
+
+        public bool IsGameOver
+        {
+            get
+            {
+                return !this.LegalMoves.Any();
+            }
+        }
 
         private IEnumerable<Twos<TPlayer>> ExploreMove(TwosDirection move)
         {

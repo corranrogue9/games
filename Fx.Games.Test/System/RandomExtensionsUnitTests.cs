@@ -10,7 +10,7 @@ namespace System
         {
             var random = new Random(0);
             var list = new[] { 5, 4, 1, 7 };
-            Assert.AreEqual(1,  random.Choose(list));
+            Assert.AreEqual(1, random.Choose(list));
         }
     }
 }

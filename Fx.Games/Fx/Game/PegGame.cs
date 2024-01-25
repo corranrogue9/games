@@ -87,13 +87,13 @@
             }
         }
 
-        public Outcome<TPlayer> Outcome
+        public WinnersAndLosers<TPlayer> WinnersAndLosers
         {
             get
             {
                 if (Moves.Any())
                 {
-                    return null;
+                    return new WinnersAndLosers<TPlayer>(Enumerable.Empty<TPlayer>(), Enumerable.Empty<TPlayer>(), Enumerable.Empty<TPlayer>());
                 }
 
                 var pieces = false;
@@ -105,7 +105,7 @@
                         {
                             if (pieces)
                             {
-                                return new Outcome<TPlayer>(Enumerable.Empty<TPlayer>());
+                                return new WinnersAndLosers<TPlayer>(Enumerable.Empty<TPlayer>(), new[] { player }, Enumerable.Empty<TPlayer>());
                             }
                             else
                             {
@@ -115,7 +115,15 @@
                     }
                 }
 
-                return new Outcome<TPlayer>(new[] { player });
+                return new WinnersAndLosers<TPlayer>(new[] { player }, Enumerable.Empty<TPlayer>(), Enumerable.Empty<TPlayer>());
+            }
+        }
+
+        public bool IsGameOver
+        {
+            get
+            {
+                return !this.Moves.Any();
             }
         }
 

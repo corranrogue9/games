@@ -57,7 +57,7 @@
                 throw new ArgumentNullException(nameof(game));
             }
 
-            foreach (var winner in game.Outcome.Winners)
+            foreach (var winner in game.WinnersAndLosers.Winners)
             {
                 Console.WriteLine($"{this.playerToString(winner)} wins!");
             }

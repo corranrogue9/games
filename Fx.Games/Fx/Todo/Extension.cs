@@ -44,7 +44,7 @@
             where TGame : IGame<TGame, TBoard, TMove, TPlayer>
         {
             return gameTree.Select(
-                game => (game, default(TMove), game.Outcome?.Winners.Contains(player, playerComparer) == true ? (DecisionTreeStatus.Win, 1.0) : game.Outcome?.Winners.Any() == false ? (DecisionTreeStatus.Draw, 0.0) : (DecisionTreeStatus.Lose, -1.0)),
+                game => (game, default(TMove), game.WinnersAndLosers.Winners.Contains(player, playerComparer) == true ? (DecisionTreeStatus.Win, 1.0) : game.WinnersAndLosers.Losers.Contains(player, playerComparer) ? (DecisionTreeStatus.Lose, -1.0) : (DecisionTreeStatus.Draw, 0.0)),
                 (game, children) =>
                 {
                     var zipped = game.Moves.Zip(children).ToList();

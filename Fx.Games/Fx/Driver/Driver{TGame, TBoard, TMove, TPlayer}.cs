@@ -25,7 +25,7 @@
 
         public TGame Run(TGame game)
         {
-            while (game.Outcome == null)
+            while (!game.IsGameOver)
             {
                 var strategy = strategies[game.CurrentPlayer];
                 displayer.DisplayBoard(game);
@@ -34,14 +34,14 @@
                 var move = strategy.SelectMove(game);
                 Console.WriteLine($"{DateTime.UtcNow}");
                 game = game.CommitMove(move);
-                if (game.Outcome != null)
+                if (game.IsGameOver)
                 {
                     break;
                 }
             }
 
             displayer.DisplayBoard(game);
-            displayer.DisplayOutcome(game);
+            displayer.DisplayOutcome(game); //// TODO outcomes now have winners and lsoers
             return game;
         }
     }

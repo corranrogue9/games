@@ -29,7 +29,7 @@
 
         public void DisplayOutcome(PegGame<TPlayer> game)
         {
-            if (game.Outcome.Winners.Any())
+            if (game.WinnersAndLosers.Winners.Any())
             {
                 Console.WriteLine("You win!");
             }

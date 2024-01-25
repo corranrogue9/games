@@ -1,5 +1,6 @@
 ﻿namespace Fx.Game
 {
+    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
 
@@ -67,21 +68,29 @@
             }
         }
 
-        public Outcome<TPlayer> Outcome
+        public WinnersAndLosers<TPlayer> WinnersAndLosers
         {
             get
             {
                 if (!this.board.Select(this.board.GetPiece).Where(piece => piece != null && piece.IsBlack).Any())
                 {
-                    return new Outcome<TPlayer>(new[] { this.white });
+                    return new WinnersAndLosers<TPlayer>(new[] { this.white }, new[] { this.black }, Enumerable.Empty<TPlayer>());
                 }
 
                 if (!this.board.Select(this.board.GetPiece).Where(piece => piece != null && !piece.IsBlack).Any())
                 {
-                    return new Outcome<TPlayer>(new[] { this.black });
+                    return new WinnersAndLosers<TPlayer>(new[] { this.black }, new[] { this.white }, Enumerable.Empty<TPlayer>());
                 }
 
-                return null;
+                return new WinnersAndLosers<TPlayer>(Enumerable.Empty<TPlayer>(), Enumerable.Empty<TPlayer>(), Enumerable.Empty<TPlayer>());
+            }
+        }
+
+        public bool IsGameOver
+        {
+            get
+            {
+                return this.WinnersAndLosers.Winners.Any() || this.WinnersAndLosers.Losers.Any() || this.WinnersAndLosers.Drawers.Any();
             }
         }
 
