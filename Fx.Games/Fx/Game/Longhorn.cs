@@ -1,4 +1,6 @@
 ﻿
+using System.Runtime.CompilerServices;
+
 namespace Fx.Game
 {
     public static class Extensions
@@ -19,6 +21,69 @@ namespace Fx.Game
 
     public sealed class Longhorn<TPlayer> : IGame<Longhorn<TPlayer>, LonghornBoard, LonghornMove, TPlayer>
     {
+        private sealed class StartingTile
+        {
+            private StartingTile(int orangeCows, int blackCows, int greenCows, int whiteCows, bool isNuggetHill)
+            {
+                this.OrangeCows = orangeCows;
+                this.BlackCows = blackCows;
+                this.GreenCows = greenCows;
+                this.WhiteCows = whiteCows;
+                this.IsNuggetHill = isNuggetHill;
+            }
+
+            public int OrangeCows { get; }
+            public int BlackCows { get; }
+            public int GreenCows { get; }
+            public int WhiteCows { get; }
+
+            public bool IsNuggetHill { get; }
+
+            public static IEnumerable<StartingTile> StartingTiles
+            {
+                get
+                {
+                    //// TODO which tile is nugget hill?
+                    yield return new StartingTile(0, 2, 1, 0, false);
+                    yield return new StartingTile(2, 1, 1, 0, false);
+                    yield return new StartingTile(2, 0, 2, 2, false);
+                    yield return new StartingTile(0, 0, 1, 3, false);
+                    yield return new StartingTile(1, 1, 2, 1, false); //// TODO the picture for this one doesn't have any white cows, but it has a brown cow? so i'm assuming that is a misprint
+                    yield return new StartingTile(0, 1, 1, 2, false); //// TODO the picture here doesn't have any green cows, but it has a red cow; because the previous used brown instead of white, i'm assuming here red is supposed to be green
+                    yield return new StartingTile(0, 1, 1, 2, false); //// TODO this one weirdly doesn't have the two white cows contiguous, while the colors are contiguous in all of the other pictures; probably this is supposed to be a "one of each" tile?
+                    yield return new StartingTile(2, 1, 0, 1, false);
+                    yield return new StartingTile(0, 2, 0, 0, false);
+                }
+            }
+        }
+
+        private static IEnumerable<ActionToken> StartingActionTokens
+        {
+            get
+            {
+                yield return new ActionToken.Gold(200);
+                yield return new ActionToken.Gold(200);
+                yield return new ActionToken.Gold(300);
+                yield return new ActionToken.Gold(300);
+                yield return new ActionToken.Gold(400);
+                yield return new ActionToken.Gold(500);
+                //// TODO i don't know if the quanities of the above gold actions are correct, the picture doesn't seem to show it
+                yield return new ActionToken.Ambush();
+                yield return new ActionToken.Ambush();
+                yield return new ActionToken.Ambush();
+                yield return new ActionToken.Epidemic();
+                yield return new ActionToken.BrandingIron();
+                yield return new ActionToken.BrandingIron();
+                yield return new ActionToken.BrandingIron();
+                yield return new ActionToken.SnakeOil();
+                yield return new ActionToken.SnakeOil();
+                yield return new ActionToken.SnakeOil();
+                yield return new ActionToken.Rattlesnake();
+                yield return new ActionToken.Rattlesnake();
+                yield return new ActionToken.Sheriff();
+            }
+        }
+
         private readonly (TPlayer player, int orange, int black, int green, int white, int gold) player1;
         private readonly (TPlayer player, int orange, int black, int green, int white, int gold) player2;
         private readonly Random random;
@@ -30,7 +95,60 @@ namespace Fx.Game
 
         private static LonghornBoard GenerateRandomBoard(Random random)
         {
-            //// TODO one of the players is supposed to pick where the other one starts
+            var createTile = (StartingTile startingTile, ActionToken actionToken) =>
+            {
+                return new LonghornTile(
+                    startingTile.OrangeCows, 
+                    startingTile.BlackCows, 
+                    startingTile.GreenCows,
+                    startingTile.WhiteCows, 
+                    actionToken);
+            };
+
+            var startingActionTokens = StartingActionTokens.Shuffle(random).Take(9).ToList(); //// TODO use applyaggregation here to create the list and determine if there's a sheriff
+            var sheriffIndex = startingActionTokens.FindIndex(token => token is ActionToken.Sheriff);
+            if (sheriffIndex != -1)
+            {
+                //// TODO is this still properly random?
+                var temp = startingActionTokens[startingActionTokens.Count];
+                startingActionTokens[startingActionTokens.Count] = startingActionTokens[sheriffIndex];
+                startingActionTokens[sheriffIndex] = temp;
+            }
+
+            var startingTiles = StartingTile.StartingTiles.Shuffle(random);
+
+            var tiles = new LonghornTile[3, 3];
+            using (var startingActionTokensEnumerator = startingActionTokens.GetEnumerator())
+            using (var startingTilesEnumerator = startingTiles.GetEnumerator())
+            {
+                startingActionTokensEnumerator.MoveNext();
+                startingTilesEnumerator.MoveNext();
+
+                for (int i = 0; i < 3; ++i)
+                {
+                    for (int j = 0; j < 3; ++j)
+                    {
+                        ActionToken startingActionToken;
+                        if (sheriffIndex != -1 && startingTilesEnumerator.Current.IsNuggetHill)
+                        {
+                            startingActionToken = startingActionTokens[startingActionTokens.Count];
+                        }
+                        else
+                        {
+                            startingActionToken = startingActionTokensEnumerator.Current;
+                            startingActionTokensEnumerator.MoveNext();
+                        }
+
+                        tiles[i, j] = createTile(startingTilesEnumerator.Current, startingActionToken);
+                        startingTilesEnumerator.MoveNext();
+                        //// TODO you are here
+                        //// TODO the starting tiles have specific cows on them, but they are just supposed to have a number of cows; the colors are random
+                    }
+                }
+            }
+
+
+            /*//// TODO one of the players is supposed to pick where the other one starts
 
             var startingLocation = (random.Next(0, 3), random.Next(0, 3));
 
@@ -81,7 +199,7 @@ namespace Fx.Game
                 }
 
                 return new LonghornBoard(tiles, startingLocation);
-            }
+            }*/
         }
 
         public Longhorn(TPlayer player1, TPlayer player2, LonghornBoard board, Random random)
@@ -293,22 +411,65 @@ namespace Fx.Game
 
     public sealed class LonghornTile
     {
-        public LonghornTile(int orangeCows, int blackCows, int greenCows, int whiteCows, int gold)
+        public LonghornTile(int orangeCows, int blackCows, int greenCows, int whiteCows, ActionToken actionToken)
         {
             this.OrangeCows = orangeCows;
             this.BlackCows = blackCows;
             this.GreenCows = greenCows;
             this.WhiteCows = whiteCows;
-
-            //// TODO what about the special action thing?
-            this.Gold = gold;
+            this.ActionToken = actionToken;
         }
 
         public int OrangeCows { get; }
+
         public int BlackCows { get; }
+
         public int GreenCows { get; }
+
         public int WhiteCows { get; }
-        public int Gold { get; }
+
+        public ActionToken ActionToken { get; }
+    }
+
+    public abstract class ActionToken
+    {
+        private ActionToken()
+        {
+        }
+
+        public sealed class Gold : ActionToken
+        {
+            public Gold(int amount)
+            {
+                this.Amount = amount;
+            }
+
+            public int Amount { get; }
+        }
+
+        public sealed class SnakeOil : ActionToken
+        {
+        }
+
+        public sealed class BrandingIron : ActionToken
+        {
+        }
+
+        public sealed class Ambush : ActionToken
+        {
+        }
+
+        public sealed class Epidemic : ActionToken
+        {
+        }
+
+        public sealed class Rattlesnake : ActionToken
+        {
+        }
+
+        public sealed class Sheriff : ActionToken
+        {
+        }
     }
 
     public sealed class LonghornMove
