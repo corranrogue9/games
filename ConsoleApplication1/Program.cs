@@ -361,7 +361,7 @@
                         writer.Append(i * 8 + 2, $"black cows: {tile.BlackCows}");
                         writer.Append(i * 8 + 3, $"white cows: {tile.WhiteCows}");
                         writer.Append(i * 8 + 4, $"orange cows: {tile.OrangeCows}");
-                        if (game.Board.PlayerLocation.row == i && game.Board.PlayerLocation.column == j)
+                        if (game.Board.PlayerLocation.Row == i && game.Board.PlayerLocation.Column == j)
                         {
                             writer.Append(i * 8 + 5, $"CURRENT PLAYER LOCATION!");
                         }
