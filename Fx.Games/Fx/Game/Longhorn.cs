@@ -23,19 +23,13 @@ namespace Fx.Game
     {
         private sealed class StartingTile
         {
-            private StartingTile(int orangeCows, int blackCows, int greenCows, int whiteCows, bool isNuggetHill)
+            private StartingTile(int numberOfCows, bool isNuggetHill)
             {
-                this.OrangeCows = orangeCows;
-                this.BlackCows = blackCows;
-                this.GreenCows = greenCows;
-                this.WhiteCows = whiteCows;
+                this.NumbrOfCows = numberOfCows;
                 this.IsNuggetHill = isNuggetHill;
             }
 
-            public int OrangeCows { get; }
-            public int BlackCows { get; }
-            public int GreenCows { get; }
-            public int WhiteCows { get; }
+            public int NumbrOfCows { get; }
 
             public bool IsNuggetHill { get; }
 
@@ -44,15 +38,15 @@ namespace Fx.Game
                 get
                 {
                     //// TODO which tile is nugget hill?
-                    yield return new StartingTile(0, 2, 1, 0, false);
-                    yield return new StartingTile(2, 1, 1, 0, false);
-                    yield return new StartingTile(2, 0, 2, 2, false);
-                    yield return new StartingTile(0, 0, 1, 3, false);
-                    yield return new StartingTile(1, 1, 2, 1, false); //// TODO the picture for this one doesn't have any white cows, but it has a brown cow? so i'm assuming that is a misprint
-                    yield return new StartingTile(0, 1, 1, 2, false); //// TODO the picture here doesn't have any green cows, but it has a red cow; because the previous used brown instead of white, i'm assuming here red is supposed to be green
-                    yield return new StartingTile(0, 1, 1, 2, false); //// TODO this one weirdly doesn't have the two white cows contiguous, while the colors are contiguous in all of the other pictures; probably this is supposed to be a "one of each" tile?
-                    yield return new StartingTile(2, 1, 0, 1, false);
-                    yield return new StartingTile(0, 2, 0, 0, false);
+                    yield return new StartingTile(3, false);
+                    yield return new StartingTile(4, false);
+                    yield return new StartingTile(4, false);
+                    yield return new StartingTile(4, false);
+                    yield return new StartingTile(5, false);
+                    yield return new StartingTile(4, false);
+                    yield return new StartingTile(4, false);
+                    yield return new StartingTile(4, false);
+                    yield return new StartingTile(2, false);
                 }
             }
         }
@@ -95,16 +89,6 @@ namespace Fx.Game
 
         private static LonghornBoard GenerateRandomBoard(Random random)
         {
-            var createTile = (StartingTile startingTile, ActionToken actionToken) =>
-            {
-                return new LonghornTile(
-                    startingTile.OrangeCows, 
-                    startingTile.BlackCows, 
-                    startingTile.GreenCows,
-                    startingTile.WhiteCows, 
-                    actionToken);
-            };
-
             var startingActionTokens = StartingActionTokens.Shuffle(random).Take(9).ToList(); //// TODO use applyaggregation here to create the list and determine if there's a sheriff
             var sheriffIndex = startingActionTokens.FindIndex(token => token is ActionToken.Sheriff);
             if (sheriffIndex != -1)
@@ -116,13 +100,21 @@ namespace Fx.Game
             }
 
             var startingTiles = StartingTile.StartingTiles.Shuffle(random);
+            var cows = Enumerable
+                .Repeat(0, 9)
+                .Concat(Enumerable.Repeat(1, 9))
+                .Concat(Enumerable.Repeat(2, 9))
+                .Concat(Enumerable.Repeat(3, 9))
+                .Shuffle(random);
 
             var tiles = new LonghornTile[3, 3];
             using (var startingActionTokensEnumerator = startingActionTokens.GetEnumerator())
             using (var startingTilesEnumerator = startingTiles.GetEnumerator())
+            using (var cowsEnumerator = cows.GetEnumerator())
             {
                 startingActionTokensEnumerator.MoveNext();
                 startingTilesEnumerator.MoveNext();
+                cowsEnumerator.MoveNext();
 
                 for (int i = 0; i < 3; ++i)
                 {
@@ -139,10 +131,33 @@ namespace Fx.Game
                             startingActionTokensEnumerator.MoveNext();
                         }
 
-                        tiles[i, j] = createTile(startingTilesEnumerator.Current, startingActionToken);
+                        var orange = 0;
+                        var black = 0;
+                        var green = 0;
+                        var white = 0;
+                        for (int k = 0; k < startingTilesEnumerator.Current.NumbrOfCows; ++k)
+                        {
+                            if (cowsEnumerator.Current == 0)
+                            {
+                                ++orange;
+                            }
+                            else if (cowsEnumerator.Current == 1)
+                            {
+                                ++black;
+                            }
+                            else if (cowsEnumerator.Current == 2)
+                            {
+                                ++green;
+                            }
+                            else if (cowsEnumerator.Current == 3)
+                            {
+                                ++white;
+                            }
+                        }
+
+                        tiles[i, j] = new LonghornTile(orange, black, green, white, startingActionToken);
                         startingTilesEnumerator.MoveNext();
                         //// TODO you are here
-                        //// TODO the starting tiles have specific cows on them, but they are just supposed to have a number of cows; the colors are random
                     }
                 }
             }
