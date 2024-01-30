@@ -323,7 +323,7 @@
             var ohs = "player2";
             var game = new Longhorn<string>(exes, ohs, random);
             var driver = Driver.Create(
-                new Dictionary<string, IStrategy<Longhorn<string>, LonghornBoard, LonghornMove, string>>
+                new Dictionary<string, IStrategy<Longhorn<string>, LonghornBoard<string>, LonghornMove, string>>
                 {
                     { exes, UserInterfaceStrategy.Create(displayer) },
                     ////{ exes, game.RandomStrategy() },
@@ -336,7 +336,7 @@
             Console.WriteLine(seed);
         }
 
-        private sealed class LonghornConsoleDisplay<TPlayer> : IDisplayer<Longhorn<TPlayer>, LonghornBoard, LonghornMove, TPlayer>
+        private sealed class LonghornConsoleDisplay<TPlayer> : IDisplayer<Longhorn<TPlayer>, LonghornBoard<TPlayer>, LonghornMove, TPlayer>
         {
             private readonly Func<TPlayer, string> transcriber;
 
@@ -349,6 +349,9 @@
             {
                 Console.WriteLine();
                 Console.WriteLine();
+
+                Console.WriteLine($"{this.transcriber(game.Board.Player1Status.Player)} status: {game.Board.Player1Status.Black} black cows, {game.Board.Player1Status.Green} green cows, {game.Board.Player1Status.Orange} orange cows, {game.Board.Player1Status.White} white cows; {string.Join(", ", game.Board.Player1Status.GoldNuggets)} gold nuggets");
+                Console.WriteLine($"{this.transcriber(game.Board.Player2Status.Player)} status: {game.Board.Player2Status.Black} black cows, {game.Board.Player2Status.Green} green cows, {game.Board.Player2Status.Orange} orange cows, {game.Board.Player2Status.White} white cows; {string.Join(", ", game.Board.Player2Status.GoldNuggets)} gold nuggets");
 
                 var writer = new Writer();
                 for (int i = 0; i < 3; ++i)

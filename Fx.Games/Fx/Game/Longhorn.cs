@@ -20,7 +20,7 @@ namespace Fx.Game
         }
     }
 
-    public sealed class Longhorn<TPlayer> : IGame<Longhorn<TPlayer>, LonghornBoard, LonghornMove, TPlayer>
+    public sealed class Longhorn<TPlayer> : IGame<Longhorn<TPlayer>, LonghornBoard<TPlayer>, LonghornMove, TPlayer>
     {
         private sealed class StartingTile
         {
@@ -78,17 +78,17 @@ namespace Fx.Game
             }
         }
 
-        private readonly (TPlayer player, int orange, int black, int green, int white, int gold) player1;
+        private readonly (TPlayer player, int orange, int black, int green, int white, int gold) player1; //// TODO probably should use longhorplayerstatus
         private readonly (TPlayer player, int orange, int black, int green, int white, int gold) player2;
         private readonly Random random;
         private readonly bool previousMoveResultedInGameOver;
 
         public Longhorn(TPlayer player1, TPlayer player2, Random random)
-            : this(random.Next() % 2 == 0, player1, player2, GenerateRandomBoard(random), random)
+            : this(random.Next() % 2 == 0, player1, player2, GenerateRandomBoard(random, player1, player2), random)
         {
         }
 
-        private static LonghornBoard GenerateRandomBoard(Random random)
+        private static LonghornBoard<TPlayer> GenerateRandomBoard(Random random, TPlayer player1, TPlayer player2)
         {
             var startingActionTokens = StartingActionTokens.Shuffle(random).Take(9).ToList(); //// TODO use applyaggregation here to create the list and determine if there's a sheriff
             var sheriffIndex = startingActionTokens.FindIndex(token => token is ActionToken.Sheriff);
@@ -164,7 +164,7 @@ namespace Fx.Game
                 }
             }
 
-            return new LonghornBoard(tiles, null);
+            return new LonghornBoard<TPlayer>(tiles, null, new LonghornPlayerStatus<TPlayer>(player1, 0, 0, 0, 0, Enumerable.Empty<int>()), new LonghornPlayerStatus<TPlayer>(player2, 0, 0, 0, 0, Enumerable.Empty<int>()));
 
 
             /*//// TODO one of the players is supposed to pick where the other one starts
@@ -221,7 +221,7 @@ namespace Fx.Game
             }*/
         }
 
-        public Longhorn(bool firstPlayer, TPlayer player1, TPlayer player2, LonghornBoard board, Random random)
+        public Longhorn(bool firstPlayer, TPlayer player1, TPlayer player2, LonghornBoard<TPlayer> board, Random random)
             : this((firstPlayer ? player1 : player2, 0, 0, 0, 0, 0), (firstPlayer ? player2 : player1, 0, 0, 0, 0, 0), board, random, false)
         {
         }
@@ -229,7 +229,7 @@ namespace Fx.Game
         private Longhorn(
             (TPlayer player, int orange, int black, int green, int white, int gold) player1,
             (TPlayer player, int orange, int black, int green, int white, int gold) player2,
-            LonghornBoard board,
+            LonghornBoard<TPlayer> board,
             Random random,
             bool previousMoveResultedInGameOver)
         {
@@ -269,10 +269,23 @@ namespace Fx.Game
                 }
                 else
                 {
+                    //// TODO The special characteristics of dangerous locations: locations containing yellow Action tokens (Rattlesnake – Sheriff) are considered as dangerous. Consequently you cannot have the same player play twice in succession at the same dangerous location if other possibilities exist.
                     var tile = this.Board.Tiles[playerLocation.Row, playerLocation.Column];
+                    var lastColor = LastColor(tile);
+                    
+
                     var takeColors = TakeColors(tile);
                     foreach (var takeColor in takeColors)
                     {
+                        if (takeColor.color == lastColor)
+                        {
+                            //// TODO do action tokens
+                            if (tile.ActionToken is ActionToken.Ambush ambush)
+                            {
+
+                            }
+                        }
+
                         var newLocations = NewLocations(playerLocation, takeColor.count).ToList();
 
                         //// TODO does applayaggregation help here?
@@ -294,6 +307,31 @@ namespace Fx.Game
                     }
                 }
             }
+        }
+
+        private static TakeColor? LastColor(LonghornTile tile)
+        {
+            if (tile.BlackCows != 0 && tile.GreenCows == 0 && tile.OrangeCows == 0 && tile.WhiteCows == 0)
+            {
+                return TakeColor.Black;
+            }
+
+            if (tile.BlackCows == 0 && tile.GreenCows != 0 && tile.OrangeCows == 0 && tile.WhiteCows == 0)
+            {
+                return TakeColor.Green;
+            }
+
+            if (tile.BlackCows == 0 && tile.GreenCows == 0 && tile.OrangeCows != 0 && tile.WhiteCows == 0)
+            {
+                return TakeColor.Orange;
+            }
+
+            if (tile.BlackCows == 0 && tile.GreenCows == 0 && tile.OrangeCows == 0 && tile.WhiteCows != 0)
+            {
+                return TakeColor.White;
+            }
+
+            return null;
         }
 
         private sealed class LocationComparer : IEqualityComparer<LonghornLocation>
@@ -397,7 +435,7 @@ namespace Fx.Game
             }
         }
 
-        public LonghornBoard Board { get; }
+        public LonghornBoard<TPlayer> Board { get; }
 
         public Outcome<TPlayer> Outcome
         {
@@ -444,7 +482,11 @@ namespace Fx.Game
             var playerLocation = this.Board.PlayerLocation;
             if (playerLocation == null && move is LonghornMove.LocationChoice locationChoice)
             {
-                var newBoard = new LonghornBoard(this.Board.Tiles, locationChoice.Location);
+                var newBoard = new LonghornBoard<TPlayer>(
+                    this.Board.Tiles, 
+                    locationChoice.Location, 
+                    new LonghornPlayerStatus<TPlayer>(this.player1.player, 0, 0, 0, 0, Enumerable.Empty<int>()), 
+                    new LonghornPlayerStatus<TPlayer>(this.player1.player, 0, 0, 0, 0, Enumerable.Empty<int>()));
                 return new Longhorn<TPlayer>(this.player2, this.player1, newBoard, this.random, false);
             }
             else if (playerLocation != null && move is LonghornMove.LocationMove locationMove)
@@ -478,7 +520,11 @@ namespace Fx.Game
                     newBoardTiles[playerLocation.Row, playerLocation.Column] = new LonghornTile(currentTile.OrangeCows, currentTile.BlackCows, currentTile.GreenCows, 0, currentTile.ActionToken);
                 }
 
-                var newBoard = new LonghornBoard(newBoardTiles, locationMove.NewLocation);
+                var newBoard = new LonghornBoard<TPlayer>(
+                    newBoardTiles, 
+                    locationMove.NewLocation,
+                    new LonghornPlayerStatus<TPlayer>(newPlayer1.player, newPlayer1.orange, newPlayer1.black, newPlayer1.green, newPlayer1.white, Enumerable.Empty<int>()),
+                    new LonghornPlayerStatus<TPlayer>(newPlayer2.player, newPlayer2.orange, newPlayer2.black, newPlayer2.green, newPlayer2.white, Enumerable.Empty<int>()));
 
                 return new Longhorn<TPlayer>(newPlayer1, newPlayer2, newBoard, random, locationMove.NewLocation == null);
             }
@@ -489,14 +535,16 @@ namespace Fx.Game
         }
     }
 
-    public sealed class LonghornBoard
+    public sealed class LonghornBoard<TPlayer>
     {
         private readonly LonghornTile[,] tiles;
 
-        public LonghornBoard(LonghornTile[,] tiles, LonghornLocation? playerLocation)
+        public LonghornBoard(LonghornTile[,] tiles, LonghornLocation? playerLocation, LonghornPlayerStatus<TPlayer> player1Status, LonghornPlayerStatus<TPlayer> player2Status)
         {
             this.tiles = tiles.Clone2();
             this.PlayerLocation = playerLocation;
+            this.Player1Status = player1Status;
+            this.Player2Status = player2Status;
         }
 
         public LonghornTile[,] Tiles
@@ -508,6 +556,10 @@ namespace Fx.Game
         }
 
         public LonghornLocation? PlayerLocation { get; }
+
+        public LonghornPlayerStatus<TPlayer> Player1Status { get; }
+
+        public LonghornPlayerStatus<TPlayer> Player2Status { get; }
     }
 
     public sealed class LonghornLocation
@@ -620,6 +672,27 @@ namespace Fx.Game
 
             public LonghornLocation? NewLocation { get; } //// TODO use inheritance; this is nullable because if all of the available tiles have no cows, the game is over
         }
+    }
+
+    public sealed class LonghornPlayerStatus<TPlayer>
+    {
+        public LonghornPlayerStatus(TPlayer player, int orange, int black, int green, int white, IEnumerable<int> goldNuggets)
+        {
+            this.Player = player;
+            this.Orange = orange;
+            this.Black = black;
+            this.Green = green;
+            this.White = white;
+            this.GoldNuggets = goldNuggets.ToList();
+        }
+
+        public TPlayer Player { get; }
+        public int Orange { get; }
+        public int Black { get; }
+        public int Green { get; }
+        public int White { get; }
+
+        public IEnumerable<int> GoldNuggets { get; }
     }
 
     public enum TakeColor
