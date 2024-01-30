@@ -328,6 +328,7 @@
                     { exes, UserInterfaceStrategy.Create(displayer) },
                     ////{ exes, game.RandomStrategy() },
                     { ohs, game.RandomStrategy() },
+                    ////{ exes, new DecisionTreeStrategy<Longhorn<string>, LonghornBoard, LonghornMove, string>(exes, StringComparer.OrdinalIgnoreCase) },
                 },
                 displayer);
             Console.WriteLine(seed);

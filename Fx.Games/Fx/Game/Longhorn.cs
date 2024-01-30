@@ -255,7 +255,11 @@ namespace Fx.Game
                     {
                         for (int j = 0; j < 3; ++j) //// TODO remove the hardcoded 3's everywhere if possible
                         {
-                            yield return new LonghornMove.LocationChoice(new LonghornLocation(i, j));
+                            var tile = this.Board.Tiles[i, j];
+                            if (tile.BlackCows + tile.GreenCows + tile.OrangeCows + tile.WhiteCows == 4)
+                            {
+                                yield return new LonghornMove.LocationChoice(new LonghornLocation(i, j));
+                            }
                         }
                     }
                 }
