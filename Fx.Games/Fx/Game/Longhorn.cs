@@ -37,10 +37,9 @@ namespace Fx.Game
             {
                 get
                 {
-                    //// TODO which tile is nugget hill?
                     yield return new StartingTile(3, false);
                     yield return new StartingTile(4, false);
-                    yield return new StartingTile(4, false);
+                    yield return new StartingTile(6, true);
                     yield return new StartingTile(4, false);
                     yield return new StartingTile(5, false);
                     yield return new StartingTile(4, false);
