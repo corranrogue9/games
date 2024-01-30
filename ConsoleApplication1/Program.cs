@@ -458,7 +458,18 @@
                     }
                     else if (move is LonghornMove.LocationMove locationMove)
                     {
-                        Console.WriteLine($"{i}: take the {locationMove.TakeColor} cows and move to ({locationMove.NewLocation.Row}, {locationMove.NewLocation.Column})");
+                        var newLocation = locationMove.NewLocation;
+                        string resultLocation;
+                        if (newLocation == null)
+                        {
+                            resultLocation = "end the game";
+                        }
+                        else
+                        {
+                            resultLocation = $"move to ({newLocation.Row}, {newLocation.Column})";
+                        }
+
+                        Console.WriteLine($"{i}: take the {locationMove.TakeColor} cows and {resultLocation}");
                     }
                     
                     ++i;

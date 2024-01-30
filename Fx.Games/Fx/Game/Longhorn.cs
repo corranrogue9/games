@@ -1,4 +1,5 @@
 ﻿
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
 namespace Fx.Game
@@ -80,6 +81,7 @@ namespace Fx.Game
         private readonly (TPlayer player, int orange, int black, int green, int white, int gold) player1;
         private readonly (TPlayer player, int orange, int black, int green, int white, int gold) player2;
         private readonly Random random;
+        private readonly bool previousMoveResultedInGameOver;
 
         public Longhorn(TPlayer player1, TPlayer player2, Random random)
             : this(random.Next() % 2 == 0, player1, player2, GenerateRandomBoard(random), random)
@@ -220,7 +222,7 @@ namespace Fx.Game
         }
 
         public Longhorn(bool firstPlayer, TPlayer player1, TPlayer player2, LonghornBoard board, Random random)
-            : this((firstPlayer ? player1 : player2, 0, 0, 0, 0, 0), (firstPlayer ? player2 : player1, 0, 0, 0, 0, 0), board, random)
+            : this((firstPlayer ? player1 : player2, 0, 0, 0, 0, 0), (firstPlayer ? player2 : player1, 0, 0, 0, 0, 0), board, random, false)
         {
         }
 
@@ -228,12 +230,14 @@ namespace Fx.Game
             (TPlayer player, int orange, int black, int green, int white, int gold) player1,
             (TPlayer player, int orange, int black, int green, int white, int gold) player2,
             LonghornBoard board,
-            Random random)
+            Random random,
+            bool previousMoveResultedInGameOver)
         {
             this.player1 = player1;
             this.player2 = player2;
             this.Board = board;
             this.random = random; //// TODO you don't need this after the initial board is created?
+            this.previousMoveResultedInGameOver = previousMoveResultedInGameOver;
         }
 
         public TPlayer CurrentPlayer
@@ -269,28 +273,77 @@ namespace Fx.Game
                     var takeColors = TakeColors(tile);
                     foreach (var takeColor in takeColors)
                     {
-                        var newLocations = NewLocations(playerLocation, takeColor.count);
-                        foreach (var newLocation in newLocations)
+                        var newLocations = NewLocations(playerLocation, takeColor.count).ToList();
+
+                        //// TODO does applayaggregation help here?
+                        if (newLocations.All(location =>
+                            this.Board.Tiles[location.Row, location.Column].BlackCows == 0 &&
+                            this.Board.Tiles[location.Row, location.Column].GreenCows == 0 &&
+                            this.Board.Tiles[location.Row, location.Column].OrangeCows == 0 &&
+                            this.Board.Tiles[location.Row, location.Column].WhiteCows == 0))
                         {
-                            yield return new LonghornMove.LocationMove(takeColor.color, newLocation);
+                            yield return new LonghornMove.LocationMove(takeColor.color, null);
+                        }
+                        else
+                        {
+                            foreach (var newLocation in newLocations)
+                            {
+                                yield return new LonghornMove.LocationMove(takeColor.color, newLocation);
+                            }
                         }
                     }
                 }
             }
         }
 
+        private sealed class LocationComparer : IEqualityComparer<LonghornLocation>
+        {
+            public bool Equals(LonghornLocation? x, LonghornLocation? y)
+            {
+                if (x == y)
+                {
+                    return true;
+                }
+
+                if (x == null)
+                {
+                    return false;
+                }
+
+                if (y == null)
+                {
+                    return false;
+                }
+
+                return x.Row == y.Row && x.Column == y.Column;
+            }
+
+            public int GetHashCode([DisallowNull] LonghornLocation obj)
+            {
+                return obj.Row ^ obj.Column;
+            }
+        }
+
         private IEnumerable<LonghornLocation> NewLocations(LonghornLocation currentLocation, int moveCount)
         {
-            //// TODO i didn't quite understand how this works; can you go through the same tile twice? can you end at the tile you start at? what are the rules here...
+            return NewLocations(currentLocation, moveCount, Enumerable.Empty<LonghornLocation>()).Distinct(new LocationComparer());
+        }
+
+        private IEnumerable<LonghornLocation> NewLocations(LonghornLocation currentLocation, int moveCount, IEnumerable<LonghornLocation> traversedLocations)
+        {
             if (moveCount == 0)
             {
-                yield return currentLocation;
+                if (!traversedLocations.Contains(currentLocation, new LocationComparer()))
+                {
+                    yield return currentLocation;
+                }
+
                 yield break;
             }
 
             if (currentLocation.Row + 1 < 3)
             {
-                foreach (var location in NewLocations(new LonghornLocation(currentLocation.Row + 1, currentLocation.Column), moveCount - 1))
+                foreach (var location in NewLocations(new LonghornLocation(currentLocation.Row + 1, currentLocation.Column), moveCount - 1, traversedLocations.Append(currentLocation)))
                 {
                     yield return location;
                 }
@@ -298,7 +351,7 @@ namespace Fx.Game
 
             if (currentLocation.Row - 1 >= 0)
             {
-                foreach (var location in NewLocations(new LonghornLocation(currentLocation.Row - 1, currentLocation.Column), moveCount - 1))
+                foreach (var location in NewLocations(new LonghornLocation(currentLocation.Row - 1, currentLocation.Column), moveCount - 1, traversedLocations.Append(currentLocation)))
                 {
                     yield return location;
                 }
@@ -306,7 +359,7 @@ namespace Fx.Game
 
             if (currentLocation.Column + 1 < 3)
             {
-                foreach (var location in NewLocations(new LonghornLocation(currentLocation.Row, currentLocation.Column + 1), moveCount - 1))
+                foreach (var location in NewLocations(new LonghornLocation(currentLocation.Row, currentLocation.Column + 1), moveCount - 1, traversedLocations.Append(currentLocation)))
                 {
                     yield return location;
                 }
@@ -314,7 +367,7 @@ namespace Fx.Game
 
             if (currentLocation.Column - 1 >= 0)
             {
-                foreach (var location in NewLocations(new LonghornLocation(currentLocation.Row, currentLocation.Column - 1), moveCount - 1))
+                foreach (var location in NewLocations(new LonghornLocation(currentLocation.Row, currentLocation.Column - 1), moveCount - 1, traversedLocations.Append(currentLocation)))
                 {
                     yield return location;
                 }
@@ -350,7 +403,7 @@ namespace Fx.Game
         {
             get
             {
-                if (this.Moves.Any())
+                if (!this.previousMoveResultedInGameOver && this.Moves.Any())
                 {
                     return null;
                 }
@@ -391,7 +444,7 @@ namespace Fx.Game
             if (playerLocation == null && move is LonghornMove.LocationChoice locationChoice)
             {
                 var newBoard = new LonghornBoard(this.Board.Tiles, locationChoice.Location);
-                return new Longhorn<TPlayer>(this.player2, this.player1, newBoard, this.random);
+                return new Longhorn<TPlayer>(this.player2, this.player1, newBoard, this.random, false);
             }
             else if (playerLocation != null && move is LonghornMove.LocationMove locationMove)
             {
@@ -426,7 +479,7 @@ namespace Fx.Game
 
                 var newBoard = new LonghornBoard(newBoardTiles, locationMove.NewLocation);
 
-                return new Longhorn<TPlayer>(newPlayer1, newPlayer2, newBoard, random);
+                return new Longhorn<TPlayer>(newPlayer1, newPlayer2, newBoard, random, locationMove.NewLocation == null);
             }
             else
             {
@@ -554,7 +607,7 @@ namespace Fx.Game
 
         public sealed class LocationMove : LonghornMove
         {
-            public LocationMove(TakeColor takeColor, LonghornLocation newLocation)
+            public LocationMove(TakeColor takeColor, LonghornLocation? newLocation)
             {
                 //// TODO assert
 
@@ -564,7 +617,7 @@ namespace Fx.Game
 
             public TakeColor TakeColor { get; }
 
-            public LonghornLocation NewLocation { get; }
+            public LonghornLocation? NewLocation { get; } //// TODO use inheritance; this is nullable because if all of the available tiles have no cows, the game is over
         }
     }
 
