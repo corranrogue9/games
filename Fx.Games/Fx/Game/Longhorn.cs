@@ -277,12 +277,36 @@ namespace Fx.Game
                     var takeColors = TakeColors(tile);
                     foreach (var takeColor in takeColors)
                     {
+                        var actionMoves = new List<ActionMove?>();
                         if (takeColor.color == lastColor)
                         {
                             //// TODO do action tokens
                             if (tile.ActionToken is ActionToken.Ambush ambush)
                             {
+                                actionMoves.Add(new ActionMove.Ambush(null));
+                                var otherPlayer = this.Board.Player2Status;
+                                if (otherPlayer.Black != 0)
+                                {
+                                    actionMoves.Add(new ActionMove.Ambush(TakeColor.Black));
+                                }
 
+                                if (otherPlayer.Green != 0)
+                                {
+                                    actionMoves.Add(new ActionMove.Ambush(TakeColor.Green));
+                                }
+
+                                if (otherPlayer.Orange != 0)
+                                {
+                                    actionMoves.Add(new ActionMove.Ambush(TakeColor.Orange));
+                                }
+
+                                if (otherPlayer.White != 0)
+                                {
+                                    actionMoves.Add(new ActionMove.Ambush(TakeColor.White));
+                                }
+                            }
+                            else if (tile.ActionToken is ActionToken.BrandingIron)
+                            {
                             }
                         }
 
@@ -295,13 +319,19 @@ namespace Fx.Game
                             this.Board.Tiles[location.Row, location.Column].OrangeCows == 0 &&
                             this.Board.Tiles[location.Row, location.Column].WhiteCows == 0))
                         {
-                            yield return new LonghornMove.LocationMove(takeColor.color, null);
+                            ////foreach (var actionMove in actionMoves)
+                            {
+                                yield return new LonghornMove.LocationMove(takeColor.color, null, null);
+                            }
                         }
                         else
                         {
                             foreach (var newLocation in newLocations)
                             {
-                                yield return new LonghornMove.LocationMove(takeColor.color, newLocation);
+                                ////foreach (var actionMove in actionMoves)
+                                {
+                                    yield return new LonghornMove.LocationMove(takeColor.color, newLocation, null);
+                                }
                             }
                         }
                     }
@@ -660,17 +690,37 @@ namespace Fx.Game
 
         public sealed class LocationMove : LonghornMove
         {
-            public LocationMove(TakeColor takeColor, LonghornLocation? newLocation)
+            public LocationMove(TakeColor takeColor, LonghornLocation? newLocation, ActionMove? actionMove)
             {
                 //// TODO assert
 
                 this.TakeColor = takeColor;
                 this.NewLocation = newLocation;
+                this.ActionMove = actionMove;
             }
 
             public TakeColor TakeColor { get; }
 
             public LonghornLocation? NewLocation { get; } //// TODO use inheritance; this is nullable because if all of the available tiles have no cows, the game is over
+
+            public ActionMove? ActionMove { get; }
+        }
+    }
+
+    public abstract class ActionMove
+    {
+        private ActionMove()
+        {
+        }
+
+        public sealed class Ambush : ActionMove
+        {
+            public Ambush(TakeColor? color)
+            {
+                this.Color = color;
+            }
+
+            public TakeColor? Color { get; } //// TODO null means steal a random gold nugget
         }
     }
 

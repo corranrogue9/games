@@ -360,7 +360,15 @@
                     {
                         var tile = game.Board.Tiles[i, j];
 
-                        writer.Append(i * 8 + 0, $"hidden gold: 0");
+                        if (tile.ActionToken is ActionToken.Ambush)
+                        {
+                            writer.Append(i * 8 + 0, $"action token: ambush");
+                        }
+                        else
+                        {
+                            writer.Append(i * 8 + 0, $"");
+                        }
+
                         writer.Append(i * 8 + 1, $"green cows: {tile.GreenCows}");
                         writer.Append(i * 8 + 2, $"black cows: {tile.BlackCows}");
                         writer.Append(i * 8 + 3, $"white cows: {tile.WhiteCows}");
