@@ -39,6 +39,8 @@
 
         static void Main(string[] args)
         {
+            ConsoleApplication2.ListExt.DoWork();
+
             /*var b = new Fx.Game.Chess.Chess<string>("W", "B");
 
             System.Console.WriteLine(b.Board.Board);
