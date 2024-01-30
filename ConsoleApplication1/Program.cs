@@ -325,8 +325,8 @@
             var driver = Driver.Create(
                 new Dictionary<string, IStrategy<Longhorn<string>, LonghornBoard, LonghornMove, string>>
                 {
-                    ////{ exes, UserInterfaceStrategy.Create(displayer) },
-                    { exes, game.RandomStrategy() },
+                    { exes, UserInterfaceStrategy.Create(displayer) },
+                    ////{ exes, game.RandomStrategy() },
                     { ohs, game.RandomStrategy() },
                 },
                 displayer);
@@ -356,12 +356,13 @@
                     {
                         var tile = game.Board.Tiles[i, j];
 
-                        writer.Append(i * 8 + 0, $"hidden gold: {tile.Gold}");
+                        writer.Append(i * 8 + 0, $"hidden gold: 0");
                         writer.Append(i * 8 + 1, $"green cows: {tile.GreenCows}");
                         writer.Append(i * 8 + 2, $"black cows: {tile.BlackCows}");
                         writer.Append(i * 8 + 3, $"white cows: {tile.WhiteCows}");
                         writer.Append(i * 8 + 4, $"orange cows: {tile.OrangeCows}");
-                        if (game.Board.PlayerLocation.Row == i && game.Board.PlayerLocation.Column == j)
+                        var playerLocation = game.Board.PlayerLocation;
+                        if (playerLocation != null && playerLocation.Row == i && playerLocation.Column == j)
                         {
                             writer.Append(i * 8 + 5, $"CURRENT PLAYER LOCATION!");
                         }
@@ -450,7 +451,15 @@
                 int i = 0;
                 foreach (var move in game.Moves)
                 {
-                    Console.WriteLine($"{i}: take the {move.TakeColor} cows and move to ({move.NewLocation.row}, {move.NewLocation.column})");
+                    if (move is LonghornMove.LocationChoice locationChoice)
+                    {
+                        Console.WriteLine($"{i}: place the other player at ({locationChoice.Location.Row}, {locationChoice.Location.Column})");
+                    }
+                    else if (move is LonghornMove.LocationMove locationMove)
+                    {
+                        Console.WriteLine($"{i}: take the {locationMove.TakeColor} cows and move to ({locationMove.NewLocation.Row}, {locationMove.NewLocation.Column})");
+                    }
+                    
                     ++i;
                 }
             }

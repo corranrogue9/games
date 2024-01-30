@@ -83,7 +83,7 @@ namespace Fx.Game
         private readonly Random random;
 
         public Longhorn(TPlayer player1, TPlayer player2, Random random)
-            : this(player1, player2, GenerateRandomBoard(random), random)
+            : this(random.Next() % 2 == 0, player1, player2, GenerateRandomBoard(random), random)
         {
         }
 
@@ -101,7 +101,7 @@ namespace Fx.Game
 
             var startingTiles = StartingTile.StartingTiles.Shuffle(random);
             var cows = Enumerable
-                .Repeat(0, 9)
+                .Repeat(0, 9) //// TODO use enum?
                 .Concat(Enumerable.Repeat(1, 9))
                 .Concat(Enumerable.Repeat(2, 9))
                 .Concat(Enumerable.Repeat(3, 9))
@@ -153,6 +153,8 @@ namespace Fx.Game
                             {
                                 ++white;
                             }
+
+                            cowsEnumerator.MoveNext();
                         }
 
                         tiles[i, j] = new LonghornTile(orange, black, green, white, startingActionToken);
@@ -218,8 +220,8 @@ namespace Fx.Game
             }*/
         }
 
-        public Longhorn(TPlayer player1, TPlayer player2, LonghornBoard board, Random random)
-            : this((player1, 0, 0, 0, 0, 0), (player2, 0, 0, 0, 0, 0), board, random)
+        public Longhorn(bool firstPlayer, TPlayer player1, TPlayer player2, LonghornBoard board, Random random)
+            : this((firstPlayer ? player1 : player2, 0, 0, 0, 0, 0), (firstPlayer ? player2 : player1, 0, 0, 0, 0, 0), board, random)
         {
         }
 
@@ -232,7 +234,7 @@ namespace Fx.Game
             this.player1 = player1;
             this.player2 = player2;
             this.Board = board;
-            this.random = random;
+            this.random = random; //// TODO you don't need this after the initial board is created?
         }
 
         public TPlayer CurrentPlayer
@@ -248,20 +250,33 @@ namespace Fx.Game
             get
             {
                 var playerLocation = this.Board.PlayerLocation;
-                var tile = this.Board.Tiles[playerLocation.Row, playerLocation.Column];
-                var takeColors = TakeColors(tile);
-                foreach (var takeColor in takeColors)
+                if (playerLocation == null)
                 {
-                    var newLocations = NewLocations(playerLocation, takeColor.count);
-                    foreach (var newLocation in newLocations)
+                    for (int i = 0; i < 3; ++i)
                     {
-                        yield return new LonghornMove(takeColor.color, newLocation);
+                        for (int j = 0; j < 3; ++j) //// TODO remove the hardcoded 3's everywhere if possible
+                        {
+                            yield return new LonghornMove.LocationChoice(new LonghornLocation(i, j));
+                        }
+                    }
+                }
+                else
+                {
+                    var tile = this.Board.Tiles[playerLocation.Row, playerLocation.Column];
+                    var takeColors = TakeColors(tile);
+                    foreach (var takeColor in takeColors)
+                    {
+                        var newLocations = NewLocations(playerLocation, takeColor.count);
+                        foreach (var newLocation in newLocations)
+                        {
+                            yield return new LonghornMove.LocationMove(takeColor.color, newLocation);
+                        }
                     }
                 }
             }
         }
 
-        private IEnumerable<(int row, int column)> NewLocations((int row, int column) currentLocation, int moveCount)
+        private IEnumerable<LonghornLocation> NewLocations(LonghornLocation currentLocation, int moveCount)
         {
             //// TODO i didn't quite understand how this works; can you go through the same tile twice? can you end at the tile you start at? what are the rules here...
             if (moveCount == 0)
@@ -270,33 +285,33 @@ namespace Fx.Game
                 yield break;
             }
 
-            if (currentLocation.row + 1 < 3)
+            if (currentLocation.Row + 1 < 3)
             {
-                foreach (var location in NewLocations((currentLocation.row + 1, currentLocation.column), moveCount - 1))
+                foreach (var location in NewLocations(new LonghornLocation(currentLocation.Row + 1, currentLocation.Column), moveCount - 1))
                 {
                     yield return location;
                 }
             }
 
-            if (currentLocation.row - 1 >= 0)
+            if (currentLocation.Row - 1 >= 0)
             {
-                foreach (var location in NewLocations((currentLocation.row - 1, currentLocation.column), moveCount - 1))
+                foreach (var location in NewLocations(new LonghornLocation(currentLocation.Row - 1, currentLocation.Column), moveCount - 1))
                 {
                     yield return location;
                 }
             }
 
-            if (currentLocation.column + 1 < 3)
+            if (currentLocation.Column + 1 < 3)
             {
-                foreach (var location in NewLocations((currentLocation.row, currentLocation.column + 1), moveCount - 1))
+                foreach (var location in NewLocations(new LonghornLocation(currentLocation.Row, currentLocation.Column + 1), moveCount - 1))
                 {
                     yield return location;
                 }
             }
 
-            if (currentLocation.column - 1 >= 0)
+            if (currentLocation.Column - 1 >= 0)
             {
-                foreach (var location in NewLocations((currentLocation.row, currentLocation.column - 1), moveCount - 1))
+                foreach (var location in NewLocations(new LonghornLocation(currentLocation.Row, currentLocation.Column - 1), moveCount - 1))
                 {
                     yield return location;
                 }
@@ -369,43 +384,51 @@ namespace Fx.Game
 
         public Longhorn<TPlayer> CommitMove(LonghornMove move)
         {
-            if (this.Board.PlayerLocation == null)
+            var playerLocation = this.Board.PlayerLocation;
+            if (playerLocation == null && move is LonghornMove.LocationChoice locationChoice)
             {
-                throw new Exception("TODO");
+                var newBoard = new LonghornBoard(this.Board.Tiles, locationChoice.Location);
+                return new Longhorn<TPlayer>(this.player2, this.player1, newBoard, this.random);
             }
+            else if (playerLocation != null && move is LonghornMove.LocationMove locationMove)
+            {
+                var newPlayer1 = this.player2;
+                var newPlayer2 = this.player1;
 
-            var newPlayer1 = this.player2;
-            var newPlayer2 = this.player1;
+                var newBoardTiles = this.Board.Tiles;
+                if (locationMove.TakeColor == TakeColor.Black)
+                {
+                    var currentTile = newBoardTiles[playerLocation.Row, playerLocation.Column];
+                    newPlayer2.black += currentTile.BlackCows;
+                    newBoardTiles[playerLocation.Row, playerLocation.Column] = new LonghornTile(currentTile.OrangeCows, 0, currentTile.GreenCows, currentTile.WhiteCows, currentTile.ActionToken);
+                }
+                else if (locationMove.TakeColor == TakeColor.Green)
+                {
+                    var currentTile = newBoardTiles[playerLocation.Row, playerLocation.Column];
+                    newPlayer2.green += currentTile.GreenCows;
+                    newBoardTiles[playerLocation.Row, playerLocation.Column] = new LonghornTile(currentTile.OrangeCows, currentTile.BlackCows, 0, currentTile.WhiteCows, currentTile.ActionToken);
+                }
+                else if (locationMove.TakeColor == TakeColor.Orange)
+                {
+                    var currentTile = newBoardTiles[playerLocation.Row, playerLocation.Column];
+                    newPlayer2.orange += currentTile.OrangeCows;
+                    newBoardTiles[playerLocation.Row, playerLocation.Column] = new LonghornTile(0, currentTile.BlackCows, currentTile.GreenCows, currentTile.WhiteCows, currentTile.ActionToken);
+                }
+                else if (locationMove.TakeColor == TakeColor.White)
+                {
+                    var currentTile = newBoardTiles[playerLocation.Row, playerLocation.Column];
+                    newPlayer2.white += currentTile.WhiteCows;
+                    newBoardTiles[playerLocation.Row, playerLocation.Column] = new LonghornTile(currentTile.OrangeCows, currentTile.BlackCows, currentTile.GreenCows, 0, currentTile.ActionToken);
+                }
 
-            var newBoardTiles = this.Board.Tiles;
-            if (move.TakeColor == TakeColor.Black)
-            {
-                var currentTile = newBoardTiles[this.Board.PlayerLocation.Row, this.Board.PlayerLocation.Column];
-                newPlayer2.black += currentTile.BlackCows;
-                newBoardTiles[this.Board.PlayerLocation.Row, this.Board.PlayerLocation.Column] = new LonghornTile(currentTile.OrangeCows, 0, currentTile.GreenCows, currentTile.WhiteCows, currentTile.Gold);
-            }
-            else if (move.TakeColor == TakeColor.Green)
-            {
-                var currentTile = newBoardTiles[this.Board.PlayerLocation.Row, this.Board.PlayerLocation.Column];
-                newPlayer2.green += currentTile.GreenCows;
-                newBoardTiles[this.Board.PlayerLocation.Row, this.Board.PlayerLocation.Column] = new LonghornTile(currentTile.OrangeCows, currentTile.BlackCows, 0, currentTile.WhiteCows, currentTile.Gold);
-            }
-            else if (move.TakeColor == TakeColor.Orange)
-            {
-                var currentTile = newBoardTiles[this.Board.PlayerLocation.Row, this.Board.PlayerLocation.Column];
-                newPlayer2.orange += currentTile.OrangeCows;
-                newBoardTiles[this.Board.PlayerLocation.Row, this.Board.PlayerLocation.Column] = new LonghornTile(0, currentTile.BlackCows, currentTile.GreenCows, currentTile.WhiteCows, currentTile.Gold);
-            }
-            else if (move.TakeColor == TakeColor.White)
-            {
-                var currentTile = newBoardTiles[this.Board.PlayerLocation.Row, this.Board.PlayerLocation.Column];
-                newPlayer2.white += currentTile.WhiteCows;
-                newBoardTiles[this.Board.PlayerLocation.Row, this.Board.PlayerLocation.Column] = new LonghornTile(currentTile.OrangeCows, currentTile.BlackCows, currentTile.GreenCows, 0, currentTile.Gold);
-            }
+                var newBoard = new LonghornBoard(newBoardTiles, locationMove.NewLocation);
 
-            var newBoard = new LonghornBoard(newBoardTiles, move.NewLocation);
-
-            return new Longhorn<TPlayer>(newPlayer1, newPlayer2, newBoard, random);
+                return new Longhorn<TPlayer>(newPlayer1, newPlayer2, newBoard, random);
+            }
+            else
+            {
+                throw new IllegalMoveExeption("TODO");
+            }
         }
     }
 
@@ -434,6 +457,8 @@ namespace Fx.Game
     {
         public LonghornLocation(int row, int column)
         {
+            //// TODO assert
+
             this.Row = row;
             this.Column = column;
         }
@@ -446,6 +471,8 @@ namespace Fx.Game
     {
         public LonghornTile(int orangeCows, int blackCows, int greenCows, int whiteCows, ActionToken actionToken)
         {
+            //// TODO assert
+
             this.OrangeCows = orangeCows;
             this.BlackCows = blackCows;
             this.GreenCows = greenCows;
@@ -474,6 +501,7 @@ namespace Fx.Game
         {
             public Gold(int amount)
             {
+                //// TODO assert 
                 this.Amount = amount;
             }
 
@@ -505,17 +533,36 @@ namespace Fx.Game
         }
     }
 
-    public sealed class LonghornMove
+    public abstract class LonghornMove
     {
-        public LonghornMove(TakeColor takeColor, (int row, int column) newLocation)
+        private LonghornMove()
         {
-            this.TakeColor = takeColor;
-            this.NewLocation = newLocation;
         }
 
-        public TakeColor TakeColor { get; }
+        public sealed class LocationChoice : LonghornMove
+        {
+            public LocationChoice(LonghornLocation location)
+            {
+                this.Location = location;
+            }
 
-        public (int row, int column) NewLocation { get; }
+            public LonghornLocation Location { get; }
+        }
+
+        public sealed class LocationMove : LonghornMove
+        {
+            public LocationMove(TakeColor takeColor, LonghornLocation newLocation)
+            {
+                //// TODO assert
+
+                this.TakeColor = takeColor;
+                this.NewLocation = newLocation;
+            }
+
+            public TakeColor TakeColor { get; }
+
+            public LonghornLocation NewLocation { get; }
+        }
     }
 
     public enum TakeColor
