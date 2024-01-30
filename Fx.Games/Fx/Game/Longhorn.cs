@@ -440,6 +440,7 @@ namespace Fx.Game
 
         public Longhorn<TPlayer> CommitMove(LonghornMove move)
         {
+            //// TODO you are here: commit moves with action tokens, and do end of game checks
             var playerLocation = this.Board.PlayerLocation;
             if (playerLocation == null && move is LonghornMove.LocationChoice locationChoice)
             {
