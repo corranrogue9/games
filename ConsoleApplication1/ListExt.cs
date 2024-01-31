@@ -18,28 +18,34 @@ namespace ConsoleApplication2
                 .Add("1234")
                 .Add("zxcv");
             //// TODO uncomment block comments and get ti implemented
-            ////var zipped = left.Zip(right);
+            var zipped = left.Zip(right);
         }
 
         /*public static ValueNode<(TValueLeft, TValueRight), Leaf> Zip<TValueLeft, TValueRight>(this ValueLeaf<TValueLeft> left, ValueLeaf<TValueRight> right)
         {
             //// TODO in your node and value definitions you are certainly not having gauranteed type safety; please fix that
             return Value.Create((left.Value, right.Value));
-        }
+        }*/
 
         public static ValueNode<(TValueLeft, TValueRight), TStructure> Zip<TValueLeft, TValueRight, TStructure>(
-            this ValueNode<TValueLeft, Inner<TStructure>> left,
-            ValueNode<TValueRight, Inner<TStructure>> right)
+            this ValueNode<TValueLeft, TStructure> left,
+            ValueNode<TValueRight, TStructure> right)
             where TStructure : Node
         {
             //// TODO in your node and value definitions you are certainly not having gauranteed type safety; please fix that
 
-            if (left is ValueInner<TValueLeft, TStructure, ValueNode<TValueLeft, TStructure>> leftInner)
+            using (var leftEnumerator = left.ToStructureless().GetEnumerator())
+            using (var rightEnumerator = right.ToStructureless().GetEnumerator())
             {
-            }
+                if (!(leftEnumerator.MoveNext() && rightEnumerator.MoveNext()))
+                {
+                    throw new InvalidOperationException("TOdO");
+                }
 
-            return null;
-        }*/
+                var leaf = Value.Create((leftEnumerator.Current, rightEnumerator.Current));
+                leaf.Add((leftEnumerator.Current, rightEnumerator.Current));
+            }
+        }
     }
 
     public abstract class Node
@@ -67,28 +73,84 @@ namespace ConsoleApplication2
             return new ValueLeaf<TValue>(value);
         }
 
-        public static ValueInner<TValue, ValueLeaf<TValue>> Add<TValue>(this ValueLeaf<TValue> leaf, TValue value)
+        public static ValueInner<TValue, Leaf, ValueLeaf<TValue>> Add<TValue>(this ValueLeaf<TValue> leaf, TValue value)
         {
-            return new ValueInner<TValue, ValueLeaf<TValue>>(value, leaf);
+            return new ValueInner<TValue, Leaf, ValueLeaf<TValue>>(value, leaf, new Inner<Leaf>(leaf.Structure));
         }
 
-        public static ValueInner<TValue, ValueInner<TValue, TValueNodeStart>> Add<TValue, TValueNodeStart>(
-            this ValueInner<TValue, TValueNodeStart> inner,
+        public static ValueInner<TValue, Inner<TStructure>, ValueInner<TValue, TStructure, TValueNodeStart>> Add<TValue, TStructure, TValueNodeStart>(
+            this ValueInner<TValue, TStructure, TValueNodeStart> inner,
             TValue value)
-            where TValueNodeStart : ValueNode<TValue>
+            where TStructure : Node
+            where TValueNodeStart : ValueNode<TValue, TStructure>
         {
-            return new ValueInner<TValue, ValueInner<TValue, TValueNodeStart>>(value, inner);
+            return new ValueInner<TValue, Inner<TStructure>, ValueInner<TValue, TStructure, TValueNodeStart>>(
+                value, 
+                inner, 
+                new Inner<Inner<TStructure>>(inner.Structure));
         }
     }
 
-    public abstract class ValueNode<TValue>
+    public abstract class ValueNode<TValue, TStructure> where TStructure : Node
+    {
+        public abstract TValue Value { get; }
+
+        public abstract TStructure Structure { get; }
+
+        public abstract IEnumerable<TValue> ToStructureless();
+    }
+
+    public sealed class ValueLeaf<TValue> : ValueNode<TValue, Leaf>
+    {
+        public ValueLeaf(TValue value)
+        {
+            this.Value = value;
+            this.Structure = new Leaf();
+        }
+
+        public override TValue Value { get; }
+
+        public override Leaf Structure { get; }
+
+        public override IEnumerable<TValue> ToStructureless()
+        {
+            yield return this.Value;
+        }
+    }
+
+    public sealed class ValueInner<TValue, TStructure, TValueNode> : ValueNode<TValue, Inner<TStructure>> where TValueNode : ValueNode<TValue, TStructure> where TStructure : Node
+    {
+        public ValueInner(TValue value, TValueNode node, Inner<TStructure> structure)
+        {
+            this.Value = value;
+            this.Node2 = node;
+            this.Structure = structure;
+        }
+
+        public override TValue Value { get; }
+
+        public override Inner<TStructure> Structure { get; }
+
+        public TValueNode Node2 { get; }
+
+        public override IEnumerable<TValue> ToStructureless()
+        {
+            yield return this.Value;
+            foreach (var element in this.Node2.ToStructureless())
+            {
+                yield return element;
+            }
+        }
+    }
+
+    public abstract class StructurelessNode<TValue>
     {
         public abstract TValue Value { get; }
     }
 
-    public sealed class ValueLeaf<TValue> : ValueNode<TValue>
+    public sealed class StructurelessLeaf<TValue> : StructurelessNode<TValue>
     {
-        public ValueLeaf(TValue value)
+        public StructurelessLeaf(TValue value)
         {
             this.Value = value;
         }
@@ -96,9 +158,10 @@ namespace ConsoleApplication2
         public override TValue Value { get; }
     }
 
-    public sealed class ValueInner<TValue, TValueNode> : ValueNode<TValue> where TValueNode : ValueNode<TValue>
+    public sealed class StructurelessInner<TValue, TNode> : StructurelessNode<TValue>
+        where TNode : StructurelessNode<TValue>
     {
-        public ValueInner(TValue value, TValueNode node)
+        public StructurelessInner(TValue value, TNode node)
         {
             this.Value = value;
             this.Node = node;
@@ -106,11 +169,6 @@ namespace ConsoleApplication2
 
         public override TValue Value { get; }
 
-        public TValueNode Node { get; }
-
-        /*public static ValueInner<(TValue, TValueRight), TValueNode2> Zip<TValueRight, TValueNode2>()
-            where TValueNode2 : ValueNode<(TValue, TValueRight)>
-        {
-        }*/
+        public TNode Node { get; }
     }
 }
