@@ -17,8 +17,14 @@ namespace ConsoleApplication2
                 .Add("qwer")
                 .Add("1234")
                 .Add("zxcv");
-            //// TODO uncomment block comments and get ti implemented
-            var zipped = left.Zip(right);
+            var right2 = Value
+                .Create(-1)
+                .Add(4)
+                .Add(3)
+                .Add(1);
+            //// TODO this doesn't quite work, but it's super close
+            //// TODO even if you get it working, you're still missing the actual tuple part because right now it's required that the left and right are the same type
+            var zipped = left.Zip(right2);
         }
 
         /*public static ValueNode<(TValueLeft, TValueRight), Leaf> Zip<TValueLeft, TValueRight>(this ValueLeaf<TValueLeft> left, ValueLeaf<TValueRight> right)
@@ -27,12 +33,21 @@ namespace ConsoleApplication2
             return Value.Create((left.Value, right.Value));
         }*/
 
-        public static ValueNode<(TValueLeft, TValueRight), TStructure> Zip<TValueLeft, TValueRight, TStructure>(
-            this ValueNode<TValueLeft, TStructure> left,
-            ValueNode<TValueRight, TStructure> right)
-            where TStructure : Node
+        /*public static ValueInner<(TValueLeft, TValueRight), Inner<TStructureTheRest>, ValueNode<(TValueLeft, TValueRight), Inner<TStructureTheRest>>> Zip<
+            TValueLeft,
+            TValueRight, 
+            TStructureTheRest,
+            TValueNodeLeft,
+            TValueNodeRight>(
+            this ValueInner<TValueLeft, Inner<TStructureTheRest>, TValueNodeLeft> left,
+            ValueInner<TValueRight, Inner<TStructureTheRest>, TValueNodeRight> right)
+            where TStructureTheRest : Node
+            where TValueNodeLeft : ValueNode<TValueLeft, Inner<TStructureTheRest>>
+            where TValueNodeRight : ValueNode<TValueRight, Inner<TStructureTheRest>>
         {
             //// TODO in your node and value definitions you are certainly not having gauranteed type safety; please fix that
+
+            var leftNode = left.Node2 as ValueInner<TValueLeft, TStructureTheRest, ValueNode<TValueLeft, TStructureTheRest>>;
 
             using (var leftEnumerator = left.ToStructureless().GetEnumerator())
             using (var rightEnumerator = right.ToStructureless().GetEnumerator())
@@ -45,15 +60,25 @@ namespace ConsoleApplication2
                 var leaf = Value.Create((leftEnumerator.Current, rightEnumerator.Current));
                 leaf.Add((leftEnumerator.Current, rightEnumerator.Current));
             }
-        }
+
+            return null;
+        }*/
     }
 
     public abstract class Node
     {
+        public abstract Node? Remainder { get; }
     }
 
     public sealed class Leaf : Node
     {
+        public override Node? Remainder
+        {
+            get
+            {
+                return null;
+            }
+        }
     }
 
     public sealed class Inner<TNode> : Node where TNode : Node
@@ -61,6 +86,14 @@ namespace ConsoleApplication2
         public Inner(TNode node)
         {
             this.Node = node;
+        }
+
+        public override Node? Remainder
+        {
+            get
+            {
+                return this.Node;
+            }
         }
 
         public TNode Node { get; }
@@ -98,6 +131,8 @@ namespace ConsoleApplication2
         public abstract TStructure Structure { get; }
 
         public abstract IEnumerable<TValue> ToStructureless();
+
+        public abstract ValueNode<(TValue, TValue), TStructure> Zip(ValueNode<TValue, TStructure> right);
     }
 
     public sealed class ValueLeaf<TValue> : ValueNode<TValue, Leaf>
@@ -106,6 +141,11 @@ namespace ConsoleApplication2
         {
             this.Value = value;
             this.Structure = new Leaf();
+        }
+
+        public override ValueNode<(TValue, TValue), Leaf> Zip(ValueNode<TValue, Leaf> right)
+        {
+            return new ValueLeaf<(TValue, TValue)>((this.Value, right.Value));
         }
 
         public override TValue Value { get; }
@@ -125,6 +165,14 @@ namespace ConsoleApplication2
             this.Value = value;
             this.Node2 = node;
             this.Structure = structure;
+        }
+
+        public override ValueNode<(TValue, TValue), Inner<TStructure>> Zip(ValueNode<TValue, Inner<TStructure>> right)
+        {
+            return new ValueInner<(TValue, TValue), TStructure, ValueNode<(TValue, TValue), TStructure>>(
+                (this.Value, this.Value),
+                this.Node2.Zip((right as ValueInner<TValue, TStructure, TValueNode>).Node2),
+                null);
         }
 
         public override TValue Value { get; }
