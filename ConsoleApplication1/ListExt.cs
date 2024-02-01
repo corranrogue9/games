@@ -25,6 +25,8 @@ namespace ConsoleApplication2
             //// TODO this doesn't quite work, but it's super close
             //// TODO even if you get it working, you're still missing the actual tuple part because right now it's required that the left and right are the same type
             var zipped = left.Zip(right2);
+
+            var zipped2 = left.Zip2(right);
         }
 
         /*public static ValueNode<(TValueLeft, TValueRight), Leaf> Zip<TValueLeft, TValueRight>(this ValueLeaf<TValueLeft> left, ValueLeaf<TValueRight> right)
@@ -133,6 +135,17 @@ namespace ConsoleApplication2
         public abstract IEnumerable<TValue> ToStructureless();
 
         public abstract ValueNode<(TValue, TValue), TStructure> Zip(ValueNode<TValue, TStructure> right);
+
+        public abstract ValueNode<(TValue, TValueRight), TStructure> Zip2<TValueRight>(ValueNode<TValueRight, TStructure> right);
+
+        internal abstract ValueNode<(TValue, TValueRight), TStructure2> Zip3<TValueRight, TStructure2>(ValueNode<TValueRight, TStructure2> right, TStructure2 structure)
+            where TStructure2 : Node;
+
+        internal abstract ValueNode<TValue2, TStructure3>? Node3<TValue2, TStructure3>()
+            where TStructure3 : Node;
+
+        internal abstract ValueNode<TValue3, TStructure4>? Node4<TValue3, TStructure4>(TStructure4 structure)
+            where TStructure4 : Node;
     }
 
     public sealed class ValueLeaf<TValue> : ValueNode<TValue, Leaf>
@@ -146,6 +159,26 @@ namespace ConsoleApplication2
         public override ValueNode<(TValue, TValue), Leaf> Zip(ValueNode<TValue, Leaf> right)
         {
             return new ValueLeaf<(TValue, TValue)>((this.Value, right.Value));
+        }
+
+        public override ValueNode<(TValue, TValueRight), Leaf> Zip2<TValueRight>(ValueNode<TValueRight, Leaf> right)
+        {
+            return new ValueLeaf<(TValue, TValueRight)>((this.Value, right.Value));
+        }
+
+        internal override ValueNode<(TValue, TValueRight), TStructure2> Zip3<TValueRight, TStructure2>(ValueNode<TValueRight, TStructure2> right, TStructure2 structure)
+        {
+            return new ValueLeaf<(TValue, TValueRight)>((this.Value, right.Value)) as ValueNode<(TValue, TValueRight), TStructure2>;
+        }
+
+        internal override ValueNode<TValue2, TStructure3>? Node3<TValue2, TStructure3>()
+        {
+            return null;
+        }
+
+        internal override ValueNode<TValue3, TStructure4>? Node4<TValue3, TStructure4>(TStructure4 structure)
+        {
+            return null;
         }
 
         public override TValue Value { get; }
@@ -170,9 +203,60 @@ namespace ConsoleApplication2
         public override ValueNode<(TValue, TValue), Inner<TStructure>> Zip(ValueNode<TValue, Inner<TStructure>> right)
         {
             return new ValueInner<(TValue, TValue), TStructure, ValueNode<(TValue, TValue), TStructure>>(
-                (this.Value, this.Value),
+                (this.Value, right.Value),
                 this.Node2.Zip((right as ValueInner<TValue, TStructure, TValueNode>).Node2),
                 null);
+        }
+
+        public override ValueNode<(TValue, TValueRight), Inner<TStructure>> Zip2<TValueRight>(ValueNode<TValueRight, Inner<TStructure>> right)
+        {
+            ValueNode<TValueRight, TStructure> rightSubNode;
+            if (typeof(TStructure) == typeof(Leaf))
+            {
+                rightSubNode = (right as ValueInner<TValueRight, Leaf, ValueLeaf<TValueRight>>).Node2 as ValueNode<TValueRight, TStructure>;
+            }
+            else
+            {
+                rightSubNode = right.Node3<TValueRight, TStructure>();
+            }
+
+            return new ValueInner<(TValue, TValueRight), TStructure, ValueNode<(TValue, TValueRight), TStructure>>(
+                (this.Value, right.Value),
+                this.Node2.Zip3(rightSubNode, this.Structure.Node),
+                null);
+        }
+
+        internal override ValueNode<(TValue, TValueRight), TStructure2> Zip3<TValueRight, TStructure2>(ValueNode<TValueRight, TStructure2> right, TStructure2 structure)
+        {
+            ValueNode<TValueRight, TStructure> rightSubNode;
+            if (typeof(TStructure) == typeof(Leaf))
+            {
+                rightSubNode = (right as ValueInner<TValueRight, Leaf, ValueLeaf<TValueRight>>).Node2 as ValueNode<TValueRight, TStructure>;
+            }
+            else
+            {
+                rightSubNode = right.Node4<TValueRight, TStructure>(this.Structure.Node);
+            }
+
+            var zipped = this.Node2.Zip3(rightSubNode as ValueNode<TValueRight, TStructure>, rightSubNode.Structure);
+
+            return zipped as ValueNode<(TValue, TValueRight), TStructure2>;
+
+            /*return new ValueInner<(TValue, TValueRight), TStructure2, ValueNode<(TValue, TValueRight), TStructure2>>(
+                (this.Value, right.Value),
+                (ValueNode<(TValue, TValueRight), TStructure2>)null,
+                ////this.Node2.Zip3<TValueRight, TStructure2>(rightSubNode, rightSubNode.Structure),
+                null);*/
+        }
+
+        internal override ValueNode<TValue2, TStructure3>? Node3<TValue2, TStructure3>()
+        {
+            return this.Node2 as ValueNode<TValue2, TStructure3>;
+        }
+
+        internal override ValueNode<TValue3, TStructure4>? Node4<TValue3, TStructure4>(TStructure4 structure)
+        {
+            return this.Node2 as ValueNode<TValue3, TStructure4>;
         }
 
         public override TValue Value { get; }
