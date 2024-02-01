@@ -240,13 +240,14 @@ namespace ConsoleApplication2
 
             var zipped = this.Node2.Zip3(rightSubNode as ValueNode<TValueRight, TStructure>, rightSubNode.Structure);
 
-            return zipped as ValueNode<(TValue, TValueRight), TStructure2>;
+            ////return zipped as ValueNode<(TValue, TValueRight), TStructure2>;
 
-            /*return new ValueInner<(TValue, TValueRight), TStructure2, ValueNode<(TValue, TValueRight), TStructure2>>(
+            return new ValueInner<(TValue, TValueRight), TStructure, ValueNode<(TValue, TValueRight), TStructure>>(
                 (this.Value, right.Value),
-                (ValueNode<(TValue, TValueRight), TStructure2>)null,
+                zipped,
+                ////(ValueNode<(TValue, TValueRight), TStructure2>)null,
                 ////this.Node2.Zip3<TValueRight, TStructure2>(rightSubNode, rightSubNode.Structure),
-                null);*/
+                null) as ValueNode<(TValue, TValueRight), TStructure2>;
         }
 
         internal override ValueNode<TValue2, TStructure3>? Node3<TValue2, TStructure3>()
