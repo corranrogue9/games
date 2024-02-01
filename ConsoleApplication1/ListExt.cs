@@ -22,11 +22,19 @@ namespace ConsoleApplication2
                 .Add(4)
                 .Add(3)
                 .Add(1);
+            var right3 = Value
+                .Create(-1)
+                .Add(4)
+                .Add(3)
+                .Add(1)
+                .Add(1);
             //// TODO this doesn't quite work, but it's super close
             //// TODO even if you get it working, you're still missing the actual tuple part because right now it's required that the left and right are the same type
             var zipped = left.Zip(right2);
 
             var zipped2 = left.Zip2(right);
+
+            var zipped3 = zipped2.Zip2(right2);
         }
 
         /*public static ValueNode<(TValueLeft, TValueRight), Leaf> Zip<TValueLeft, TValueRight>(this ValueLeaf<TValueLeft> left, ValueLeaf<TValueRight> right)
@@ -205,7 +213,7 @@ namespace ConsoleApplication2
             return new ValueInner<(TValue, TValue), TStructure, ValueNode<(TValue, TValue), TStructure>>(
                 (this.Value, right.Value),
                 this.Node2.Zip((right as ValueInner<TValue, TStructure, TValueNode>).Node2),
-                null);
+                this.Structure);
         }
 
         public override ValueNode<(TValue, TValueRight), Inner<TStructure>> Zip2<TValueRight>(ValueNode<TValueRight, Inner<TStructure>> right)
@@ -223,7 +231,7 @@ namespace ConsoleApplication2
             return new ValueInner<(TValue, TValueRight), TStructure, ValueNode<(TValue, TValueRight), TStructure>>(
                 (this.Value, right.Value),
                 this.Node2.Zip3(rightSubNode, this.Structure.Node),
-                null);
+                this.Structure);
         }
 
         internal override ValueNode<(TValue, TValueRight), TStructure2> Zip3<TValueRight, TStructure2>(ValueNode<TValueRight, TStructure2> right, TStructure2 structure)
@@ -247,7 +255,7 @@ namespace ConsoleApplication2
                 zipped,
                 ////(ValueNode<(TValue, TValueRight), TStructure2>)null,
                 ////this.Node2.Zip3<TValueRight, TStructure2>(rightSubNode, rightSubNode.Structure),
-                null) as ValueNode<(TValue, TValueRight), TStructure2>;
+                this.Structure) as ValueNode<(TValue, TValueRight), TStructure2>;
         }
 
         internal override ValueNode<TValue2, TStructure3>? Node3<TValue2, TStructure3>()
