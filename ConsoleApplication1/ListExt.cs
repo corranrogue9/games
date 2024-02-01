@@ -35,6 +35,8 @@ namespace ConsoleApplication2
             var zipped2 = left.Zip2(right);
 
             var zipped3 = zipped2.Zip2(right2);
+            Console.WriteLine(zipped3.Structure.Count);
+            Console.WriteLine(right3.Structure.Count);
         }
 
         /*public static ValueNode<(TValueLeft, TValueRight), Leaf> Zip<TValueLeft, TValueRight>(this ValueLeaf<TValueLeft> left, ValueLeaf<TValueRight> right)
@@ -75,34 +77,59 @@ namespace ConsoleApplication2
         }*/
     }
 
-    public abstract class Node
+    public interface INode
     {
-        public abstract Node? Remainder { get; }
+        public abstract INode? Remainder { get; }
+
+        public abstract int Count { get; }
     }
 
-    public sealed class Leaf : Node
+    /*public abstract class Node
     {
-        public override Node? Remainder
+        public abstract Node? Remainder { get; }
+
+        public abstract int Count { get; }
+    }*/
+
+    public struct Leaf : INode
+    {
+        public INode? Remainder
         {
             get
             {
                 return null;
             }
         }
+
+        public int Count
+        {
+            get
+            {
+                return 1;
+            }
+        }
     }
 
-    public sealed class Inner<TNode> : Node where TNode : Node
+    public struct Inner<TNode> : INode where TNode : INode
     {
         public Inner(TNode node)
         {
             this.Node = node;
         }
 
-        public override Node? Remainder
+        public INode? Remainder
         {
             get
             {
                 return this.Node;
+            }
+        }
+
+        public int Count
+        {
+            get
+            {
+                return this.Node.Count + 1;
             }
         }
 
@@ -118,23 +145,23 @@ namespace ConsoleApplication2
 
         public static ValueInner<TValue, Leaf, ValueLeaf<TValue>> Add<TValue>(this ValueLeaf<TValue> leaf, TValue value)
         {
-            return new ValueInner<TValue, Leaf, ValueLeaf<TValue>>(value, leaf, new Inner<Leaf>(leaf.Structure));
+            return new ValueInner<TValue, Leaf, ValueLeaf<TValue>>(value, leaf, default);
         }
 
         public static ValueInner<TValue, Inner<TStructure>, ValueInner<TValue, TStructure, TValueNodeStart>> Add<TValue, TStructure, TValueNodeStart>(
             this ValueInner<TValue, TStructure, TValueNodeStart> inner,
             TValue value)
-            where TStructure : Node
+            where TStructure : INode
             where TValueNodeStart : ValueNode<TValue, TStructure>
         {
             return new ValueInner<TValue, Inner<TStructure>, ValueInner<TValue, TStructure, TValueNodeStart>>(
                 value, 
                 inner, 
-                new Inner<Inner<TStructure>>(inner.Structure));
+                default);
         }
     }
 
-    public abstract class ValueNode<TValue, TStructure> where TStructure : Node
+    public abstract class ValueNode<TValue, TStructure> where TStructure : INode
     {
         public abstract TValue Value { get; }
 
@@ -147,13 +174,13 @@ namespace ConsoleApplication2
         public abstract ValueNode<(TValue, TValueRight), TStructure> Zip2<TValueRight>(ValueNode<TValueRight, TStructure> right);
 
         internal abstract ValueNode<(TValue, TValueRight), TStructure2> Zip3<TValueRight, TStructure2>(ValueNode<TValueRight, TStructure2> right, TStructure2 structure)
-            where TStructure2 : Node;
+            where TStructure2 : INode;
 
         internal abstract ValueNode<TValue2, TStructure3>? Node3<TValue2, TStructure3>()
-            where TStructure3 : Node;
+            where TStructure3 : INode;
 
         internal abstract ValueNode<TValue3, TStructure4>? Node4<TValue3, TStructure4>(TStructure4 structure)
-            where TStructure4 : Node;
+            where TStructure4 : INode;
     }
 
     public sealed class ValueLeaf<TValue> : ValueNode<TValue, Leaf>
@@ -199,13 +226,13 @@ namespace ConsoleApplication2
         }
     }
 
-    public sealed class ValueInner<TValue, TStructure, TValueNode> : ValueNode<TValue, Inner<TStructure>> where TValueNode : ValueNode<TValue, TStructure> where TStructure : Node
+    public sealed class ValueInner<TValue, TStructure, TValueNode> : ValueNode<TValue, Inner<TStructure>> where TValueNode : ValueNode<TValue, TStructure> where TStructure : INode
     {
         public ValueInner(TValue value, TValueNode node, Inner<TStructure> structure)
         {
             this.Value = value;
             this.Node2 = node;
-            this.Structure = structure;
+            ////this.Structure = structure;
         }
 
         public override ValueNode<(TValue, TValue), Inner<TStructure>> Zip(ValueNode<TValue, Inner<TStructure>> right)
@@ -270,7 +297,7 @@ namespace ConsoleApplication2
 
         public override TValue Value { get; }
 
-        public override Inner<TStructure> Structure { get; }
+        public override Inner<TStructure> Structure { get; } = default;
 
         public TValueNode Node2 { get; }
 
