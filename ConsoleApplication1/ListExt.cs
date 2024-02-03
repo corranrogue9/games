@@ -155,6 +155,47 @@ namespace ConsoleApplication2
 
     public static class Value
     {
+        public static ValueNode<TValueResult, Inner<Inner<Inner<Inner<Inner<Inner<Inner<TStructure>>>>>>>> Select<TValueSource, TValueResult, TStructure>(
+            this ValueNode<TValueSource, TStructure> inner, Func<TValueSource, TValueResult> selector)
+            where TStructure : INode
+        {
+            //// TODO return type shuoldn't have inner, same issue as append and reverse really
+            var result = inner.Aggregate(new ValueLeaf<TValueResult>(selector(inner.Value)) as IValueNode<TValueResult>, (aggregate, element) => aggregate.Append(selector(element)));
+            var asdf9 = result as ValueNode<TValueResult, Inner<Inner<Inner<Inner<Inner<Inner<Inner<Inner<TStructure>>>>>>>>>;
+            var asdf8 = result as ValueNode<TValueResult, Inner<Inner<Inner<Inner<Inner<Inner<Inner<TStructure>>>>>>>>;
+            var asdf7 = result as ValueNode<TValueResult, Inner<Inner<Inner<Inner<Inner<Inner<TStructure>>>>>>>;
+            var asdf1 = result as ValueNode<TValueResult, Inner<Inner<Inner<Inner<Inner<TStructure>>>>>>;
+            var asdf2 = result as ValueNode<TValueResult, Inner<Inner<Inner<Inner<TStructure>>>>>;
+            var asdf3 = result as ValueNode<TValueResult, Inner<Inner<Inner<TStructure>>>>;
+            var asdf4 = result as ValueNode<TValueResult, Inner<Inner<TStructure>>>;
+            var asdf5 = result as ValueNode<TValueResult, Inner<TStructure>>;
+            var asdf6 = result as ValueNode<TValueResult, TStructure>;
+            return asdf8;
+        }
+
+        public static IValueNode<TValue> Append<TValue>(this IValueNode<TValue> node, TValue value)
+        {
+            if (node is ValueLeaf<TValue> leaf)
+            {
+                //// TODO must be a better way, you'll need to repeat this sort of thign everywhere; this is the result of needing to say node.TheRest.Aggregate but not having TheRest
+                return leaf.Append(value);
+            }
+
+            var thing = node.Aggregate(Value.Create(node.Value) as IValueNode<TValue>, (aggregate, element) => aggregate.Prepend(element)).Prepend(value);
+            return thing.Reverse();
+        }
+
+        public static IValueNode<TValue> Reverse<TValue>(this IValueNode<TValue> node)
+        {
+            if (node is ValueLeaf<TValue> leaf)
+            {
+                //// TODO must be a better way, you'll need to repeat this sort of thign everywhere; this is the result of needing to say node.TheRest.Aggregate but not having TheRest
+                return node;
+            }
+
+            return node.Aggregate(new ValueLeaf<TValue>(node.Value) as IValueNode<TValue>, (aggregate, element) => aggregate.Prepend(element));
+        }
+
         public static ValueLeaf<TValue> Create<TValue>(TValue value)
         {
             return new ValueLeaf<TValue>(value);
@@ -203,11 +244,6 @@ namespace ConsoleApplication2
         {
             return inner.Node2.Aggregate(new ValueLeaf<TValue>(inner.Value) as IValueNode<TValue>, (aggregate, element) => aggregate.Prepend(element)) as ValueInner<TValue, TStructure, TValueNode>;
         }
-
-        /*public static IEnumerable<TElement> Append2<TElement>(this IEnumerable<TElement> source, TElement element)
-        {
-            return source.Aggregate2(Enumerable.Empty<TElement>(), (aggregate, element2) => aggregate.Prepend2(element2)).Reverse();
-        }*/
     }
 
     public interface IValueNode<TValue>
@@ -215,6 +251,8 @@ namespace ConsoleApplication2
         IValueNode<TValue> Prepend(TValue value);
 
         TAggregate Aggregate<TAggregate>(TAggregate seed, Func<TAggregate, TValue, TAggregate> aggregator);
+
+        TValue Value { get; }
     }
 
     public abstract class ValueNode<TValue, TStructure> : IValueNode<TValue> where TStructure : INode
