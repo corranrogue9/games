@@ -162,7 +162,7 @@ namespace ConsoleApplication2
 
         public static ValueInner<TValue, Leaf, ValueLeaf<TValue>> Append<TValue>(this ValueLeaf<TValue> leaf, TValue value)
         {
-            return new ValueInner<TValue, Leaf, ValueLeaf<TValue>>(value, leaf, default);
+            return new ValueInner<TValue, Leaf, ValueLeaf<TValue>>(leaf.Value, Value.Create(value), default);
         }
 
         public static ValueInner<TValue, Inner<TStructure>, ValueInner<TValue, TStructure, TValueNodeStart>> Append<TValue, TStructure, TValueNodeStart>(
