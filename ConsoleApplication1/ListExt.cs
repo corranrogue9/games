@@ -1,10 +1,61 @@
-﻿using System.IO.Compression;
+﻿using System.Globalization;
+using System.IO.Compression;
 using System.Net.Http.Headers;
 
 namespace ConsoleApplication2
 {
     public static class ListExt
     {
+        public static TAggregate Aggregate2<TElement, TAggregate>(this IEnumerable<TElement> source, TAggregate seed, Func<TAggregate, TElement, TAggregate> accumulator)
+        {
+            foreach (var element in source)
+            {
+                seed = accumulator(seed, element);
+            }
+
+            return seed;
+        }
+
+        public static IEnumerable<TElement> Prepend2<TElement>(this IEnumerable<TElement> source, TElement element)
+        {
+            yield return element;
+
+            foreach (var element2 in source)
+            {
+                yield return element2;
+            }
+        }
+
+        public static IEnumerable<TElement> Append2<TElement>(this IEnumerable<TElement> source, TElement element)
+        {
+            return source.Aggregate2(Enumerable.Empty<TElement>(), (aggregate, element2) => aggregate.Prepend2(element2)).Reverse();
+        }
+
+        public static IEnumerable<TElement> Concat2<TElement>(this IEnumerable<TElement> first, IEnumerable<TElement> second)
+        {
+            return second.Aggregate2(first, (aggregate, element) => aggregate.Append2(element));
+        }
+
+        public static IEnumerable<TResult> Select2<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> selector)
+        {
+            return source.Aggregate2(Enumerable.Empty<TResult>(), (aggregate, element) => aggregate.Append2(selector(element)));
+        }
+
+        public static IEnumerable<TResult> SelectMany2<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, IEnumerable<TResult>> selector)
+        {
+            return source.Aggregate2(Enumerable.Empty<TResult>(), (aggregate, element) => aggregate.Concat2(selector(element)));
+        }
+
+        public static IEnumerable<TElement> Where2<TElement>(this IEnumerable<TElement> source, Func<TElement, bool> predicate)
+        {
+            return source.Aggregate2(Enumerable.Empty<TElement>(), (aggregate, element) => predicate(element) ? aggregate.Append(element) : aggregate);
+        }
+
+        public static IEnumerable<TElement> Reverse2<TElement>(this IEnumerable<TElement> source)
+        {
+            return source.Aggregate2(Enumerable.Empty<TElement>(), (aggregate, element) => aggregate.Prepend2(element));
+        }
+
         public static void DoWork()
         {
             var left = Value
