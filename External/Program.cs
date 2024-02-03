@@ -32,8 +32,6 @@
                 .Append(3)
                 .Append(1)
                 .Append(1);
-            //// TODO this doesn't quite work, but it's super close
-            //// TODO even if you get it working, you're still missing the actual tuple part because right now it's required that the left and right are the same type
             var zipped = left.Zip(right2);
 
             var zipped2 = left.Zip2(right);
