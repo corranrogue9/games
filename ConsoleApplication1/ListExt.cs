@@ -28,7 +28,7 @@ namespace ConsoleApplication2
 
         public static IEnumerable<TElement> Append2<TElement>(this IEnumerable<TElement> source, TElement element)
         {
-            return source.Aggregate2(Enumerable.Empty<TElement>(), (aggregate, element2) => aggregate.Prepend2(element2)).Reverse();
+            return source.Aggregate2(Enumerable.Empty<TElement>(), (aggregate, element2) => aggregate.Prepend2(element2)).Prepend2(element).Reverse();
         }
 
         public static IEnumerable<TElement> Concat2<TElement>(this IEnumerable<TElement> first, IEnumerable<TElement> second)
@@ -54,40 +54,6 @@ namespace ConsoleApplication2
         public static IEnumerable<TElement> Reverse2<TElement>(this IEnumerable<TElement> source)
         {
             return source.Aggregate2(Enumerable.Empty<TElement>(), (aggregate, element) => aggregate.Prepend2(element));
-        }
-
-        public static void DoWork()
-        {
-            var left = Value
-                .Create(1)
-                .Add(3)
-                .Add(4)
-                .Add(-1);
-            var right = Value
-                .Create("asdf")
-                .Add("qwer")
-                .Add("1234")
-                .Add("zxcv");
-            var right2 = Value
-                .Create(-1)
-                .Add(4)
-                .Add(3)
-                .Add(1);
-            var right3 = Value
-                .Create(-1)
-                .Add(4)
-                .Add(3)
-                .Add(1)
-                .Add(1);
-            //// TODO this doesn't quite work, but it's super close
-            //// TODO even if you get it working, you're still missing the actual tuple part because right now it's required that the left and right are the same type
-            var zipped = left.Zip(right2);
-
-            var zipped2 = left.Zip2(right);
-
-            var zipped3 = zipped2.Zip2(right2);
-            Console.WriteLine(zipped3.Structure.Count);
-            Console.WriteLine(right3.Structure.Count);
         }
 
         /*public static ValueNode<(TValueLeft, TValueRight), Leaf> Zip<TValueLeft, TValueRight>(this ValueLeaf<TValueLeft> left, ValueLeaf<TValueRight> right)
@@ -194,25 +160,64 @@ namespace ConsoleApplication2
             return new ValueLeaf<TValue>(value);
         }
 
-        public static ValueInner<TValue, Leaf, ValueLeaf<TValue>> Add<TValue>(this ValueLeaf<TValue> leaf, TValue value)
+        public static ValueInner<TValue, Leaf, ValueLeaf<TValue>> Append<TValue>(this ValueLeaf<TValue> leaf, TValue value)
         {
             return new ValueInner<TValue, Leaf, ValueLeaf<TValue>>(value, leaf, default);
         }
 
-        public static ValueInner<TValue, Inner<TStructure>, ValueInner<TValue, TStructure, TValueNodeStart>> Add<TValue, TStructure, TValueNodeStart>(
+        public static ValueInner<TValue, Inner<TStructure>, ValueInner<TValue, TStructure, TValueNodeStart>> Append<TValue, TStructure, TValueNodeStart>(
             this ValueInner<TValue, TStructure, TValueNodeStart> inner,
             TValue value)
             where TStructure : INode
             where TValueNodeStart : ValueNode<TValue, TStructure>
         {
-            return new ValueInner<TValue, Inner<TStructure>, ValueInner<TValue, TStructure, TValueNodeStart>>(
-                value, 
-                inner, 
-                default);
+            var thing = inner.Node2.Aggregate(Value.Create(inner.Value) as IValueNode<TValue>, (aggregate, element) => aggregate.Prepend(element)).Prepend(value);
+            var casted = thing as ValueInner<TValue, Inner<TStructure>, ValueInner<TValue, TStructure, TValueNodeStart>>;
+            return casted.Reverse();
         }
+
+        public static ValueInner<TValue, Leaf, ValueLeaf<TValue>> Prepend<TValue>(this ValueLeaf<TValue> leaf, TValue value)
+        {
+            return leaf.Prepend(value, leaf.Structure);
+        }
+
+        public static ValueInner<TValue, Inner<TStructure>, ValueInner<TValue, TStructure, TValueNodeStart>> Prepend<TValue, TStructure, TValueNodeStart>(
+            this ValueInner<TValue, TStructure, TValueNodeStart> inner,
+            TValue value)
+            where TStructure : INode
+            where TValueNodeStart : ValueNode<TValue, TStructure>
+        {
+            return inner.Prepend(value, inner.Structure);
+        }
+
+        public static ValueInner<TValue, TStructure, TValueNodePrepend> Prepend<TValue, TStructure, TValueNodePrepend>(this TValueNodePrepend node, TValue value, TStructure structure)
+            where TStructure : INode
+            where TValueNodePrepend : ValueNode<TValue, TStructure>
+        {
+            return node.Prepend(value) as ValueInner<TValue, TStructure, TValueNodePrepend>;
+        }
+
+        public static ValueInner<TValue, TStructure, TValueNode> Reverse<TValue, TStructure, TValueNode>(this ValueInner<TValue, TStructure, TValueNode> inner)
+            where TStructure : INode
+            where TValueNode : ValueNode<TValue, TStructure>
+        {
+            return inner.Node2.Aggregate(new ValueLeaf<TValue>(inner.Value) as IValueNode<TValue>, (aggregate, element) => aggregate.Prepend(element)) as ValueInner<TValue, TStructure, TValueNode>;
+        }
+
+        /*public static IEnumerable<TElement> Append2<TElement>(this IEnumerable<TElement> source, TElement element)
+        {
+            return source.Aggregate2(Enumerable.Empty<TElement>(), (aggregate, element2) => aggregate.Prepend2(element2)).Reverse();
+        }*/
     }
 
-    public abstract class ValueNode<TValue, TStructure> where TStructure : INode
+    public interface IValueNode<TValue>
+    {
+        IValueNode<TValue> Prepend(TValue value);
+
+        TAggregate Aggregate<TAggregate>(TAggregate seed, Func<TAggregate, TValue, TAggregate> aggregator);
+    }
+
+    public abstract class ValueNode<TValue, TStructure> : IValueNode<TValue> where TStructure : INode
     {
         public abstract TValue Value { get; }
 
@@ -232,6 +237,13 @@ namespace ConsoleApplication2
 
         internal abstract ValueNode<TValue3, TStructure4>? Node4<TValue3, TStructure4>(TStructure4 structure)
             where TStructure4 : INode;
+
+        public abstract TAggregate Aggregate<TAggregate>(TAggregate seed, Func<TAggregate, TValue, TAggregate> aggregator);
+
+        internal abstract ValueInner<TValue, TStructure, TValueNodePrepend> PrependInternal<TValueNodePrepend>(TValueNodePrepend node, TValue value)
+            where TValueNodePrepend : ValueNode<TValue, TStructure>;
+
+        public abstract IValueNode<TValue> Prepend(TValue value);
     }
 
     public sealed class ValueLeaf<TValue> : ValueNode<TValue, Leaf>
@@ -275,10 +287,48 @@ namespace ConsoleApplication2
         {
             yield return this.Value;
         }
+
+        public override TAggregate Aggregate<TAggregate>(TAggregate seed, Func<TAggregate, TValue, TAggregate> aggregator)
+        {
+            return aggregator(seed, this.Value);
+        }
+
+        internal override ValueInner<TValue, Leaf, TValueNodePrepend> PrependInternal<TValueNodePrepend>(TValueNodePrepend node, TValue value)
+        {
+            return new ValueInner<TValue, Leaf, TValueNodePrepend>(value, node, default);
+        }
+
+        public override IValueNode<TValue> Prepend(TValue value)
+        {
+            return this.PrependInternal(this, value);
+        }
+
+
+        /*public ValueInner<TValue, Leaf, ValueLeaf<TValue>> Prepend(TValue value)
+        {
+            return new ValueInner<TValue, Leaf, ValueLeaf<TValue>>(this.Value, new ValueLeaf<TValue>(value), default);
+        }*/
     }
 
     public sealed class ValueInner<TValue, TStructure, TValueNode> : ValueNode<TValue, Inner<TStructure>> where TValueNode : ValueNode<TValue, TStructure> where TStructure : INode
     {
+        /*public ValueInner<TValue, Inner<TStructure>, ValueInner<TValue, TStructure, TValueNode>> Prepend(TValue value)
+        {
+        }*/
+
+        public override TAggregate Aggregate<TAggregate>(TAggregate seed, Func<TAggregate, TValue, TAggregate> aggregator)
+        {
+            return this.Node2.Aggregate(aggregator(seed, this.Value), aggregator);
+        }
+
+        internal override ValueInner<TValue, Inner<TStructure>, TValueNodePrepend> PrependInternal<TValueNodePrepend>(TValueNodePrepend node, TValue value)
+        {
+            return new ValueInner<TValue, Inner<TStructure>, TValueNodePrepend>(
+                value,
+                node,
+                default);
+        }
+
         public ValueInner(TValue value, TValueNode node, Inner<TStructure> structure)
         {
             this.Value = value;
@@ -359,6 +409,11 @@ namespace ConsoleApplication2
             {
                 yield return element;
             }
+        }
+
+        public override IValueNode<TValue> Prepend(TValue value)
+        {
+            return this.PrependInternal(this, value);
         }
     }
 
