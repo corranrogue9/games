@@ -280,7 +280,6 @@ namespace Fx.Game
                         var actionMoves = new List<ActionMove?>();
                         if (takeColor.color == lastColor)
                         {
-                            //// TODO do action tokens
                             if (tile.ActionToken is ActionToken.Ambush ambush)
                             {
                                 actionMoves.Add(new ActionMove.Ambush(null));
@@ -378,6 +377,8 @@ namespace Fx.Game
                             {
                                 //// TODO is it useful to have an actionmove for this?
                             }
+                            
+                            //// TODO implement the displayer for the action tokens
                         }
 
                         var newLocations = NewLocations(playerLocation, takeColor.count).ToList();
