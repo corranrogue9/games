@@ -366,6 +366,30 @@
                         {
                             writer.Append(i * 8 + 0, $"action token: ambush");
                         }
+                        else if (tile.ActionToken is ActionToken.BrandingIron)
+                        {
+                            writer.Append(i * 8 + 0, $"action token: branding iron");
+                        }
+                        else if (tile.ActionToken is ActionToken.Epidemic)
+                        {
+                            writer.Append(i * 8 + 0, $"action token: epidemice");
+                        }
+                        else if (tile.ActionToken is ActionToken.Gold gold)
+                        {
+                            writer.Append(i * 8 + 0, $"action token: gold ({gold.Amount})");
+                        }
+                        else if (tile.ActionToken is ActionToken.Rattlesnake)
+                        {
+                            writer.Append(i * 8 + 0, $"action token: rattlesnake");
+                        }
+                        else if (tile.ActionToken is ActionToken.Sheriff)
+                        {
+                            writer.Append(i * 8 + 0, $"action token: sheriff");
+                        }
+                        else if (tile.ActionToken is ActionToken.SnakeOil)
+                        {
+                            writer.Append(i * 8 + 0, $"action token: snake oil");
+                        }
                         else
                         {
                             writer.Append(i * 8 + 0, $"");

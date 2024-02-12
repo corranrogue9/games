@@ -317,6 +317,7 @@ namespace Fx.Game
                             else if (tile.ActionToken is ActionToken.Gold)
                             {
                                 //// TODO is it useful to have an actionmove for this?
+                                actionMoves.Add(null);
                             }
                             else if (tile.ActionToken is ActionToken.Rattlesnake)
                             {
@@ -372,13 +373,17 @@ namespace Fx.Game
                             else if (tile.ActionToken is ActionToken.Sheriff)
                             {
                                 //// TODO is it useful to have an actionmove for this?
+                                actionMoves.Add(null);
                             }
                             else if (tile.ActionToken is ActionToken.SnakeOil)
                             {
                                 //// TODO is it useful to have an actionmove for this?
+                                actionMoves.Add(null);
                             }
-                            
-                            //// TODO implement the displayer for the action tokens
+                        }
+                        else
+                        {
+                            actionMoves.Add(null);
                         }
 
                         var newLocations = NewLocations(playerLocation, takeColor.count).ToList();
