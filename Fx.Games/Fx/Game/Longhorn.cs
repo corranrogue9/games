@@ -307,6 +307,76 @@ namespace Fx.Game
                             }
                             else if (tile.ActionToken is ActionToken.BrandingIron)
                             {
+                                var adjacentLocations = NewLocations(playerLocation, 1);
+                                actionMoves.AddRange(adjacentLocations.Select(adjacentLocation => new ActionMove.BrandingIron(adjacentLocation)));
+                                //// TODO the rules same "take all of the cattle of the same colour"; does this mean take the cattle of a color, or take the cattle of the color that you selected for your move?
+                            }
+                            else if (tile.ActionToken is ActionToken.Epidemic)
+                            {
+                                actionMoves.AddRange(Enumerable.Range(0, 4).Select(color => new ActionMove.Epidemic((TakeColor)color)));
+                            }
+                            else if (tile.ActionToken is ActionToken.Gold)
+                            {
+                                //// TODO is it useful to have an actionmove for this?
+                            }
+                            else if (tile.ActionToken is ActionToken.Rattlesnake)
+                            {
+                                var currentPlayer = this.Board.Player1Status;
+
+                                IEnumerable<LonghornLocation?> blackLocations;
+                                if (currentPlayer.Black == 0)
+                                {
+                                    blackLocations = new LonghornLocation?[] { null };
+                                }
+                                else
+                                {
+                                    blackLocations = NewLocations(playerLocation, 1);
+                                }
+
+                                IEnumerable<LonghornLocation?> greenLocations;
+                                if (currentPlayer.Green == 0)
+                                {
+                                    greenLocations = new LonghornLocation?[] { null };
+                                }
+                                else
+                                {
+                                    greenLocations = NewLocations(playerLocation, 1);
+                                }
+
+                                IEnumerable<LonghornLocation?> orangeLocations;
+                                if (currentPlayer.Orange == 0)
+                                {
+                                    orangeLocations = new LonghornLocation?[] { null };
+                                }
+                                else
+                                {
+                                    orangeLocations = NewLocations(playerLocation, 1);
+                                }
+
+                                IEnumerable<LonghornLocation?> whiteLocations;
+                                if (currentPlayer.White == 0)
+                                {
+                                    whiteLocations = new LonghornLocation?[] { null };
+                                }
+                                else
+                                {
+                                    whiteLocations = NewLocations(playerLocation, 1);
+                                }
+
+                                actionMoves.AddRange(
+                                    blackLocations.SelectMany(
+                                        blackLocation => greenLocations.SelectMany(
+                                            greenLocation => orangeLocations.SelectMany(
+                                                orangeLocation => whiteLocations.Select(
+                                                    whiteLocation => new ActionMove.Rattlesnake(blackLocation, greenLocation, orangeLocation, whiteLocation))))));
+                            }
+                            else if (tile.ActionToken is ActionToken.Sheriff)
+                            {
+                                //// TODO is it useful to have an actionmove for this?
+                            }
+                            else if (tile.ActionToken is ActionToken.SnakeOil)
+                            {
+                                //// TODO is it useful to have an actionmove for this?
                             }
                         }
 
@@ -319,18 +389,18 @@ namespace Fx.Game
                             this.Board.Tiles[location.Row, location.Column].OrangeCows == 0 &&
                             this.Board.Tiles[location.Row, location.Column].WhiteCows == 0))
                         {
-                            ////foreach (var actionMove in actionMoves)
+                            foreach (var actionMove in actionMoves)
                             {
-                                yield return new LonghornMove.LocationMove(takeColor.color, null, null);
+                                yield return new LonghornMove.LocationMove(takeColor.color, null, actionMove);
                             }
                         }
                         else
                         {
                             foreach (var newLocation in newLocations)
                             {
-                                ////foreach (var actionMove in actionMoves)
+                                foreach (var actionMove in actionMoves)
                                 {
-                                    yield return new LonghornMove.LocationMove(takeColor.color, newLocation, null);
+                                    yield return new LonghornMove.LocationMove(takeColor.color, newLocation, actionMove);
                                 }
                             }
                         }
@@ -721,6 +791,42 @@ namespace Fx.Game
             }
 
             public TakeColor? Color { get; } //// TODO null means steal a random gold nugget
+        }
+
+        public sealed class BrandingIron : ActionMove
+        {
+            public BrandingIron(LonghornLocation location)
+            {
+                this.Location = location;
+            }
+
+            public LonghornLocation Location { get; }
+        }
+
+        public sealed class Epidemic : ActionMove
+        {
+            public Epidemic(TakeColor color)
+            {
+                this.Color = color;
+            }
+
+            public TakeColor Color { get; }
+        }
+
+        public sealed class Rattlesnake : ActionMove
+        {
+            public Rattlesnake(LonghornLocation? blackLocation, LonghornLocation? greenLocation, LonghornLocation? orangeLocation, LonghornLocation? whiteLocation)
+            {
+                this.BlackLocation = blackLocation;
+                this.GreenLocation = greenLocation;
+                this.OrangeLocation = orangeLocation;
+                this.WhiteLocation = whiteLocation;
+            }
+
+            public LonghornLocation? BlackLocation { get; }
+            public LonghornLocation? GreenLocation { get; }
+            public LonghornLocation? OrangeLocation { get; }
+            public LonghornLocation? WhiteLocation { get; }
         }
     }
 
