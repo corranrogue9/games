@@ -506,7 +506,49 @@
                             resultLocation = $"move to ({newLocation.Row}, {newLocation.Column})";
                         }
 
-                        Console.WriteLine($"{i}: take the {locationMove.TakeColor} cows and {resultLocation}");
+                        //// TODO actionmove is null for several types of action tokens; this is because there's no decision to be made for those tokens; however, 
+                        //// TODO displaying the move, we will likely want to show the user the action move that they will be committing; in this case, the displayer
+                        //// TODO will be responsible for knowing what the action move is that is being committed; this violates the idea that the game engine is the
+                        //// TODO only thing responsible for knowing how to play the game; on the other hand, if the game engine requires the action move to be
+                        //// TODO supplied, it's a pretty bad experience to commit a move that is legal except that the caller needed to know that the action move is
+                        //// TODO the remaining legal move; is there a way to improve the framework to account for such things? maybe the modeling of the move for this
+                        //// TODO game as having 3 components is the broken part?
+                        var action = string.Empty;
+                        if (locationMove.ActionMove is ActionMove.Ambush ambush)
+                        {
+                            if (ambush.Color == null)
+                            {
+                                action = ", steal a random gold nugget from your opponent,";
+                            }
+                            else
+                            {
+                                action = $", steal the {ambush.Color} cows from your opponent,";
+                            }
+                        }
+                        else if (locationMove.ActionMove is ActionMove.BrandingIron brandingIron)
+                        {
+                            action = $", brand the {locationMove.TakeColor} cows at ({brandingIron.Location.Row}, {brandingIron.Location.Column}),";
+                        }
+                        else if (locationMove.ActionMove is ActionMove.Epidemic epidemic)
+                        {
+                            action = $", cause an epidemic among the {epidemic.Color} cows,";
+                        }
+                        else if (locationMove.ActionMove is ActionMove.Rattlesnake rattlesnake)
+                        {
+                            var locations = string.Join(", ", new[]
+                                {
+                                    (TakeColor.Black, rattlesnake.BlackLocation),
+                                    (TakeColor.Green, rattlesnake.GreenLocation),
+                                    (TakeColor.Orange, rattlesnake.OrangeLocation),
+                                    (TakeColor.White, rattlesnake.WhiteLocation),
+                                }
+                                .Where(location => location.Item2 != null)
+                                .Select(location => $"{location.Item1} cows to ({location.Item2.Row}, {location.Item2.Column})"));
+
+                            action = $", guide your cows away from the rattlesnake ({locations}),";
+                        }
+
+                        Console.WriteLine($"{i}: take the {locationMove.TakeColor} cows{action} and {resultLocation}");
                     }
                     
                     ++i;
