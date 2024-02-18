@@ -280,6 +280,7 @@ namespace Fx.Game
                         var actionMoves = new List<ActionMove?>();
                         if (takeColor.color == lastColor)
                         {
+                            //// TODO you shouldn't be able to move somewhere with a null action token; is this asserted anywhere?
                             if (tile.ActionToken is ActionToken.Ambush ambush)
                             {
                                 actionMoves.Add(new ActionMove.Ambush(null));
@@ -584,6 +585,8 @@ namespace Fx.Game
 
         public Longhorn<TPlayer> CommitMove(LonghornMove move)
         {
+            //// TODO check for legal moves
+
             //// TODO you are here: commit moves with action tokens, and do end of game checks
             var playerLocation = this.Board.PlayerLocation;
             if (playerLocation == null && move is LonghornMove.LocationChoice locationChoice)
@@ -601,30 +604,33 @@ namespace Fx.Game
                 var newPlayer2 = this.player1;
 
                 var newBoardTiles = this.Board.Tiles;
+                var currentTile = newBoardTiles[playerLocation.Row, playerLocation.Column];
+                var lastCowColor = LastColor(currentTile);
+                var takeActionToken = lastCowColor == locationMove.TakeColor;
+                var actionToken = currentTile.ActionToken;
+
                 if (locationMove.TakeColor == TakeColor.Black)
                 {
-                    var currentTile = newBoardTiles[playerLocation.Row, playerLocation.Column];
                     newPlayer2.black += currentTile.BlackCows;
-                    newBoardTiles[playerLocation.Row, playerLocation.Column] = new LonghornTile(currentTile.OrangeCows, 0, currentTile.GreenCows, currentTile.WhiteCows, currentTile.ActionToken);
+                    newBoardTiles[playerLocation.Row, playerLocation.Column] = new LonghornTile(currentTile.OrangeCows, 0, currentTile.GreenCows, currentTile.WhiteCows, takeActionToken ? null : currentTile.ActionToken);
                 }
                 else if (locationMove.TakeColor == TakeColor.Green)
                 {
-                    var currentTile = newBoardTiles[playerLocation.Row, playerLocation.Column];
                     newPlayer2.green += currentTile.GreenCows;
-                    newBoardTiles[playerLocation.Row, playerLocation.Column] = new LonghornTile(currentTile.OrangeCows, currentTile.BlackCows, 0, currentTile.WhiteCows, currentTile.ActionToken);
+                    newBoardTiles[playerLocation.Row, playerLocation.Column] = new LonghornTile(currentTile.OrangeCows, currentTile.BlackCows, 0, currentTile.WhiteCows, takeActionToken ? null : currentTile.ActionToken);
                 }
                 else if (locationMove.TakeColor == TakeColor.Orange)
                 {
-                    var currentTile = newBoardTiles[playerLocation.Row, playerLocation.Column];
                     newPlayer2.orange += currentTile.OrangeCows;
-                    newBoardTiles[playerLocation.Row, playerLocation.Column] = new LonghornTile(0, currentTile.BlackCows, currentTile.GreenCows, currentTile.WhiteCows, currentTile.ActionToken);
+                    newBoardTiles[playerLocation.Row, playerLocation.Column] = new LonghornTile(0, currentTile.BlackCows, currentTile.GreenCows, currentTile.WhiteCows, takeActionToken ? null : currentTile.ActionToken);
                 }
                 else if (locationMove.TakeColor == TakeColor.White)
                 {
-                    var currentTile = newBoardTiles[playerLocation.Row, playerLocation.Column];
                     newPlayer2.white += currentTile.WhiteCows;
-                    newBoardTiles[playerLocation.Row, playerLocation.Column] = new LonghornTile(currentTile.OrangeCows, currentTile.BlackCows, currentTile.GreenCows, 0, currentTile.ActionToken);
+                    newBoardTiles[playerLocation.Row, playerLocation.Column] = new LonghornTile(currentTile.OrangeCows, currentTile.BlackCows, currentTile.GreenCows, 0, takeActionToken ? null : currentTile.ActionToken);
                 }
+
+                //// TODO apply action token
 
                 var newBoard = new LonghornBoard<TPlayer>(
                     newBoardTiles, 
@@ -684,7 +690,7 @@ namespace Fx.Game
 
     public sealed class LonghornTile
     {
-        public LonghornTile(int orangeCows, int blackCows, int greenCows, int whiteCows, ActionToken actionToken)
+        public LonghornTile(int orangeCows, int blackCows, int greenCows, int whiteCows, ActionToken? actionToken)
         {
             //// TODO assert
 
@@ -703,7 +709,7 @@ namespace Fx.Game
 
         public int WhiteCows { get; }
 
-        public ActionToken ActionToken { get; }
+        public ActionToken? ActionToken { get; }
     }
 
     public abstract class ActionToken
