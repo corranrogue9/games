@@ -319,7 +319,7 @@
         private static void LonghornHumanVsRandom()
         {
             var displayer = new LonghornConsoleDisplay<string>(_ => _);
-            var seed = 273759000; //// Environment.TickCount;
+            var seed = /*273759000;*/ Environment.TickCount;
             var random = new Random(seed);
             var exes = "player1";
             var ohs = "player2";
@@ -327,8 +327,9 @@
             var driver = Driver.Create(
                 new Dictionary<string, IStrategy<Longhorn<string>, LonghornBoard<string>, LonghornMove, string>>
                 {
-                    { exes, UserInterfaceStrategy.Create(displayer) },
+                    ////{ exes, UserInterfaceStrategy.Create(displayer) },
                     ////{ exes, game.RandomStrategy() },
+                    { exes, new MonteCarloStrategy2<Longhorn<string>, LonghornBoard<string>, LonghornMove, string>(exes, 100000, StringComparer.OrdinalIgnoreCase, random) },
                     { ohs, game.RandomStrategy() },
                     ////{ exes, new DecisionTreeStrategy<Longhorn<string>, LonghornBoard, LonghornMove, string>(exes, StringComparer.OrdinalIgnoreCase) },
                 },

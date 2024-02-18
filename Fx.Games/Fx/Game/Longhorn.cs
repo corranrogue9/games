@@ -120,8 +120,8 @@ namespace Fx.Game
             if (sheriffIndex != -1)
             {
                 //// TODO is this still properly random?
-                var temp = startingActionTokens[startingActionTokens.Count];
-                startingActionTokens[startingActionTokens.Count] = startingActionTokens[sheriffIndex];
+                var temp = startingActionTokens[startingActionTokens.Count - 1];
+                startingActionTokens[startingActionTokens.Count - 1] = startingActionTokens[sheriffIndex];
                 startingActionTokens[sheriffIndex] = temp;
             }
 
@@ -149,7 +149,7 @@ namespace Fx.Game
                         ActionToken startingActionToken;
                         if (sheriffIndex != -1 && startingTilesEnumerator.Current.IsNuggetHill)
                         {
-                            startingActionToken = startingActionTokens[startingActionTokens.Count];
+                            startingActionToken = startingActionTokens[startingActionTokens.Count - 1];
                         }
                         else
                         {
@@ -746,10 +746,11 @@ namespace Fx.Game
                     }
                     else if (actionToken is ActionToken.Sheriff sheriffToken && locationMove.ActionMove == null)
                     {
-                        if (locationMove.NewLocation != null)
+                        /*if (locationMove.NewLocation != null)
                         {
+                            //// TODO this actually gets thrown erroneously
                             throw new IllegalMoveExeption("TODO sheriff token should end the game");
-                        }
+                        }*/
 
                         newPlayer2.arrested = true;
                     }
@@ -771,6 +772,7 @@ namespace Fx.Game
                     new LonghornPlayerStatus<TPlayer>(newPlayer1.player, newPlayer1.orange, newPlayer1.black, newPlayer1.green, newPlayer1.white, newPlayer1.gold),
                     new LonghornPlayerStatus<TPlayer>(newPlayer2.player, newPlayer2.orange, newPlayer2.black, newPlayer2.green, newPlayer2.white, newPlayer2.gold));
 
+                //// TODO what about if a player gets 9 cows of the same color?
                 return new Longhorn<TPlayer>(newPlayer1, newPlayer2, newBoard, random, locationMove.NewLocation == null);
             }
             else
