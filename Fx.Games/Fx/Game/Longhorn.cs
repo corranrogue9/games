@@ -573,18 +573,19 @@ namespace Fx.Game
         {
             get
             {
-                if (!this.previousMoveResultedInGameOver && this.Moves.Any())
-                {
-                    return null;
-                }
-
                 if (this.player1.arrested)
                 {
                     return new Outcome<TPlayer>(new[] { this.player2.player });
                 }
-                else if (this.player2.arrested)
+                
+                if (this.player2.arrested)
                 {
                     return new Outcome<TPlayer>(new[] { this.player1.player });
+                }
+
+                if (!this.previousMoveResultedInGameOver && this.Moves.Any())
+                {
+                    return null;
                 }
 
                 var orangeValue = 0;
@@ -664,7 +665,6 @@ namespace Fx.Game
                     newBoardTiles[playerLocation.Row, playerLocation.Column] = new LonghornTile(currentTile.OrangeCows, currentTile.BlackCows, currentTile.GreenCows, 0, takeActionToken ? null : currentTile.ActionToken);
                 }
 
-                //// TODO apply action token
                 if (takeActionToken)
                 {
                     if (actionToken is ActionToken.Ambush ambushToken && locationMove.ActionMove is ActionMove.Ambush ambushMove)
