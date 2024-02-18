@@ -18,6 +18,31 @@ namespace Fx.Game
                 yield return array[i];
             }
         }
+
+        public static bool TrySkip<T>(this IEnumerable<T> self, out T skipped, out IEnumerable<T> remaining)
+        {
+            using (var enumerator = self.GetEnumerator())
+            {
+                if (!enumerator.MoveNext())
+                {
+                    skipped = default;
+                    remaining = default;
+                    return false;
+                }
+
+                skipped = enumerator.Current;
+                remaining = TheRest(enumerator);
+                return true;
+            }
+        }
+
+        private static IEnumerable<T> TheRest<T>(IEnumerator<T> enumerator)
+        {
+            while (enumerator.MoveNext())
+            {
+                yield return enumerator.Current;
+            }
+        }
     }
 
     public sealed class Longhorn<TPlayer> : IGame<Longhorn<TPlayer>, LonghornBoard<TPlayer>, LonghornMove, TPlayer>
@@ -78,8 +103,8 @@ namespace Fx.Game
             }
         }
 
-        private readonly (TPlayer player, int orange, int black, int green, int white, int gold) player1; //// TODO probably should use longhorplayerstatus
-        private readonly (TPlayer player, int orange, int black, int green, int white, int gold) player2;
+        private readonly (TPlayer player, int orange, int black, int green, int white, IEnumerable<int> gold, bool arrested) player1; //// TODO probably should use longhorplayerstatus
+        private readonly (TPlayer player, int orange, int black, int green, int white, IEnumerable<int> gold, bool arrested) player2;
         private readonly Random random;
         private readonly bool previousMoveResultedInGameOver;
 
@@ -222,13 +247,13 @@ namespace Fx.Game
         }
 
         public Longhorn(bool firstPlayer, TPlayer player1, TPlayer player2, LonghornBoard<TPlayer> board, Random random)
-            : this((firstPlayer ? player1 : player2, 0, 0, 0, 0, 0), (firstPlayer ? player2 : player1, 0, 0, 0, 0, 0), board, random, false)
+            : this((firstPlayer ? player1 : player2, 0, 0, 0, 0, Enumerable.Empty<int>(), false), (firstPlayer ? player2 : player1, 0, 0, 0, 0, Enumerable.Empty<int>(), false), board, random, false)
         {
         }
 
         private Longhorn(
-            (TPlayer player, int orange, int black, int green, int white, int gold) player1,
-            (TPlayer player, int orange, int black, int green, int white, int gold) player2,
+            (TPlayer player, int orange, int black, int green, int white, IEnumerable<int> gold, bool arrested) player1,
+            (TPlayer player, int orange, int black, int green, int white, IEnumerable<int> gold, bool arrested) player2,
             LonghornBoard<TPlayer> board,
             Random random,
             bool previousMoveResultedInGameOver)
@@ -553,6 +578,15 @@ namespace Fx.Game
                     return null;
                 }
 
+                if (this.player1.arrested)
+                {
+                    return new Outcome<TPlayer>(new[] { this.player2.player });
+                }
+                else if (this.player2.arrested)
+                {
+                    return new Outcome<TPlayer>(new[] { this.player1.player });
+                }
+
                 var orangeValue = 0;
                 var blackValue = 0;
                 var greenValue = 0;
@@ -565,8 +599,8 @@ namespace Fx.Game
                     whiteValue += tile.WhiteCows;
                 }
 
-                var player1Score = this.player1.orange * orangeValue + this.player1.black * blackValue + this.player1.green * greenValue + this.player1.white * whiteValue + this.player1.gold;
-                var player2Score = this.player2.orange * orangeValue + this.player2.black * blackValue + this.player2.green * greenValue + this.player2.white * whiteValue + this.player2.gold;
+                var player1Score = this.player1.orange * orangeValue + this.player1.black * blackValue + this.player1.green * greenValue + this.player1.white * whiteValue + this.player1.gold.Sum();
+                var player2Score = this.player2.orange * orangeValue + this.player2.black * blackValue + this.player2.green * greenValue + this.player2.white * whiteValue + this.player2.gold.Sum();
 
                 var winners = new List<TPlayer>();
                 if (player1Score >= player2Score)
@@ -631,12 +665,166 @@ namespace Fx.Game
                 }
 
                 //// TODO apply action token
+                if (takeActionToken)
+                {
+                    if (actionToken is ActionToken.Ambush ambushToken && locationMove.ActionMove is ActionMove.Ambush ambushMove)
+                    {
+                        if (ambushMove.Color == null)
+                        {
+                            if (newPlayer1.gold.Shuffle(this.random).TrySkip(out var stolen, out var kept))
+                            {
+                                newPlayer1.gold = kept;
+                                newPlayer2.gold = newPlayer2.gold.Append(stolen);
+                            }
+                        }
+                        else if (ambushMove.Color == TakeColor.Black)
+                        {
+                            var stolen = Math.Min(newPlayer1.black, 2);
+                            newPlayer1.black -= stolen;
+                            newPlayer2.black += stolen;
+                        }
+                        else if (ambushMove.Color == TakeColor.Green)
+                        {
+                            var stolen = Math.Min(newPlayer1.green, 2);
+                            newPlayer1.green -= stolen;
+                            newPlayer2.green += stolen;
+                        }
+                        else if (ambushMove.Color == TakeColor.Orange)
+                        {
+                            var stolen = Math.Min(newPlayer1.orange, 2);
+                            newPlayer1.orange -= stolen;
+                            newPlayer2.orange += stolen;
+                        }
+                        else if (ambushMove.Color == TakeColor.White)
+                        {
+                            var stolen = Math.Min(newPlayer1.white, 2);
+                            newPlayer1.white -= stolen;
+                            newPlayer2.white += stolen;
+                        }
+                        else
+                        {
+                            throw new IllegalMoveExeption("TODO ambush color invalid");
+                        }
+                    }
+                    else if (actionToken is ActionToken.BrandingIron brandingIronToken && locationMove.ActionMove is ActionMove.BrandingIron brandingIronMove)
+                    {
+                        var brandingLocation = brandingIronMove.Location;
+                        var brandingTile = newBoardTiles[brandingLocation.Row, brandingLocation.Column];
+                        if (locationMove.TakeColor == TakeColor.Black)
+                        {
+                            newPlayer2.black += brandingTile.BlackCows;
+                            newBoardTiles[brandingLocation.Row, brandingLocation.Column] = new LonghornTile(brandingTile.OrangeCows, 0, brandingTile.GreenCows, brandingTile.WhiteCows, brandingTile.ActionToken);
+                        }
+                        else if (locationMove.TakeColor == TakeColor.Green)
+                        {
+                            newPlayer2.green += brandingTile.GreenCows;
+                            newBoardTiles[brandingLocation.Row, brandingLocation.Column] = new LonghornTile(brandingTile.OrangeCows, brandingTile.BlackCows, 0, brandingTile.WhiteCows, brandingTile.ActionToken);
+                        }
+                        else if (locationMove.TakeColor == TakeColor.Orange)
+                        {
+                            newPlayer2.orange += brandingTile.OrangeCows;
+                            newBoardTiles[brandingLocation.Row, brandingLocation.Column] = new LonghornTile(0, brandingTile.BlackCows, brandingTile.GreenCows, brandingTile.WhiteCows, brandingTile.ActionToken);
+                        }
+                        else if (locationMove.TakeColor == TakeColor.White)
+                        {
+                            newPlayer2.white += brandingTile.WhiteCows;
+                            newBoardTiles[brandingLocation.Row, brandingLocation.Column] = new LonghornTile(brandingTile.OrangeCows, brandingTile.BlackCows, brandingTile.GreenCows, 0, brandingTile.ActionToken);
+                        }
+                    }
+                    else if (actionToken is ActionToken.Epidemic epidemicToken && locationMove.ActionMove is ActionMove.Epidemic epidemicMove)
+                    {
+                        for (int i = 0; i < 3; ++i)
+                        {
+                            for (int j = 0; j < 3; ++j)
+                            {
+                                var originalTile = newBoardTiles[i, j];
+                                if (epidemicMove.Color == TakeColor.Black)
+                                {
+                                    newBoardTiles[i, j] = new LonghornTile(originalTile.OrangeCows, 0, originalTile.GreenCows, originalTile.WhiteCows, originalTile.ActionToken);
+                                }
+                                else if (epidemicMove.Color == TakeColor.Green)
+                                {
+                                    newBoardTiles[i, j] = new LonghornTile(originalTile.OrangeCows, originalTile.BlackCows, 0, originalTile.WhiteCows, originalTile.ActionToken);
+                                }
+                                else if (epidemicMove.Color == TakeColor.Orange)
+                                {
+                                    newBoardTiles[i, j] = new LonghornTile(0, originalTile.BlackCows, originalTile.GreenCows, originalTile.WhiteCows, originalTile.ActionToken);
+                                }
+                                else if (epidemicMove.Color == TakeColor.White)
+                                {
+                                    newBoardTiles[i, j] = new LonghornTile(originalTile.OrangeCows, originalTile.BlackCows, originalTile.GreenCows, 0, originalTile.ActionToken);
+                                }
+                            }
+                        }
+                    }
+                    else if (actionToken is ActionToken.Gold goldToken && locationMove.ActionMove == null)
+                    {
+                        newPlayer2.gold = newPlayer2.gold.Append(goldToken.Amount);
+                    }
+                    else if (actionToken is ActionToken.Rattlesnake rattlesnakeToken && locationMove.ActionMove is ActionMove.Rattlesnake rattlesnakeMove)
+                    {
+                        if (rattlesnakeMove.BlackLocation != null)
+                        {
+                            //// TODO assert that newplayer2.black is greater than 0?
+                            newPlayer2.black -= 1;
+                            var cowLocation = rattlesnakeMove.BlackLocation;
+                            var originalTile = newBoardTiles[cowLocation.Row, cowLocation.Column];
+                            newBoardTiles[cowLocation.Row, cowLocation.Column] = new LonghornTile(originalTile.OrangeCows, originalTile.BlackCows + 1, originalTile.GreenCows, originalTile.WhiteCows, originalTile.ActionToken);
+                        }
+                        
+                        if (rattlesnakeMove.GreenLocation != null)
+                        {
+                            //// TODO assert that newplayer2.black is greater than 0?
+                            newPlayer2.green -= 1;
+                            var cowLocation = rattlesnakeMove.GreenLocation;
+                            var originalTile = newBoardTiles[cowLocation.Row, cowLocation.Column];
+                            newBoardTiles[cowLocation.Row, cowLocation.Column] = new LonghornTile(originalTile.OrangeCows, originalTile.BlackCows, originalTile.GreenCows + 1, originalTile.WhiteCows, originalTile.ActionToken);
+                        }
+                        
+                        if (rattlesnakeMove.OrangeLocation != null)
+                        {
+                            //// TODO assert that newplayer2.black is greater than 0?
+                            newPlayer2.orange -= 1;
+                            var cowLocation = rattlesnakeMove.OrangeLocation;
+                            var originalTile = newBoardTiles[cowLocation.Row, cowLocation.Column];
+                            newBoardTiles[cowLocation.Row, cowLocation.Column] = new LonghornTile(originalTile.OrangeCows + 1, originalTile.BlackCows, originalTile.GreenCows, originalTile.WhiteCows, originalTile.ActionToken);
+                        }
+                        
+                        if (rattlesnakeMove.WhiteLocation != null)
+                        {
+                            //// TODO assert that newplayer2.black is greater than 0?
+                            newPlayer2.white -= 1;
+                            var cowLocation = rattlesnakeMove.WhiteLocation;
+                            var originalTile = newBoardTiles[cowLocation.Row, cowLocation.Column];
+                            newBoardTiles[cowLocation.Row, cowLocation.Column] = new LonghornTile(originalTile.OrangeCows, originalTile.BlackCows, originalTile.GreenCows, originalTile.WhiteCows + 1, originalTile.ActionToken);
+                        }
+                    }
+                    else if (actionToken is ActionToken.Sheriff sheriffToken && locationMove.ActionMove == null)
+                    {
+                        if (locationMove.NewLocation != null)
+                        {
+                            throw new IllegalMoveExeption("TODO sheriff token should end the game");
+                        }
+
+                        newPlayer2.arrested = true;
+                    }
+                    else if (actionToken is ActionToken.SnakeOil snakeOilToken && locationMove.ActionMove == null)
+                    {
+                        var temp = newPlayer1;
+                        newPlayer1 = newPlayer2;
+                        newPlayer2 = temp;
+                    }
+                    else
+                    {
+                        throw new IllegalMoveExeption("TODO action token and action move aren't aligned");
+                    }
+                }
 
                 var newBoard = new LonghornBoard<TPlayer>(
                     newBoardTiles, 
                     locationMove.NewLocation,
-                    new LonghornPlayerStatus<TPlayer>(newPlayer1.player, newPlayer1.orange, newPlayer1.black, newPlayer1.green, newPlayer1.white, Enumerable.Empty<int>()),
-                    new LonghornPlayerStatus<TPlayer>(newPlayer2.player, newPlayer2.orange, newPlayer2.black, newPlayer2.green, newPlayer2.white, Enumerable.Empty<int>()));
+                    new LonghornPlayerStatus<TPlayer>(newPlayer1.player, newPlayer1.orange, newPlayer1.black, newPlayer1.green, newPlayer1.white, newPlayer1.gold),
+                    new LonghornPlayerStatus<TPlayer>(newPlayer2.player, newPlayer2.orange, newPlayer2.black, newPlayer2.green, newPlayer2.white, newPlayer2.gold));
 
                 return new Longhorn<TPlayer>(newPlayer1, newPlayer2, newBoard, random, locationMove.NewLocation == null);
             }
