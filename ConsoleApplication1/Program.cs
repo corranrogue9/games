@@ -329,9 +329,9 @@
                 {
                     ////{ exes, UserInterfaceStrategy.Create(displayer) },
                     ////{ exes, game.RandomStrategy() },
-                    { exes, new MonteCarloStrategy2<Longhorn<string>, LonghornBoard<string>, LonghornMove, string>(exes, 100000, StringComparer.OrdinalIgnoreCase, random) },
+                    ////{ exes, new MonteCarloStrategy2<Longhorn<string>, LonghornBoard<string>, LonghornMove, string>(exes, 100000, StringComparer.OrdinalIgnoreCase, random) },
                     { ohs, game.RandomStrategy() },
-                    ////{ exes, new DecisionTreeStrategy<Longhorn<string>, LonghornBoard, LonghornMove, string>(exes, StringComparer.OrdinalIgnoreCase) },
+                    { exes, new DecisionTreeStrategy<Longhorn<string>, LonghornBoard<string>, LonghornMove, string>(exes, StringComparer.OrdinalIgnoreCase) },
                 },
                 displayer);
             Console.WriteLine(seed);
