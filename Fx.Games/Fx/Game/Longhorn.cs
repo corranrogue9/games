@@ -190,60 +190,6 @@ namespace Fx.Game
             }
 
             return new LonghornBoard<TPlayer>(tiles, null, new LonghornPlayerStatus<TPlayer>(player1, 0, 0, 0, 0, Enumerable.Empty<int>()), new LonghornPlayerStatus<TPlayer>(player2, 0, 0, 0, 0, Enumerable.Empty<int>()));
-
-
-            /*//// TODO one of the players is supposed to pick where the other one starts
-
-            var startingLocation = (random.Next(0, 3), random.Next(0, 3));
-
-            //// TODO how many cows are there?
-            var cows = Enumerable
-                .Repeat(0, 15)
-                .Concat(Enumerable.Repeat(1, 15))
-                .Concat(Enumerable.Repeat(2, 15))
-                .Concat(Enumerable.Repeat(3, 15))
-                .Shuffle(random);
-            using (var cowsEnumerator = cows.GetEnumerator())
-            {
-                var tiles = new LonghornTile[3, 3];
-                for (int i = 0; i < 3; ++i)
-                {
-                    for (int j = 0; j < 3; ++j)
-                    {
-                        var numberOfCows = random.Next(3, 7); //// TODO is 6 the max? what is the distribution of tiles? there should probably be tile instances and random ones is chosen
-                        var orange = 0;
-                        var black = 0;
-                        var green = 0;
-                        var white = 0;
-                        for (int k = 0; k < numberOfCows; ++k)
-                        {
-                            cowsEnumerator.MoveNext();
-                            var current = cowsEnumerator.Current;
-                            if (current == 0)
-                            {
-                                ++orange;
-                            }
-                            else if (current == 1)
-                            {
-                                ++black;
-                            }
-                            else if (current == 2)
-                            {
-                                ++green;
-                            }
-                            else
-                            {
-                                ++white;
-                            }
-                        }
-
-                        var gold = random.Next(1, 5);
-                        tiles[i, j] = new LonghornTile(orange, black, green, white, gold);
-                    }
-                }
-
-                return new LonghornBoard(tiles, startingLocation);
-            }*/
         }
 
         public Longhorn(bool firstPlayer, TPlayer player1, TPlayer player2, LonghornBoard<TPlayer> board, Random random)
@@ -622,7 +568,6 @@ namespace Fx.Game
         {
             //// TODO check for legal moves
 
-            //// TODO you are here: commit moves with action tokens, and do end of game checks
             var playerLocation = this.Board.PlayerLocation;
             if (playerLocation == null && move is LonghornMove.LocationChoice locationChoice)
             {
