@@ -103,8 +103,92 @@ namespace Fx.Game
             }
         }
 
-        private readonly (TPlayer player, int orange, int black, int green, int white, IEnumerable<int> gold, bool arrested) player1; //// TODO probably should use longhorplayerstatus
-        private readonly (TPlayer player, int orange, int black, int green, int white, IEnumerable<int> gold, bool arrested) player2;
+        private sealed class LonghornPlayer
+        {
+            public LonghornPlayer(LonghornPlayerStatus<TPlayer> status, bool arrested)
+            {
+                this.Status = status;
+                this.Arrested = arrested;
+            }
+
+            public LonghornPlayerStatus<TPlayer> Status { get; }
+
+            public bool Arrested { get; }
+
+            public static LonghornPlayer Default(TPlayer player)
+            {
+                return new LonghornPlayer(
+                    new LonghornPlayerStatus<TPlayer>(player, 0, 0, 0, 0, Enumerable.Empty<int>()),
+                    false);
+            }
+
+            public Builder ToBuilder()
+            {
+                return new Builder(this.Status.Player)
+                {
+                    Arrested = this.Arrested,
+                    Status = new Builder.LonghornPlayerStatusBuilder(this.Status.Player)
+                    {
+                        Black = this.Status.Black,
+                        GoldNuggets = this.Status.GoldNuggets,
+                        Green = this.Status.Green,
+                        Orange = this.Status.Orange,
+                        White = this.Status.White,
+                    },
+                };
+            }
+
+            public sealed class Builder
+            {
+                public Builder(TPlayer player)
+                {
+                    this.Status = new LonghornPlayerStatusBuilder(player);
+                    this.Arrested = false;
+                }
+
+                public LonghornPlayerStatusBuilder Status { get; set; }
+
+                public bool Arrested { get; set; }
+
+                public LonghornPlayer Build()
+                {
+                    return new LonghornPlayer(this.Status.Build(), this.Arrested);
+                }
+
+                public sealed class LonghornPlayerStatusBuilder
+                {
+                    public LonghornPlayerStatusBuilder(TPlayer player)
+                    {
+                        this.Player = player;
+                        this.Orange = 0;
+                        this.Black = 0;
+                        this.Green = 0;
+                        this.White = 0;
+                        this.GoldNuggets = Enumerable.Empty<int>();
+                    }
+
+                    public TPlayer Player { get; set; }
+
+                    public int Orange { get; set; }
+
+                    public int Black { get; set; }
+
+                    public int Green { get; set; }
+
+                    public int White { get; set; }
+
+                    public IEnumerable<int> GoldNuggets { get; set; }
+
+                    public LonghornPlayerStatus<TPlayer> Build()
+                    {
+                        return new LonghornPlayerStatus<TPlayer>(this.Player, this.Orange, this.Black, this.Green, this.White, this.GoldNuggets);
+                    }
+                }
+            }
+        }
+
+        private readonly LonghornPlayer player1;
+        private readonly LonghornPlayer player2;
         private readonly Random random;
         private readonly bool previousMoveResultedInGameOver;
 
@@ -127,10 +211,10 @@ namespace Fx.Game
 
             var startingTiles = StartingTile.StartingTiles.Shuffle(random);
             var cows = Enumerable
-                .Repeat(0, 9) //// TODO use enum?
-                .Concat(Enumerable.Repeat(1, 9))
-                .Concat(Enumerable.Repeat(2, 9))
-                .Concat(Enumerable.Repeat(3, 9))
+                .Repeat(TakeColor.Orange, 9)
+                .Concat(Enumerable.Repeat(TakeColor.Black, 9))
+                .Concat(Enumerable.Repeat(TakeColor.Green, 9))
+                .Concat(Enumerable.Repeat(TakeColor.White, 9))
                 .Shuffle(random);
 
             var tiles = new LonghornTile[3, 3];
@@ -163,19 +247,19 @@ namespace Fx.Game
                         var white = 0;
                         for (int k = 0; k < startingTilesEnumerator.Current.NumbrOfCows; ++k)
                         {
-                            if (cowsEnumerator.Current == 0)
+                            if (cowsEnumerator.Current == TakeColor.Orange)
                             {
                                 ++orange;
                             }
-                            else if (cowsEnumerator.Current == 1)
+                            else if (cowsEnumerator.Current == TakeColor.Black)
                             {
                                 ++black;
                             }
-                            else if (cowsEnumerator.Current == 2)
+                            else if (cowsEnumerator.Current == TakeColor.Green)
                             {
                                 ++green;
                             }
-                            else if (cowsEnumerator.Current == 3)
+                            else if (cowsEnumerator.Current == TakeColor.White)
                             {
                                 ++white;
                             }
@@ -193,13 +277,13 @@ namespace Fx.Game
         }
 
         public Longhorn(bool firstPlayer, TPlayer player1, TPlayer player2, LonghornBoard<TPlayer> board, Random random)
-            : this((firstPlayer ? player1 : player2, 0, 0, 0, 0, Enumerable.Empty<int>(), false), (firstPlayer ? player2 : player1, 0, 0, 0, 0, Enumerable.Empty<int>(), false), board, random, false)
+            : this(LonghornPlayer.Default(firstPlayer ? player1 : player2), LonghornPlayer.Default(firstPlayer ? player2 : player1), board, random, false)
         {
         }
 
         private Longhorn(
-            (TPlayer player, int orange, int black, int green, int white, IEnumerable<int> gold, bool arrested) player1,
-            (TPlayer player, int orange, int black, int green, int white, IEnumerable<int> gold, bool arrested) player2,
+            LonghornPlayer player1,
+            LonghornPlayer player2,
             LonghornBoard<TPlayer> board,
             Random random,
             bool previousMoveResultedInGameOver)
@@ -215,7 +299,7 @@ namespace Fx.Game
         {
             get
             {
-                return this.player1.player;
+                return this.player1.Status.Player;
             }
         }
 
@@ -519,14 +603,14 @@ namespace Fx.Game
         {
             get
             {
-                if (this.player1.arrested)
+                if (this.player1.Arrested)
                 {
-                    return new Outcome<TPlayer>(new[] { this.player2.player });
+                    return new Outcome<TPlayer>(new[] { this.player2.Status.Player });
                 }
                 
-                if (this.player2.arrested)
+                if (this.player2.Arrested)
                 {
-                    return new Outcome<TPlayer>(new[] { this.player1.player });
+                    return new Outcome<TPlayer>(new[] { this.player1.Status.Player });
                 }
 
                 if (!this.previousMoveResultedInGameOver && this.Moves.Any())
@@ -546,18 +630,18 @@ namespace Fx.Game
                     whiteValue += tile.WhiteCows;
                 }
 
-                var player1Score = this.player1.orange * orangeValue + this.player1.black * blackValue + this.player1.green * greenValue + this.player1.white * whiteValue + this.player1.gold.Sum();
-                var player2Score = this.player2.orange * orangeValue + this.player2.black * blackValue + this.player2.green * greenValue + this.player2.white * whiteValue + this.player2.gold.Sum();
+                var player1Score = this.player1.Status.Orange * orangeValue + this.player1.Status.Black * blackValue + this.player1.Status.Green * greenValue + this.player1.Status.White * whiteValue + this.player1.Status.GoldNuggets.Sum();
+                var player2Score = this.player2.Status.Orange * orangeValue + this.player2.Status.Black * blackValue + this.player2.Status.Green * greenValue + this.player2.Status.White * whiteValue + this.player2.Status.GoldNuggets.Sum();
 
                 var winners = new List<TPlayer>();
                 if (player1Score >= player2Score)
                 {
-                    winners.Add(this.player1.player);
+                    winners.Add(this.player1.Status.Player);
                 }
 
                 if (player2Score >= player1Score)
                 {
-                    winners.Add(this.player2.player);
+                    winners.Add(this.player2.Status.Player);
                 }
 
                 return new Outcome<TPlayer>(winners);
@@ -574,14 +658,14 @@ namespace Fx.Game
                 var newBoard = new LonghornBoard<TPlayer>(
                     this.Board.Tiles, 
                     locationChoice.Location, 
-                    new LonghornPlayerStatus<TPlayer>(this.player1.player, 0, 0, 0, 0, Enumerable.Empty<int>()), 
-                    new LonghornPlayerStatus<TPlayer>(this.player1.player, 0, 0, 0, 0, Enumerable.Empty<int>()));
+                    new LonghornPlayerStatus<TPlayer>(this.player1.Status.Player, 0, 0, 0, 0, Enumerable.Empty<int>()), 
+                    new LonghornPlayerStatus<TPlayer>(this.player1.Status.Player, 0, 0, 0, 0, Enumerable.Empty<int>()));
                 return new Longhorn<TPlayer>(this.player2, this.player1, newBoard, this.random, false);
             }
             else if (playerLocation != null && move is LonghornMove.LocationMove locationMove)
             {
-                var newPlayer1 = this.player2;
-                var newPlayer2 = this.player1;
+                var newPlayer1Builder = this.player2.ToBuilder();
+                var newPlayer2Builder = this.player1.ToBuilder();
 
                 var newBoardTiles = this.Board.Tiles;
                 var currentTile = newBoardTiles[playerLocation.Row, playerLocation.Column];
@@ -591,22 +675,22 @@ namespace Fx.Game
 
                 if (locationMove.TakeColor == TakeColor.Black)
                 {
-                    newPlayer2.black += currentTile.BlackCows;
+                    newPlayer2Builder.Status.Black += currentTile.BlackCows;
                     newBoardTiles[playerLocation.Row, playerLocation.Column] = new LonghornTile(currentTile.OrangeCows, 0, currentTile.GreenCows, currentTile.WhiteCows, takeActionToken ? null : currentTile.ActionToken);
                 }
                 else if (locationMove.TakeColor == TakeColor.Green)
                 {
-                    newPlayer2.green += currentTile.GreenCows;
+                    newPlayer2Builder.Status.Green += currentTile.GreenCows;
                     newBoardTiles[playerLocation.Row, playerLocation.Column] = new LonghornTile(currentTile.OrangeCows, currentTile.BlackCows, 0, currentTile.WhiteCows, takeActionToken ? null : currentTile.ActionToken);
                 }
                 else if (locationMove.TakeColor == TakeColor.Orange)
                 {
-                    newPlayer2.orange += currentTile.OrangeCows;
+                    newPlayer2Builder.Status.Orange += currentTile.OrangeCows;
                     newBoardTiles[playerLocation.Row, playerLocation.Column] = new LonghornTile(0, currentTile.BlackCows, currentTile.GreenCows, currentTile.WhiteCows, takeActionToken ? null : currentTile.ActionToken);
                 }
                 else if (locationMove.TakeColor == TakeColor.White)
                 {
-                    newPlayer2.white += currentTile.WhiteCows;
+                    newPlayer2Builder.Status.White += currentTile.WhiteCows;
                     newBoardTiles[playerLocation.Row, playerLocation.Column] = new LonghornTile(currentTile.OrangeCows, currentTile.BlackCows, currentTile.GreenCows, 0, takeActionToken ? null : currentTile.ActionToken);
                 }
 
@@ -616,35 +700,35 @@ namespace Fx.Game
                     {
                         if (ambushMove.Color == null)
                         {
-                            if (newPlayer1.gold.Shuffle(this.random).TrySkip(out var stolen, out var kept))
+                            if (newPlayer1Builder.Status.GoldNuggets.Shuffle(this.random).TrySkip(out var stolen, out var kept))
                             {
-                                newPlayer1.gold = kept;
-                                newPlayer2.gold = newPlayer2.gold.Append(stolen);
+                                newPlayer1Builder.Status.GoldNuggets = kept;
+                                newPlayer2Builder.Status.GoldNuggets = newPlayer2Builder.Status.GoldNuggets.Append(stolen);
                             }
                         }
                         else if (ambushMove.Color == TakeColor.Black)
                         {
-                            var stolen = Math.Min(newPlayer1.black, 2);
-                            newPlayer1.black -= stolen;
-                            newPlayer2.black += stolen;
+                            var stolen = Math.Min(newPlayer1Builder.Status.Black, 2);
+                            newPlayer1Builder.Status.Black -= stolen;
+                            newPlayer2Builder.Status.Black += stolen;
                         }
                         else if (ambushMove.Color == TakeColor.Green)
                         {
-                            var stolen = Math.Min(newPlayer1.green, 2);
-                            newPlayer1.green -= stolen;
-                            newPlayer2.green += stolen;
+                            var stolen = Math.Min(newPlayer1Builder.Status.Green, 2);
+                            newPlayer1Builder.Status.Green -= stolen;
+                            newPlayer2Builder.Status.Green += stolen;
                         }
                         else if (ambushMove.Color == TakeColor.Orange)
                         {
-                            var stolen = Math.Min(newPlayer1.orange, 2);
-                            newPlayer1.orange -= stolen;
-                            newPlayer2.orange += stolen;
+                            var stolen = Math.Min(newPlayer1Builder.Status.Orange, 2);
+                            newPlayer1Builder.Status.Orange -= stolen;
+                            newPlayer2Builder.Status.Orange += stolen;
                         }
                         else if (ambushMove.Color == TakeColor.White)
                         {
-                            var stolen = Math.Min(newPlayer1.white, 2);
-                            newPlayer1.white -= stolen;
-                            newPlayer2.white += stolen;
+                            var stolen = Math.Min(newPlayer1Builder.Status.White, 2);
+                            newPlayer1Builder.Status.White -= stolen;
+                            newPlayer2Builder.Status.White += stolen;
                         }
                         else
                         {
@@ -657,22 +741,22 @@ namespace Fx.Game
                         var brandingTile = newBoardTiles[brandingLocation.Row, brandingLocation.Column];
                         if (locationMove.TakeColor == TakeColor.Black)
                         {
-                            newPlayer2.black += brandingTile.BlackCows;
+                            newPlayer2Builder.Status.Black += brandingTile.BlackCows;
                             newBoardTiles[brandingLocation.Row, brandingLocation.Column] = new LonghornTile(brandingTile.OrangeCows, 0, brandingTile.GreenCows, brandingTile.WhiteCows, brandingTile.ActionToken);
                         }
                         else if (locationMove.TakeColor == TakeColor.Green)
                         {
-                            newPlayer2.green += brandingTile.GreenCows;
+                            newPlayer2Builder.Status.Green += brandingTile.GreenCows;
                             newBoardTiles[brandingLocation.Row, brandingLocation.Column] = new LonghornTile(brandingTile.OrangeCows, brandingTile.BlackCows, 0, brandingTile.WhiteCows, brandingTile.ActionToken);
                         }
                         else if (locationMove.TakeColor == TakeColor.Orange)
                         {
-                            newPlayer2.orange += brandingTile.OrangeCows;
+                            newPlayer2Builder.Status.Orange += brandingTile.OrangeCows;
                             newBoardTiles[brandingLocation.Row, brandingLocation.Column] = new LonghornTile(0, brandingTile.BlackCows, brandingTile.GreenCows, brandingTile.WhiteCows, brandingTile.ActionToken);
                         }
                         else if (locationMove.TakeColor == TakeColor.White)
                         {
-                            newPlayer2.white += brandingTile.WhiteCows;
+                            newPlayer2Builder.Status.White += brandingTile.WhiteCows;
                             newBoardTiles[brandingLocation.Row, brandingLocation.Column] = new LonghornTile(brandingTile.OrangeCows, brandingTile.BlackCows, brandingTile.GreenCows, 0, brandingTile.ActionToken);
                         }
                     }
@@ -704,14 +788,14 @@ namespace Fx.Game
                     }
                     else if (actionToken is ActionToken.Gold goldToken && locationMove.ActionMove == null)
                     {
-                        newPlayer2.gold = newPlayer2.gold.Append(goldToken.Amount);
+                        newPlayer2Builder.Status.GoldNuggets = newPlayer2Builder.Status.GoldNuggets.Append(goldToken.Amount);
                     }
                     else if (actionToken is ActionToken.Rattlesnake rattlesnakeToken && locationMove.ActionMove is ActionMove.Rattlesnake rattlesnakeMove)
                     {
                         if (rattlesnakeMove.BlackLocation != null)
                         {
                             //// TODO assert that newplayer2.black is greater than 0?
-                            newPlayer2.black -= 1;
+                            newPlayer2Builder.Status.Black -= 1;
                             var cowLocation = rattlesnakeMove.BlackLocation;
                             var originalTile = newBoardTiles[cowLocation.Row, cowLocation.Column];
                             newBoardTiles[cowLocation.Row, cowLocation.Column] = new LonghornTile(originalTile.OrangeCows, originalTile.BlackCows + 1, originalTile.GreenCows, originalTile.WhiteCows, originalTile.ActionToken);
@@ -720,7 +804,7 @@ namespace Fx.Game
                         if (rattlesnakeMove.GreenLocation != null)
                         {
                             //// TODO assert that newplayer2.black is greater than 0?
-                            newPlayer2.green -= 1;
+                            newPlayer2Builder.Status.Green -= 1;
                             var cowLocation = rattlesnakeMove.GreenLocation;
                             var originalTile = newBoardTiles[cowLocation.Row, cowLocation.Column];
                             newBoardTiles[cowLocation.Row, cowLocation.Column] = new LonghornTile(originalTile.OrangeCows, originalTile.BlackCows, originalTile.GreenCows + 1, originalTile.WhiteCows, originalTile.ActionToken);
@@ -729,7 +813,7 @@ namespace Fx.Game
                         if (rattlesnakeMove.OrangeLocation != null)
                         {
                             //// TODO assert that newplayer2.black is greater than 0?
-                            newPlayer2.orange -= 1;
+                            newPlayer2Builder.Status.Orange -= 1;
                             var cowLocation = rattlesnakeMove.OrangeLocation;
                             var originalTile = newBoardTiles[cowLocation.Row, cowLocation.Column];
                             newBoardTiles[cowLocation.Row, cowLocation.Column] = new LonghornTile(originalTile.OrangeCows + 1, originalTile.BlackCows, originalTile.GreenCows, originalTile.WhiteCows, originalTile.ActionToken);
@@ -738,7 +822,7 @@ namespace Fx.Game
                         if (rattlesnakeMove.WhiteLocation != null)
                         {
                             //// TODO assert that newplayer2.black is greater than 0?
-                            newPlayer2.white -= 1;
+                            newPlayer2Builder.Status.White -= 1;
                             var cowLocation = rattlesnakeMove.WhiteLocation;
                             var originalTile = newBoardTiles[cowLocation.Row, cowLocation.Column];
                             newBoardTiles[cowLocation.Row, cowLocation.Column] = new LonghornTile(originalTile.OrangeCows, originalTile.BlackCows, originalTile.GreenCows, originalTile.WhiteCows + 1, originalTile.ActionToken);
@@ -752,13 +836,13 @@ namespace Fx.Game
                             throw new IllegalMoveExeption("TODO sheriff token should end the game");
                         }*/
 
-                        newPlayer2.arrested = true;
+                        newPlayer2Builder.Arrested = true;
                     }
                     else if (actionToken is ActionToken.SnakeOil snakeOilToken && locationMove.ActionMove == null)
                     {
-                        var temp = newPlayer1;
-                        newPlayer1 = newPlayer2;
-                        newPlayer2 = temp;
+                        var temp = newPlayer1Builder;
+                        newPlayer1Builder = newPlayer2Builder;
+                        newPlayer2Builder = temp;
                     }
                     else
                     {
@@ -766,11 +850,14 @@ namespace Fx.Game
                     }
                 }
 
+                var newPlayer1 = newPlayer1Builder.Build();
+                var newPlayer2 = newPlayer2Builder.Build();
+
                 var newBoard = new LonghornBoard<TPlayer>(
                     newBoardTiles, 
                     locationMove.NewLocation,
-                    new LonghornPlayerStatus<TPlayer>(newPlayer1.player, newPlayer1.orange, newPlayer1.black, newPlayer1.green, newPlayer1.white, newPlayer1.gold),
-                    new LonghornPlayerStatus<TPlayer>(newPlayer2.player, newPlayer2.orange, newPlayer2.black, newPlayer2.green, newPlayer2.white, newPlayer2.gold));
+                    newPlayer1.Status,
+                    newPlayer2.Status);
 
                 //// TODO what about if a player gets 9 cows of the same color?
                 return new Longhorn<TPlayer>(newPlayer1, newPlayer2, newBoard, random, locationMove.NewLocation == null);
