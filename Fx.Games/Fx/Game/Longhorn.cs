@@ -210,7 +210,11 @@ I have some questions about longhorn:
 
         private static LonghornBoard<TPlayer> GenerateRandomBoard(Random random, TPlayer player1, TPlayer player2)
         {
-            var startingActionTokens = StartingActionTokens.Shuffle(random).Take(9).ToList(); //// TODO use applyaggregation here to create the list and determine if there's a sheriff
+            var rows = 3;
+            var columns = 3;
+
+            var tiles = new LonghornTile[rows, columns];
+            var startingActionTokens = StartingActionTokens.Shuffle(random).Take(tiles.Length).ToList(); //// TODO use applyaggregation here to create the list and determine if there's a sheriff
             var sheriffIndex = startingActionTokens.FindIndex(token => token is ActionToken.Sheriff);
             if (sheriffIndex != -1)
             {
@@ -227,7 +231,6 @@ I have some questions about longhorn:
                 .Concat(Enumerable.Repeat(TakeColor.White, 9))
                 .Shuffle(random);
 
-            var tiles = new LonghornTile[3, 3];
             using (var startingActionTokensEnumerator = startingActionTokens.GetEnumerator())
             using (var startingTilesEnumerator = startingTiles.GetEnumerator())
             using (var cowsEnumerator = cows.GetEnumerator())
@@ -236,9 +239,9 @@ I have some questions about longhorn:
                 startingTilesEnumerator.MoveNext();
                 cowsEnumerator.MoveNext();
 
-                for (int i = 0; i < 3; ++i)
+                for (int i = 0; i < tiles.GetLength(0); ++i)
                 {
-                    for (int j = 0; j < 3; ++j)
+                    for (int j = 0; j < tiles.GetLength(1); ++j)
                     {
                         ActionToken startingActionToken;
                         if (sheriffIndex != -1 && startingTilesEnumerator.Current.IsNuggetHill)
@@ -320,9 +323,9 @@ I have some questions about longhorn:
                 var playerLocation = this.Board.PlayerLocation;
                 if (playerLocation == null)
                 {
-                    for (int i = 0; i < 3; ++i)
+                    for (int i = 0; i < this.Board.Tiles.GetLength(0); ++i)
                     {
-                        for (int j = 0; j < 3; ++j) //// TODO remove the hardcoded 3's everywhere if possible
+                        for (int j = 0; j < this.Board.Tiles.GetLength(1); ++j)
                         {
                             var tile = this.Board.Tiles[i, j];
                             if (tile.BlackCows + tile.GreenCows + tile.OrangeCows + tile.WhiteCows == 4)
@@ -551,7 +554,7 @@ I have some questions about longhorn:
                 yield break;
             }
 
-            if (currentLocation.Row + 1 < 3)
+            if (currentLocation.Row + 1 < this.Board.Tiles.GetLength(0))
             {
                 foreach (var location in NewLocations(new LonghornLocation(currentLocation.Row + 1, currentLocation.Column), moveCount - 1, traversedLocations.Append(currentLocation)))
                 {
@@ -567,7 +570,7 @@ I have some questions about longhorn:
                 }
             }
 
-            if (currentLocation.Column + 1 < 3)
+            if (currentLocation.Column + 1 < this.Board.Tiles.GetLength(1))
             {
                 foreach (var location in NewLocations(new LonghornLocation(currentLocation.Row, currentLocation.Column + 1), moveCount - 1, traversedLocations.Append(currentLocation)))
                 {
@@ -772,9 +775,9 @@ I have some questions about longhorn:
                     }
                     else if (actionToken is ActionToken.Epidemic epidemicToken && locationMove.ActionMove is ActionMove.Epidemic epidemicMove)
                     {
-                        for (int i = 0; i < 3; ++i)
+                        for (int i = 0; i < newBoardTiles.GetLength(0); ++i)
                         {
-                            for (int j = 0; j < 3; ++j)
+                            for (int j = 0; j < newBoardTiles.GetLength(1); ++j)
                             {
                                 var originalTile = newBoardTiles[i, j];
                                 if (epidemicMove.Color == TakeColor.Black)
