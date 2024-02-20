@@ -319,7 +319,7 @@
         private static void LonghornHumanVsRandom()
         {
             var displayer = new LonghornConsoleDisplay<string>(_ => _);
-            var seed = /*273759000;*/ Environment.TickCount;
+            var seed = 581316343;//// Environment.TickCount;
             var random = new Random(seed);
             var exes = "player1";
             var ohs = "player2";

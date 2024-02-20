@@ -91,6 +91,7 @@ I have some questions about longhorn:
     d. Go through each tile; if that tile is nugget hill and the sheriff was taken, put the sherrif there; otherwise, place the next token in the list on the tile
 
     I'm not sure that c is still a properly uniformly distributed
+3. The rules for the branding iron say "take all of the cattle of the same colour on one of the orthogonally adjacent locations". Do you think this means "pick a color and take the cows of that color" or "take the cows of the color that you took from the current location"? It's the "same colour" part that's throwing me off. 
                 */
                 yield return new ActionToken.Gold(200);
                 yield return new ActionToken.Gold(200);
@@ -348,7 +349,6 @@ I have some questions about longhorn:
                         var actionMoves = new List<ActionMove?>();
                         if (takeColor.color == lastColor)
                         {
-                            //// TODO you shouldn't be able to move somewhere with a null action token; is this asserted anywhere?
                             if (tile.ActionToken is ActionToken.Ambush ambush)
                             {
                                 actionMoves.Add(new ActionMove.Ambush(null));
@@ -377,7 +377,6 @@ I have some questions about longhorn:
                             {
                                 var adjacentLocations = NewLocations(playerLocation, 1);
                                 actionMoves.AddRange(adjacentLocations.Select(adjacentLocation => new ActionMove.BrandingIron(adjacentLocation)));
-                                //// TODO the rules same "take all of the cattle of the same colour"; does this mean take the cattle of a color, or take the cattle of the color that you selected for your move?
                             }
                             else if (tile.ActionToken is ActionToken.Epidemic)
                             {
@@ -455,21 +454,11 @@ I have some questions about longhorn:
                             actionMoves.Add(null);
                         }
 
-                        var newLocations = NewLocations(playerLocation, takeColor.count).ToList();
+                        var newLocations = NewLocations(playerLocation, takeColor.count)
+                            .Where(location => !IsEmpty(this.Board.Tiles[location.Row, location.Column]))
+                            .ToList();
 
-                        //// TODO does applayaggregation help here?
-                        if (newLocations.All(location =>
-                            this.Board.Tiles[location.Row, location.Column].BlackCows == 0 &&
-                            this.Board.Tiles[location.Row, location.Column].GreenCows == 0 &&
-                            this.Board.Tiles[location.Row, location.Column].OrangeCows == 0 &&
-                            this.Board.Tiles[location.Row, location.Column].WhiteCows == 0))
-                        {
-                            foreach (var actionMove in actionMoves)
-                            {
-                                yield return new LonghornMove.LocationMove(takeColor.color, null, actionMove);
-                            }
-                        }
-                        else
+                        if (newLocations.Any())
                         {
                             foreach (var newLocation in newLocations)
                             {
@@ -479,9 +468,21 @@ I have some questions about longhorn:
                                 }
                             }
                         }
+                        else
+                        {
+                            foreach (var actionMove in actionMoves)
+                            {
+                                yield return new LonghornMove.LocationMove(takeColor.color, null, actionMove);
+                            }
+                        }
                     }
                 }
             }
+        }
+
+        private static bool IsEmpty(LonghornTile tile)
+        {
+            return tile.BlackCows == 0 && tile.GreenCows == 0 && tile.OrangeCows == 0 && tile.WhiteCows == 0;
         }
 
         private static TakeColor? LastColor(LonghornTile tile)
