@@ -319,7 +319,8 @@
         private static void LonghornHumanVsRandom()
         {
             var displayer = new LonghornConsoleDisplay<string>(_ => _);
-            var seed = 581316343;//// Environment.TickCount;
+            ////var seed = 581316343;
+            var seed = Environment.TickCount;
             var random = new Random(seed);
             var exes = "player1";
             var ohs = "player2";
@@ -534,6 +535,10 @@
                         {
                             action = $", cause an epidemic among the {epidemic.Color} cows,";
                         }
+                        else if (locationMove.ActionMove is ActionMove.Gold)
+                        {
+                            action = $", take the gold token,";
+                        }
                         else if (locationMove.ActionMove is ActionMove.Rattlesnake rattlesnake)
                         {
                             var locations = string.Join(", ", new[]
@@ -547,6 +552,14 @@
                                 .Select(location => $"{location.Item1} cows to ({location.Item2.Row}, {location.Item2.Column})"));
 
                             action = $", guide your cows away from the rattlesnake ({locations}),";
+                        }
+                        else if (locationMove.ActionMove is ActionMove.Sheriff)
+                        {
+                            action = $", get caught by the sheriff,";
+                        }
+                        else if (locationMove.ActionMove is ActionMove.SnakeOil)
+                        {
+                            action = $", use the snake oil to take an extra turn,";
                         }
 
                         Console.WriteLine($"{i}: take the {locationMove.TakeColor} cows{action} and {resultLocation}");

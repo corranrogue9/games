@@ -384,8 +384,7 @@ I have some questions about longhorn:
                             }
                             else if (tile.ActionToken is ActionToken.Gold)
                             {
-                                //// TODO is it useful to have an actionmove for this?
-                                actionMoves.Add(null);
+                                actionMoves.Add(new ActionMove.Gold());
                             }
                             else if (tile.ActionToken is ActionToken.Rattlesnake)
                             {
@@ -440,13 +439,11 @@ I have some questions about longhorn:
                             }
                             else if (tile.ActionToken is ActionToken.Sheriff)
                             {
-                                //// TODO is it useful to have an actionmove for this?
-                                actionMoves.Add(null);
+                                actionMoves.Add(new ActionMove.Sheriff());
                             }
                             else if (tile.ActionToken is ActionToken.SnakeOil)
                             {
-                                //// TODO is it useful to have an actionmove for this?
-                                actionMoves.Add(null);
+                                actionMoves.Add(new ActionMove.SnakeOil());
                             }
                         }
                         else
@@ -800,7 +797,7 @@ I have some questions about longhorn:
                             }
                         }
                     }
-                    else if (actionToken is ActionToken.Gold goldToken && locationMove.ActionMove == null)
+                    else if (actionToken is ActionToken.Gold goldToken && locationMove.ActionMove is ActionMove.Gold)
                     {
                         newPlayer2Builder.Status.GoldNuggets = newPlayer2Builder.Status.GoldNuggets.Append(goldToken.Amount);
                     }
@@ -842,7 +839,7 @@ I have some questions about longhorn:
                             newBoardTiles[cowLocation.Row, cowLocation.Column] = new LonghornTile(originalTile.OrangeCows, originalTile.BlackCows, originalTile.GreenCows, originalTile.WhiteCows + 1, originalTile.ActionToken);
                         }
                     }
-                    else if (actionToken is ActionToken.Sheriff sheriffToken && locationMove.ActionMove == null)
+                    else if (actionToken is ActionToken.Sheriff sheriffToken && locationMove.ActionMove is ActionMove.Sheriff)
                     {
                         /*if (locationMove.NewLocation != null)
                         {
@@ -852,7 +849,7 @@ I have some questions about longhorn:
 
                         newPlayer2Builder.Arrested = true;
                     }
-                    else if (actionToken is ActionToken.SnakeOil snakeOilToken && locationMove.ActionMove == null)
+                    else if (actionToken is ActionToken.SnakeOil snakeOilToken && locationMove.ActionMove is ActionMove.SnakeOil)
                     {
                         var temp = newPlayer1Builder;
                         newPlayer1Builder = newPlayer2Builder;
@@ -1060,6 +1057,10 @@ I have some questions about longhorn:
 
             public TakeColor Color { get; }
         }
+        
+        public sealed class Gold : ActionMove
+        {
+        }
 
         public sealed class Rattlesnake : ActionMove
         {
@@ -1075,6 +1076,14 @@ I have some questions about longhorn:
             public LonghornLocation? GreenLocation { get; }
             public LonghornLocation? OrangeLocation { get; }
             public LonghornLocation? WhiteLocation { get; }
+        }
+
+        public sealed class Sheriff : ActionMove
+        {
+        }
+
+        public sealed class SnakeOil : ActionMove
+        {
         }
     }
 
