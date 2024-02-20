@@ -80,13 +80,24 @@ namespace Fx.Game
         {
             get
             {
+                /*
+TODO
+I have some questions about longhorn:
+1. Can  you check to see now many of each kind of gold token is actually in the box? I think it's 200 x2, 300 x2, 400 x1, and 500 x1
+2. The action tokens are supposed to be picked at random, but the sheriff token is always at nugget hill if it's picked. I don't know if my below algorithm is mathematically sound:
+    a. Shuffle the tokens
+    b. Take the first 9
+    c. If the sheriff is among those 9, swap the sheriff with the last token
+    d. Go through each tile; if that tile is nugget hill and the sheriff was taken, put the sherrif there; otherwise, place the next token in the list on the tile
+
+    I'm not sure that c is still a properly uniformly distributed
+                */
                 yield return new ActionToken.Gold(200);
                 yield return new ActionToken.Gold(200);
                 yield return new ActionToken.Gold(300);
                 yield return new ActionToken.Gold(300);
                 yield return new ActionToken.Gold(400);
                 yield return new ActionToken.Gold(500);
-                //// TODO i don't know if the quanities of the above gold actions are correct, the picture doesn't seem to show it
                 yield return new ActionToken.Ambush();
                 yield return new ActionToken.Ambush();
                 yield return new ActionToken.Ambush();
@@ -203,7 +214,6 @@ namespace Fx.Game
             var sheriffIndex = startingActionTokens.FindIndex(token => token is ActionToken.Sheriff);
             if (sheriffIndex != -1)
             {
-                //// TODO is this still properly random?
                 var temp = startingActionTokens[startingActionTokens.Count - 1];
                 startingActionTokens[startingActionTokens.Count - 1] = startingActionTokens[sheriffIndex];
                 startingActionTokens[sheriffIndex] = temp;
@@ -291,7 +301,7 @@ namespace Fx.Game
             this.player1 = player1;
             this.player2 = player2;
             this.Board = board;
-            this.random = random; //// TODO you don't need this after the initial board is created?
+            this.random = random;
             this.previousMoveResultedInGameOver = previousMoveResultedInGameOver;
         }
 
