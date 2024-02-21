@@ -846,11 +846,6 @@ I have some questions about longhorn:
                     }
                     else if (actionToken is ActionToken.Sheriff sheriffToken && locationMove.ActionMove is ActionMove.Sheriff)
                     {
-                        if (locationMove.NewLocation != null)
-                        {
-                            throw new IllegalMoveExeption("TODO sheriff token should end the game");
-                        }
-
                         newPlayer2Builder.Arrested = true;
                     }
                     else if (actionToken is ActionToken.SnakeOil snakeOilToken && locationMove.ActionMove is ActionMove.SnakeOil)
