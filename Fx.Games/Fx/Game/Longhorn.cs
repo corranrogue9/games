@@ -663,7 +663,7 @@ I have some questions about longhorn:
         {
             if (!this.Moves.Where(legalMove => LonghornMoveComparer.Instance.Equals(legalMove, move)).Any())
             {
-                throw new IllegalMoveExeption("TODO The provided move is not legal");
+                throw new IllegalMoveExeption("The provided move is not legal"); //// TODO use the transcriber pattern to put the move data in the error message? or maybe have a illegalmoveexception<T> and put the move in the exception?
             }
             
             var playerLocation = this.Board.PlayerLocation;
@@ -746,7 +746,7 @@ I have some questions about longhorn:
                         }
                         else
                         {
-                            throw new IllegalMoveExeption("TODO ambush color invalid");
+                            throw new IllegalMoveExeption($"The provided ambush color '{ambushMove.Color}' is not a valid longhorn color");
                         }
                     }
                     else if (actionToken is ActionToken.BrandingIron brandingIronToken && locationMove.ActionMove is ActionMove.BrandingIron brandingIronMove)
@@ -808,7 +808,6 @@ I have some questions about longhorn:
                     {
                         if (rattlesnakeMove.BlackLocation != null)
                         {
-                            //// TODO assert that newplayer2.black is greater than 0?
                             newPlayer2Builder.Status.Black -= 1;
                             var cowLocation = rattlesnakeMove.BlackLocation;
                             var originalTile = newBoardTiles[cowLocation.Row, cowLocation.Column];
@@ -817,7 +816,6 @@ I have some questions about longhorn:
                         
                         if (rattlesnakeMove.GreenLocation != null)
                         {
-                            //// TODO assert that newplayer2.black is greater than 0?
                             newPlayer2Builder.Status.Green -= 1;
                             var cowLocation = rattlesnakeMove.GreenLocation;
                             var originalTile = newBoardTiles[cowLocation.Row, cowLocation.Column];
@@ -826,7 +824,6 @@ I have some questions about longhorn:
                         
                         if (rattlesnakeMove.OrangeLocation != null)
                         {
-                            //// TODO assert that newplayer2.black is greater than 0?
                             newPlayer2Builder.Status.Orange -= 1;
                             var cowLocation = rattlesnakeMove.OrangeLocation;
                             var originalTile = newBoardTiles[cowLocation.Row, cowLocation.Column];
@@ -835,7 +832,6 @@ I have some questions about longhorn:
                         
                         if (rattlesnakeMove.WhiteLocation != null)
                         {
-                            //// TODO assert that newplayer2.black is greater than 0?
                             newPlayer2Builder.Status.White -= 1;
                             var cowLocation = rattlesnakeMove.WhiteLocation;
                             var originalTile = newBoardTiles[cowLocation.Row, cowLocation.Column];
