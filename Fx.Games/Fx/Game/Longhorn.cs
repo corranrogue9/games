@@ -1097,7 +1097,7 @@ I have some questions about longhorn:
                     this.Color = color;
                 }
 
-                public TakeColor Color { get; } //// TODO null means steal a random gold nugget
+                public TakeColor Color { get; }
             }
         }
 
@@ -1105,6 +1105,7 @@ I have some questions about longhorn:
         {
             public BrandingIron(LonghornLocation location)
             {
+                //// TODO finish assertionsa
                 this.Location = location;
             }
 
