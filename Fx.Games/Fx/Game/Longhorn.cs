@@ -661,8 +661,11 @@ I have some questions about longhorn:
 
         public Longhorn<TPlayer> CommitMove(LonghornMove move)
         {
-            //// TODO check for legal moves
-
+            if (!this.Moves.Where(legalMove => LonghornMoveComparer.Instance.Equals(legalMove, move)).Any())
+            {
+                throw new IllegalMoveExeption("TODO The provided move is not legal");
+            }
+            
             var playerLocation = this.Board.PlayerLocation;
             if (playerLocation == null && move is LonghornMove.LocationChoice locationChoice)
             {
@@ -875,7 +878,7 @@ I have some questions about longhorn:
             }
             else
             {
-                throw new IllegalMoveExeption("TODO");
+                throw new IllegalMoveExeption("Code should be unreachable");
             }
         }
     }
@@ -1114,5 +1117,212 @@ I have some questions about longhorn:
         Black,
         Green,
         White,
+    }
+
+    public sealed class LonghornMoveComparer : IEqualityComparer<LonghornMove>
+    {
+        private LonghornMoveComparer()
+        {
+        }
+
+        public static LonghornMoveComparer Instance { get; } = new LonghornMoveComparer();
+
+        public bool Equals(LonghornMove? x, LonghornMove? y)
+        {
+            if (x == y)
+            {
+                return true;
+            }
+
+            if (x == null || y == null)
+            {
+                return false;
+            }
+
+            if (x is LonghornMove.LocationChoice xLocationChoice && y is LonghornMove.LocationChoice yLocationChoice)
+            {
+                return
+                    LocationComparer.Instance.Equals(xLocationChoice.Location, yLocationChoice.Location);
+            }
+
+            if (x is LonghornMove.LocationMove xLocationMove && y is LonghornMove.LocationMove yLocationMove)
+            {
+                return
+                    ActionMoveComparer.Instance.Equals(xLocationMove.ActionMove, yLocationMove.ActionMove) &&
+                    LocationComparer.Instance.Equals(xLocationMove.NewLocation, yLocationMove.NewLocation) &&
+                    xLocationMove.TakeColor == yLocationMove.TakeColor;
+            }
+
+            return false;
+        }
+
+        public int GetHashCode([DisallowNull] LonghornMove x)
+        {
+            if (x is LonghornMove.LocationChoice xLocationChoice)
+            {
+                return
+                    1 ^
+                    LocationComparer.Instance.GetHashCode(xLocationChoice.Location);
+            }
+
+            if (x is LonghornMove.LocationMove xLocationMove)
+            {
+                return
+                    2 ^
+                    ActionMoveComparer.Instance.GetHashCode(xLocationMove.ActionMove) ^
+                    LocationComparer.Instance.GetHashCode(xLocationMove.NewLocation) ^
+                    xLocationMove.TakeColor.GetHashCode();
+            }
+
+            return 0;
+        }
+    }
+
+    public sealed class LocationComparer : IEqualityComparer<LonghornLocation?>
+    {
+        private LocationComparer()
+        {
+        }
+
+        public static LocationComparer Instance { get; } = new LocationComparer();
+
+        public bool Equals(LonghornLocation? x, LonghornLocation? y)
+        {
+            if (x == y)
+            {
+                return true;
+            }
+
+            if (x == null || y == null)
+            {
+                return false;
+            }
+
+            return x.Row == y.Row && x.Column == y.Column;
+        }
+
+        public int GetHashCode(LonghornLocation? obj)
+        {
+            if (obj == null)
+            {
+                return 0;
+            }
+
+            return obj.Row ^ obj.Column;
+        }
+    }
+
+    public sealed class ActionMoveComparer : IEqualityComparer<ActionMove?>
+    {
+        private ActionMoveComparer()
+        {
+        }
+
+        public static ActionMoveComparer Instance { get; } = new ActionMoveComparer();
+
+        public bool Equals(ActionMove? x, ActionMove? y)
+        {
+            if (x == y)
+            {
+                return true;
+            }
+
+            if (x == null || y == null)
+            {
+                return false;
+            }
+
+            if (x is ActionMove.Ambush xAmbush && y is ActionMove.Ambush yAmbush)
+            {
+                return xAmbush.Color == yAmbush.Color;
+            }
+
+            if (x is ActionMove.BrandingIron xBrandingIron && y is ActionMove.BrandingIron yBrandingIron)
+            {
+                return LocationComparer.Instance.Equals(xBrandingIron.Location, yBrandingIron.Location);
+            }
+
+            if (x is ActionMove.Epidemic xEpidemic && y is ActionMove.Epidemic yEpidemic)
+            {
+                return xEpidemic.Color == yEpidemic.Color;
+            }
+
+            if (x is ActionMove.Gold xGold && y is ActionMove.Gold yGold)
+            {
+                return true;
+            }
+
+            if (x is ActionMove.Rattlesnake xRattlesnake && y is ActionMove.Rattlesnake yRattlesnake)
+            {
+                return
+                    LocationComparer.Instance.Equals(xRattlesnake.BlackLocation, yRattlesnake.BlackLocation) &&
+                    LocationComparer.Instance.Equals(xRattlesnake.GreenLocation, yRattlesnake.GreenLocation) &&
+                    LocationComparer.Instance.Equals(xRattlesnake.OrangeLocation, yRattlesnake.OrangeLocation) &&
+                    LocationComparer.Instance.Equals(xRattlesnake.WhiteLocation, yRattlesnake.WhiteLocation);
+            }
+
+            if (x is ActionMove.Sheriff xSheriff && y is ActionMove.Sheriff ySheriff)
+            {
+                return true;
+            }
+
+            if (x is ActionMove.SnakeOil xSnakeOil && y is ActionMove.SnakeOil ySnakeOil)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public int GetHashCode(ActionMove? obj)
+        {
+            if (obj is ActionMove.Ambush xAmbush)
+            {
+                return 
+                    1 ^
+                    xAmbush.Color.GetHashCode();
+            }
+
+            if (obj is ActionMove.BrandingIron xBrandingIron)
+            {
+                return 
+                    2 ^ 
+                    LocationComparer.Instance.GetHashCode(xBrandingIron.Location);
+            }
+
+            if (obj is ActionMove.Epidemic xEpidemic)
+            {
+                return 
+                    3 ^
+                    xEpidemic.Color.GetHashCode();
+            }
+
+            if (obj is ActionMove.Gold xGold)
+            {
+                return 4;
+            }
+
+            if (obj is ActionMove.Rattlesnake xRattlesnake)
+            {
+                return
+                    5 ^
+                    LocationComparer.Instance.GetHashCode(xRattlesnake.BlackLocation) ^
+                    LocationComparer.Instance.GetHashCode(xRattlesnake.GreenLocation) ^
+                    LocationComparer.Instance.GetHashCode(xRattlesnake.OrangeLocation) ^
+                    LocationComparer.Instance.GetHashCode(xRattlesnake.WhiteLocation);
+            }
+
+            if (obj is ActionMove.Sheriff xSheriff)
+            {
+                return 6;
+            }
+
+            if (obj is ActionMove.SnakeOil xSnakeOil)
+            {
+                return 7;
+            }
+
+            return 0;
+        }
     }
 }
