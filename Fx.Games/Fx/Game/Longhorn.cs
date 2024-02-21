@@ -1105,7 +1105,7 @@ I have some questions about longhorn:
         {
             public BrandingIron(LonghornLocation location)
             {
-                //// TODO finish assertionsa
+                //// TODO finish assertions
                 this.Location = location;
             }
 
