@@ -856,7 +856,7 @@ I have some questions about longhorn:
                     }
                     else
                     {
-                        throw new IllegalMoveExeption("TODO action token and action move aren't aligned");
+                        throw new IllegalMoveExeption("Code should be unreachable");
                     }
                 }
 
@@ -885,6 +885,26 @@ I have some questions about longhorn:
 
         public LonghornBoard(LonghornTile[,] tiles, LonghornLocation? playerLocation, LonghornPlayerStatus<TPlayer> player1Status, LonghornPlayerStatus<TPlayer> player2Status)
         {
+            if (tiles == null)
+            {
+                throw new ArgumentNullException(nameof(tiles));
+            }
+
+            if (tiles.Rank != 2 || tiles.GetLength(0) != 3 || tiles.GetLength(1) != 3)
+            {
+                throw new ArgumentOutOfRangeException(nameof(tiles));
+            }
+
+            if (player1Status == null)
+            {
+                throw new ArgumentNullException(nameof(player1Status));
+            }
+
+            if (player2Status == null)
+            {
+                throw new ArgumentNullException(nameof(player2Status));
+            }
+
             this.tiles = tiles.Clone2();
             this.PlayerLocation = playerLocation;
             this.Player1Status = player1Status;
@@ -910,7 +930,15 @@ I have some questions about longhorn:
     {
         public LonghornLocation(int row, int column)
         {
-            //// TODO assert
+            if (row < 0 || row >= 3)
+            {
+                throw new ArgumentOutOfRangeException(nameof(row));
+            }
+
+            if (column < 0 || column >= 3)
+            {
+                throw new ArgumentOutOfRangeException(nameof(column));
+            }
 
             this.Row = row;
             this.Column = column;
@@ -924,7 +952,25 @@ I have some questions about longhorn:
     {
         public LonghornTile(int orangeCows, int blackCows, int greenCows, int whiteCows, ActionToken? actionToken)
         {
-            //// TODO assert
+            if (orangeCows < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(orangeCows));
+            }
+
+            if (blackCows < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(blackCows));
+            }
+
+            if (greenCows < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(greenCows));
+            }
+
+            if (whiteCows < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(whiteCows));
+            }
 
             this.OrangeCows = orangeCows;
             this.BlackCows = blackCows;
@@ -954,7 +1000,11 @@ I have some questions about longhorn:
         {
             public Gold(int amount)
             {
-                //// TODO assert 
+                if (amount < 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(amount));
+                }
+
                 this.Amount = amount;
             }
 
@@ -996,6 +1046,11 @@ I have some questions about longhorn:
         {
             public LocationChoice(LonghornLocation location)
             {
+                if (location == null)
+                {
+                    throw new ArgumentNullException(nameof(location));
+                }
+
                 this.Location = location;
             }
 
@@ -1006,8 +1061,6 @@ I have some questions about longhorn:
         {
             public LocationMove(TakeColor takeColor, LonghornLocation? newLocation, ActionMove? actionMove)
             {
-                //// TODO assert
-
                 this.TakeColor = takeColor;
                 this.NewLocation = newLocation;
                 this.ActionMove = actionMove;
