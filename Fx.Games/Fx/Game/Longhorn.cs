@@ -457,9 +457,15 @@ I have some questions about longhorn:
 
                         if (newLocations.Any())
                         {
-                            foreach (var newLocation in newLocations)
+                            foreach (var actionMove in actionMoves)
                             {
-                                foreach (var actionMove in actionMoves)
+                                if (actionMove is ActionMove.Sheriff)
+                                {
+                                    yield return new LonghornMove.LocationMove(takeColor.color, null, actionMove);
+                                    continue;
+                                }
+
+                                foreach (var newLocation in newLocations)
                                 {
                                     yield return new LonghornMove.LocationMove(takeColor.color, newLocation, actionMove);
                                 }
@@ -840,11 +846,10 @@ I have some questions about longhorn:
                     }
                     else if (actionToken is ActionToken.Sheriff sheriffToken && locationMove.ActionMove is ActionMove.Sheriff)
                     {
-                        /*if (locationMove.NewLocation != null)
+                        if (locationMove.NewLocation != null)
                         {
-                            //// TODO this actually gets thrown erroneously
                             throw new IllegalMoveExeption("TODO sheriff token should end the game");
-                        }*/
+                        }
 
                         newPlayer2Builder.Arrested = true;
                     }
