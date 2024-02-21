@@ -351,26 +351,26 @@ I have some questions about longhorn:
                         {
                             if (tile.ActionToken is ActionToken.Ambush ambush)
                             {
-                                actionMoves.Add(new ActionMove.Ambush(null));
+                                actionMoves.Add(new ActionMove.Ambush.StealGold());
                                 var otherPlayer = this.Board.Player2Status;
                                 if (otherPlayer.Black != 0)
                                 {
-                                    actionMoves.Add(new ActionMove.Ambush(TakeColor.Black));
+                                    actionMoves.Add(new ActionMove.Ambush.StealCows(TakeColor.Black));
                                 }
 
                                 if (otherPlayer.Green != 0)
                                 {
-                                    actionMoves.Add(new ActionMove.Ambush(TakeColor.Green));
+                                    actionMoves.Add(new ActionMove.Ambush.StealCows(TakeColor.Green));
                                 }
 
                                 if (otherPlayer.Orange != 0)
                                 {
-                                    actionMoves.Add(new ActionMove.Ambush(TakeColor.Orange));
+                                    actionMoves.Add(new ActionMove.Ambush.StealCows(TakeColor.Orange));
                                 }
 
                                 if (otherPlayer.White != 0)
                                 {
-                                    actionMoves.Add(new ActionMove.Ambush(TakeColor.White));
+                                    actionMoves.Add(new ActionMove.Ambush.StealCows(TakeColor.White));
                                 }
                             }
                             else if (tile.ActionToken is ActionToken.BrandingIron)
@@ -716,35 +716,35 @@ I have some questions about longhorn:
 
                 if (takeActionToken)
                 {
-                    if (actionToken is ActionToken.Ambush ambushToken && locationMove.ActionMove is ActionMove.Ambush ambushMove)
+                    if (actionToken is ActionToken.Ambush stealGoldToken && locationMove.ActionMove is ActionMove.Ambush.StealGold stealGoldMove)
                     {
-                        if (ambushMove.Color == null)
+                        if (newPlayer1Builder.Status.GoldNuggets.Shuffle(this.random).TrySkip(out var stolen, out var kept))
                         {
-                            if (newPlayer1Builder.Status.GoldNuggets.Shuffle(this.random).TrySkip(out var stolen, out var kept))
-                            {
-                                newPlayer1Builder.Status.GoldNuggets = kept;
-                                newPlayer2Builder.Status.GoldNuggets = newPlayer2Builder.Status.GoldNuggets.Append(stolen);
-                            }
+                            newPlayer1Builder.Status.GoldNuggets = kept;
+                            newPlayer2Builder.Status.GoldNuggets = newPlayer2Builder.Status.GoldNuggets.Append(stolen);
                         }
-                        else if (ambushMove.Color == TakeColor.Black)
+                    }
+                    else if (actionToken is ActionToken.Ambush stealCowsToken && locationMove.ActionMove is ActionMove.Ambush.StealCows stealCowsMove)
+                    {
+                        if (stealCowsMove.Color == TakeColor.Black)
                         {
                             var stolen = Math.Min(newPlayer1Builder.Status.Black, 2);
                             newPlayer1Builder.Status.Black -= stolen;
                             newPlayer2Builder.Status.Black += stolen;
                         }
-                        else if (ambushMove.Color == TakeColor.Green)
+                        else if (stealCowsMove.Color == TakeColor.Green)
                         {
                             var stolen = Math.Min(newPlayer1Builder.Status.Green, 2);
                             newPlayer1Builder.Status.Green -= stolen;
                             newPlayer2Builder.Status.Green += stolen;
                         }
-                        else if (ambushMove.Color == TakeColor.Orange)
+                        else if (stealCowsMove.Color == TakeColor.Orange)
                         {
                             var stolen = Math.Min(newPlayer1Builder.Status.Orange, 2);
                             newPlayer1Builder.Status.Orange -= stolen;
                             newPlayer2Builder.Status.Orange += stolen;
                         }
-                        else if (ambushMove.Color == TakeColor.White)
+                        else if (stealCowsMove.Color == TakeColor.White)
                         {
                             var stolen = Math.Min(newPlayer1Builder.Status.White, 2);
                             newPlayer1Builder.Status.White -= stolen;
@@ -752,7 +752,7 @@ I have some questions about longhorn:
                         }
                         else
                         {
-                            throw new IllegalMoveExeption($"The provided ambush color '{ambushMove.Color}' is not a valid longhorn color");
+                            throw new IllegalMoveExeption($"The provided ambush color '{stealCowsMove.Color}' is not a valid longhorn color");
                         }
                     }
                     else if (actionToken is ActionToken.BrandingIron brandingIronToken && locationMove.ActionMove is ActionMove.BrandingIron brandingIronMove)
@@ -1080,14 +1080,25 @@ I have some questions about longhorn:
         {
         }
 
-        public sealed class Ambush : ActionMove
+        public abstract class Ambush : ActionMove
         {
-            public Ambush(TakeColor? color)
+            private Ambush()
             {
-                this.Color = color;
             }
 
-            public TakeColor? Color { get; } //// TODO null means steal a random gold nugget
+            public sealed class StealGold : Ambush
+            {
+            }
+
+            public sealed class StealCows : Ambush
+            {
+                public StealCows(TakeColor color)
+                {
+                    this.Color = color;
+                }
+
+                public TakeColor Color { get; } //// TODO null means steal a random gold nugget
+            }
         }
 
         public sealed class BrandingIron : ActionMove
@@ -1281,9 +1292,14 @@ I have some questions about longhorn:
                 return false;
             }
 
-            if (x is ActionMove.Ambush xAmbush && y is ActionMove.Ambush yAmbush)
+            if (x is ActionMove.Ambush.StealGold xAmbushGold && y is ActionMove.Ambush.StealGold yAmbushGold)
             {
-                return xAmbush.Color == yAmbush.Color;
+                return true;
+            }
+
+            if (x is ActionMove.Ambush.StealCows xAmbushCows && y is ActionMove.Ambush.StealCows yAmbushCows)
+            {
+                return xAmbushCows.Color == yAmbushCows.Color;
             }
 
             if (x is ActionMove.BrandingIron xBrandingIron && y is ActionMove.BrandingIron yBrandingIron)
@@ -1325,36 +1341,41 @@ I have some questions about longhorn:
 
         public int GetHashCode(ActionMove? obj)
         {
-            if (obj is ActionMove.Ambush xAmbush)
+            if (obj is ActionMove.Ambush.StealGold xAmbushGold)
+            {
+                return 1;
+            }
+
+            if (obj is ActionMove.Ambush.StealCows xAmbushCows)
             {
                 return 
-                    1 ^
-                    xAmbush.Color.GetHashCode();
+                    2 ^ 
+                    xAmbushCows.Color.GetHashCode();
             }
 
             if (obj is ActionMove.BrandingIron xBrandingIron)
             {
                 return 
-                    2 ^ 
+                    3 ^ 
                     LocationComparer.Instance.GetHashCode(xBrandingIron.Location);
             }
 
             if (obj is ActionMove.Epidemic xEpidemic)
             {
                 return 
-                    3 ^
+                    4 ^
                     xEpidemic.Color.GetHashCode();
             }
 
             if (obj is ActionMove.Gold xGold)
             {
-                return 4;
+                return 5;
             }
 
             if (obj is ActionMove.Rattlesnake xRattlesnake)
             {
                 return
-                    5 ^
+                    6 ^
                     LocationComparer.Instance.GetHashCode(xRattlesnake.BlackLocation) ^
                     LocationComparer.Instance.GetHashCode(xRattlesnake.GreenLocation) ^
                     LocationComparer.Instance.GetHashCode(xRattlesnake.OrangeLocation) ^
@@ -1363,12 +1384,12 @@ I have some questions about longhorn:
 
             if (obj is ActionMove.Sheriff xSheriff)
             {
-                return 6;
+                return 7;
             }
 
             if (obj is ActionMove.SnakeOil xSnakeOil)
             {
-                return 7;
+                return 8;
             }
 
             return 0;

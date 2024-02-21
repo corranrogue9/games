@@ -516,16 +516,13 @@
                         //// TODO the remaining legal move; is there a way to improve the framework to account for such things? maybe the modeling of the move for this
                         //// TODO game as having 3 components is the broken part?
                         var action = string.Empty;
-                        if (locationMove.ActionMove is ActionMove.Ambush ambush)
+                        if (locationMove.ActionMove is ActionMove.Ambush.StealGold ambushGold)
                         {
-                            if (ambush.Color == null)
-                            {
-                                action = ", steal a random gold nugget from your opponent,";
-                            }
-                            else
-                            {
-                                action = $", steal the {ambush.Color} cows from your opponent,";
-                            }
+                            action = ", steal a random gold nugget from your opponent,";
+                        }
+                        else if (locationMove.ActionMove is ActionMove.Ambush.StealCows ambushCows)
+                        {
+                            action = $", steal the {ambushCows.Color} cows from your opponent,";
                         }
                         else if (locationMove.ActionMove is ActionMove.BrandingIron brandingIron)
                         {
@@ -564,7 +561,7 @@
 
                         Console.WriteLine($"{i}: take the {locationMove.TakeColor} cows{action} and {resultLocation}");
                     }
-                    
+
                     ++i;
                 }
             }
@@ -724,7 +721,7 @@
         public sealed class WinnabilityScore<TGame, TBoard, TMove, TPlayer> where TGame : IGame<TGame, TBoard, TMove, TPlayer>
         {
             public IGame<TGame, TBoard, TMove, TPlayer> Game { get; set; }
-        
+
             public TMove Move { get; set; }
 
             public SafeScore Score { get; set; }
@@ -749,7 +746,7 @@
             {
                 this.maximizeMovesStrategy = MaximizeMovesStrategy.Default<Fx.Game.Chess.ChessGame<TPlayer>, Fx.Game.Chess.ChessGameState, Fx.Game.Chess.ChessMove, TPlayer>();
                 this.gameTreeStrategy = new GameTreeDepthStrategy<ChessGame<TPlayer>, ChessGameState, Fx.Game.Chess.ChessMove, TPlayer>(
-                    game =>  ChessScore(game, player),
+                    game => ChessScore(game, player),
                     Node.TreeFactory,
                     2);
                 this.decisionTreeStrategy = new DecisionTreeStrategy<ChessGame<TPlayer>, ChessGameState, Fx.Game.Chess.ChessMove, TPlayer>(player, playerComparer);
