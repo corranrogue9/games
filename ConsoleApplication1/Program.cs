@@ -365,6 +365,8 @@
                     for (int j = 0; j < 3; ++j)
                     {
                         var tile = game.Board.Tiles[i, j];
+                        var playerLocation = game.Board.PlayerLocation;
+                        var currentPlayerLocation = playerLocation != null && playerLocation.Row == i && playerLocation.Column == j;
 
                         if (tile.ActionToken is ActionToken.Ambush)
                         {
@@ -403,8 +405,8 @@
                         writer.Append(i * 8 + 2, $"black cows: {tile.BlackCows}");
                         writer.Append(i * 8 + 3, $"white cows: {tile.WhiteCows}");
                         writer.Append(i * 8 + 4, $"orange cows: {tile.OrangeCows}");
-                        var playerLocation = game.Board.PlayerLocation;
-                        if (playerLocation != null && playerLocation.Row == i && playerLocation.Column == j)
+
+                        if (currentPlayerLocation)
                         {
                             writer.Append(i * 8 + 5, $"CURRENT PLAYER LOCATION!");
                         }
@@ -560,16 +562,16 @@
                             action = $", use the snake oil to take an extra turn,";
                         }
 
-                        Console.WriteLine($"{i}: take {CowCount(game, locationMove)} {locationMove.TakeColor} cows{action} and {resultLocation}");
+                        Console.WriteLine($"{i}: take {CowCount(game, locationMove, game.Board.PlayerLocation)} {locationMove.TakeColor} cows{action} and {resultLocation}");
                     }
 
                     ++i;
                 }
             }
 
-            private static int CowCount(Longhorn<TPlayer> game, LonghornMove.LocationMove locationMove)
+            private static int CowCount(Longhorn<TPlayer> game, LonghornMove.LocationMove locationMove, LonghornLocation location)
             {
-                var tile = game.Board.Tiles[locationMove.NewLocation.Row, locationMove.NewLocation.Column];
+                var tile = game.Board.Tiles[location.Row, location.Column];
                 if (locationMove.TakeColor == TakeColor.Black)
                 {
                     return tile.BlackCows;
