@@ -487,7 +487,6 @@
 
             public void DisplayMoves(Longhorn<TPlayer> game)
             {
-                //// TODO ask for coordinates instead of providing all possibilities?
                 Console.WriteLine("Which move would you like to select?");
                 int i = 0;
                 foreach (var move in game.Moves)
