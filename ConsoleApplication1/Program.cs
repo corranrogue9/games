@@ -357,6 +357,7 @@
 
                 Console.WriteLine($"{this.transcriber(game.Board.Player1Status.Player)} status: {game.Board.Player1Status.Black} black cows, {game.Board.Player1Status.Green} green cows, {game.Board.Player1Status.Orange} orange cows, {game.Board.Player1Status.White} white cows; {string.Join(", ", game.Board.Player1Status.GoldNuggets)} gold nuggets");
                 Console.WriteLine($"{this.transcriber(game.Board.Player2Status.Player)} status: {game.Board.Player2Status.Black} black cows, {game.Board.Player2Status.Green} green cows, {game.Board.Player2Status.Orange} orange cows, {game.Board.Player2Status.White} white cows; {string.Join(", ", game.Board.Player2Status.GoldNuggets)} gold nuggets");
+                Console.WriteLine();
 
                 var writer = new Writer();
                 for (int i = 0; i < 3; ++i)
