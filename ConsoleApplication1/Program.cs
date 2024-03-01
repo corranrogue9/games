@@ -328,10 +328,11 @@
             var driver = Driver.Create(
                 new Dictionary<string, IStrategy<Longhorn<string>, LonghornBoard<string>, LonghornMove, string>>
                 {
-                    ////{ exes, UserInterfaceStrategy.Create(displayer) },
+                    { exes, UserInterfaceStrategy.Create(displayer) },
                     ////{ exes, game.RandomStrategy() },
-                    { exes, new MonteCarloStrategy2<Longhorn<string>, LonghornBoard<string>, LonghornMove, string>(exes, 100000, StringComparer.OrdinalIgnoreCase, random) },
-                    { ohs, game.RandomStrategy() },
+                    ////{ exes, new MonteCarloStrategy2<Longhorn<string>, LonghornBoard<string>, LonghornMove, string>(exes, 100000, StringComparer.OrdinalIgnoreCase, random) },
+                    ////{ ohs, game.RandomStrategy() },
+                    { ohs, new MonteCarloStrategy2<Longhorn<string>, LonghornBoard<string>, LonghornMove, string>(ohs, 100000, StringComparer.OrdinalIgnoreCase, random) },
                     ////{ ohs, new DecisionTreeStrategy<Longhorn<string>, LonghornBoard<string>, LonghornMove, string>(ohs, StringComparer.OrdinalIgnoreCase) },
                 },
                 displayer);

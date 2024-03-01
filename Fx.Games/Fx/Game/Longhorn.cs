@@ -1105,7 +1105,11 @@ I have some questions about longhorn:
         {
             public BrandingIron(LonghornLocation location)
             {
-                //// TODO finish assertions
+                if (location == null)
+                {
+                    throw new ArgumentNullException(nameof(location));
+                }
+
                 this.Location = location;
             }
 
@@ -1136,10 +1140,13 @@ I have some questions about longhorn:
                 this.WhiteLocation = whiteLocation;
             }
 
-            public LonghornLocation? BlackLocation { get; }
-            public LonghornLocation? GreenLocation { get; }
-            public LonghornLocation? OrangeLocation { get; }
-            public LonghornLocation? WhiteLocation { get; }
+            public LonghornLocation? BlackLocation { get; } // null means that the player has no black cows
+
+            public LonghornLocation? GreenLocation { get; } // null means that the player has no green cows
+
+            public LonghornLocation? OrangeLocation { get; } // null means that the player has no orange cows
+
+            public LonghornLocation? WhiteLocation { get; } // null means that the player has no white cows
         }
 
         public sealed class Sheriff : ActionMove
@@ -1155,6 +1162,11 @@ I have some questions about longhorn:
     {
         public LonghornPlayerStatus(TPlayer player, int orange, int black, int green, int white, IEnumerable<int> goldNuggets)
         {
+            if (goldNuggets == null)
+            {
+                throw new ArgumentNullException(nameof(goldNuggets));
+            }
+
             this.Player = player;
             this.Orange = orange;
             this.Black = black;
@@ -1164,9 +1176,13 @@ I have some questions about longhorn:
         }
 
         public TPlayer Player { get; }
+
         public int Orange { get; }
+
         public int Black { get; }
+
         public int Green { get; }
+
         public int White { get; }
 
         public IEnumerable<int> GoldNuggets { get; }
