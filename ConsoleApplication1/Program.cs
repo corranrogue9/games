@@ -560,11 +560,37 @@
                             action = $", use the snake oil to take an extra turn,";
                         }
 
-                        Console.WriteLine($"{i}: take the {locationMove.TakeColor} cows{action} and {resultLocation}");
+                        Console.WriteLine($"{i}: take {CowCount(game, locationMove)} {locationMove.TakeColor} cows{action} and {resultLocation}");
                     }
 
                     ++i;
                 }
+            }
+
+            private static int CowCount(Longhorn<TPlayer> game, LonghornMove.LocationMove locationMove)
+            {
+                var tile = game.Board.Tiles[locationMove.NewLocation.Row, locationMove.NewLocation.Column];
+                if (locationMove.TakeColor == TakeColor.Black)
+                {
+                    return tile.BlackCows;
+                }
+
+                if (locationMove.TakeColor == TakeColor.Green)
+                {
+                    return tile.GreenCows;
+                }
+
+                if (locationMove.TakeColor == TakeColor.Orange)
+                {
+                    return tile.OrangeCows;
+                }
+
+                if (locationMove.TakeColor == TakeColor.White)
+                {
+                    return tile.WhiteCows;
+                }
+
+                throw new InvalidOperationException($"invalid color specified for move: {(int)locationMove.TakeColor}");
             }
 
             public void DisplayOutcome(Longhorn<TPlayer> game)
