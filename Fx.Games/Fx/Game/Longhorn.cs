@@ -117,20 +117,24 @@ I have some questions about longhorn:
 
         private sealed class LonghornPlayer
         {
-            public LonghornPlayer(LonghornPlayerStatus<TPlayer> status, bool arrested)
+            public LonghornPlayer(LonghornPlayerStatus<TPlayer> status, bool arrested, bool previousLocationWasDangerous)
             {
                 this.Status = status;
                 this.Arrested = arrested;
+                this.PreviousLocationWasDangerous = previousLocationWasDangerous;
             }
 
             public LonghornPlayerStatus<TPlayer> Status { get; }
 
             public bool Arrested { get; }
 
+            public bool PreviousLocationWasDangerous { get; }
+
             public static LonghornPlayer Default(TPlayer player)
             {
                 return new LonghornPlayer(
                     new LonghornPlayerStatus<TPlayer>(player, 0, 0, 0, 0, Enumerable.Empty<int>()),
+                    false,
                     false);
             }
 
@@ -139,6 +143,7 @@ I have some questions about longhorn:
                 return new Builder(this.Status.Player)
                 {
                     Arrested = this.Arrested,
+                    PreviousLocationWasDangerous = this.PreviousLocationWasDangerous,
                     Status = new Builder.LonghornPlayerStatusBuilder(this.Status.Player)
                     {
                         Black = this.Status.Black,
@@ -156,15 +161,18 @@ I have some questions about longhorn:
                 {
                     this.Status = new LonghornPlayerStatusBuilder(player);
                     this.Arrested = false;
+                    this.PreviousLocationWasDangerous = false;
                 }
 
                 public LonghornPlayerStatusBuilder Status { get; set; }
 
                 public bool Arrested { get; set; }
 
+                public bool PreviousLocationWasDangerous { get; set; }
+
                 public LonghornPlayer Build()
                 {
-                    return new LonghornPlayer(this.Status.Build(), this.Arrested);
+                    return new LonghornPlayer(this.Status.Build(), this.Arrested, this.PreviousLocationWasDangerous);
                 }
 
                 public sealed class LonghornPlayerStatusBuilder
@@ -455,6 +463,19 @@ I have some questions about longhorn:
                             .Where(location => !IsEmpty(this.Board.Tiles[location.Row, location.Column]))
                             .ToList();
 
+                        if (this.player2.PreviousLocationWasDangerous)
+                        {
+                            var newSafeLocations = newLocations
+                                .Where(location =>
+                                    !(this.Board.Tiles[location.Row, location.Column].ActionToken is ActionToken.Rattlesnake) &&
+                                    !(this.Board.Tiles[location.Row, location.Column].ActionToken is ActionToken.Sheriff))
+                                .ToList();
+                            if (newSafeLocations.Count != 0)
+                            {
+                                newLocations = newSafeLocations;
+                            }
+                        }
+
                         if (newLocations.Any())
                         {
                             foreach (var actionMove in actionMoves)
@@ -692,6 +713,8 @@ I have some questions about longhorn:
                 var lastCowColor = LastColor(currentTile);
                 var takeActionToken = lastCowColor == locationMove.TakeColor;
                 var actionToken = currentTile.ActionToken;
+
+                newPlayer2Builder.PreviousLocationWasDangerous = actionToken is ActionToken.Rattlesnake || actionToken is ActionToken.Sheriff;
 
                 if (locationMove.TakeColor == TakeColor.Black)
                 {
