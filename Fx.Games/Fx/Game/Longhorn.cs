@@ -346,7 +346,6 @@ I have some questions about longhorn:
                 }
                 else
                 {
-                    //// TODO The special characteristics of dangerous locations: locations containing yellow Action tokens (Rattlesnake – Sheriff) are considered as dangerous. Consequently you cannot have the same player play twice in succession at the same dangerous location if other possibilities exist.
                     var tile = this.Board.Tiles[playerLocation.Row, playerLocation.Column];
                     var lastColor = LastColor(tile);
                     
