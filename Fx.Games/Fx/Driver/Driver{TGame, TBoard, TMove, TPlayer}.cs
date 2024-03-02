@@ -31,7 +31,16 @@
                 displayer.DisplayBoard(game);
                 displayer.DisplayMoves(game);
                 var move = strategy.SelectMove(game);
-                Console.WriteLine($"{game.CurrentPlayer} selected {move}"); //// TODO move.tostring cannot be relied on
+
+                if (this.displayer is LonghornConsoleDisplay<TPlayer> longhornConsoleDisplayer)
+                {
+                    Console.WriteLine($"{game.CurrentPlayer} selected {longhornConsoleDisplayer.TranscribeMove(game as Longhorn<TPlayer>, move as LonghornMove)}");
+                }
+                else
+                {
+                    Console.WriteLine($"{game.CurrentPlayer} selected {move}"); //// TODO move.tostring cannot be relied on
+                }
+
                 game = game.CommitMove(move);
                 if (game.Outcome != null)
                 {
