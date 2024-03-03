@@ -932,7 +932,6 @@ I have some questions about longhorn:
                     newPlayer1.Status,
                     newPlayer2.Status);
 
-                //// TODO what about if a player gets 9 cows of the same color?
                 return new Longhorn<TPlayer>(newPlayer1, newPlayer2, newBoard, random, locationMove.NewLocation == null);
             }
             else
