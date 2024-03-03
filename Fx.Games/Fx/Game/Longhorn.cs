@@ -353,6 +353,12 @@ I have some questions about longhorn:
                     var takeColors = TakeColors(tile);
                     foreach (var takeColor in takeColors)
                     {
+                        var shotTheMoon =
+                            takeColor.color == TakeColor.Black && this.Board.Player1Status.Black + takeColor.count == 9 ||
+                            takeColor.color == TakeColor.Green && this.Board.Player1Status.Green + takeColor.count == 9 ||
+                            takeColor.color == TakeColor.Orange && this.Board.Player1Status.Orange + takeColor.count == 9 ||
+                            takeColor.color == TakeColor.White && this.Board.Player1Status.White + takeColor.count == 9;
+
                         var actionMoves = new List<ActionMove?>();
                         if (takeColor.color == lastColor)
                         {
@@ -485,6 +491,12 @@ I have some questions about longhorn:
                                     continue;
                                 }
 
+                                if (shotTheMoon)
+                                {
+                                    yield return new LonghornMove.LocationMove(takeColor.color, null, null);
+                                    break;
+                                }
+
                                 foreach (var newLocation in newLocations)
                                 {
                                     yield return new LonghornMove.LocationMove(takeColor.color, newLocation, actionMove);
@@ -495,6 +507,18 @@ I have some questions about longhorn:
                         {
                             foreach (var actionMove in actionMoves)
                             {
+                                if (actionMove is ActionMove.Sheriff)
+                                {
+                                    yield return new LonghornMove.LocationMove(takeColor.color, null, actionMove);
+                                    continue;
+                                }
+
+                                if (shotTheMoon)
+                                {
+                                    yield return new LonghornMove.LocationMove(takeColor.color, null, null);
+                                    break;
+                                }
+
                                 yield return new LonghornMove.LocationMove(takeColor.color, null, actionMove);
                             }
                         }
@@ -655,6 +679,16 @@ I have some questions about longhorn:
                     return null;
                 }
 
+                if (this.player1.Status.Black == 9 || this.player1.Status.Green == 9 || this.player1.Status.Orange == 9 || this.player1.Status.White == 9)
+                {
+                    return new Outcome<TPlayer>(new[] { this.player1.Status.Player });
+                }
+
+                if (this.player2.Status.Black == 9 || this.player2.Status.Green == 9 || this.player2.Status.Orange == 9 || this.player2.Status.White == 9)
+                {
+                    return new Outcome<TPlayer>(new[] { this.player2.Status.Player });
+                }
+
                 var orangeValue = 0;
                 var blackValue = 0;
                 var greenValue = 0;
@@ -736,7 +770,14 @@ I have some questions about longhorn:
                     newBoardTiles[playerLocation.Row, playerLocation.Column] = new LonghornTile(currentTile.OrangeCows, currentTile.BlackCows, currentTile.GreenCows, 0, takeActionToken ? null : currentTile.ActionToken);
                 }
 
-                if (takeActionToken)
+                if (newPlayer2Builder.Status.Black == 9 || newPlayer2Builder.Status.Green == 9 || newPlayer2Builder.Status.Orange == 9 || newPlayer2Builder.Status.White == 9)
+                {
+                    if (takeActionToken && actionToken is ActionToken.Sheriff)
+                    {
+                        newPlayer2Builder.Arrested = true;
+                    }
+                }
+                else if (takeActionToken)
                 {
                     if (actionToken is ActionToken.Ambush stealGoldToken && locationMove.ActionMove is ActionMove.Ambush.StealGold stealGoldMove)
                     {
